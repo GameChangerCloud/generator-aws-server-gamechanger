@@ -1,0 +1,30 @@
+{
+  "name": "generator-graphql-lambdas",
+  "version": "1.0.0",
+  "description": "Simple generator of a lambdas that can handle graphql queries from a graphql schema",
+  "main": "index.js",
+  "files": [
+    "generators"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ippon.fr/jratsimandresy/generator-graphql-lambdas.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "easygraphql-parser": "0.0.13",
+    "graphql": "^15.2.0",
+    "pg": "^8.2.1",
+    "pluralize": "^8.0.0",
+    "rds-data": "^1.1.0",
+    "yeoman-generator": "^4.8.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.709.0",
+    "faker": "^4.1.0"
+  }
+}
