@@ -14,7 +14,7 @@ resource "aws_lambda_function" "lambda" {
   filename = data.archive_file.init.output_path
   handler = "index.handler"
   runtime = "nodejs12.x"
-  timeout = 15
+  timeout = 60
   environment {
     variables = {
       SECRETARN = aws_secretsmanager_secret.example.arn

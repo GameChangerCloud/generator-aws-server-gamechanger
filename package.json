@@ -1,5 +1,5 @@
 {
-  "name": "generator-graphql-lambdas",
+  "name": "generator-aws-server-gamechanger",
   "version": "1.0.0",
   "description": "Simple generator of a lambdas that can handle graphql queries from a graphql schema",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.ippon.fr/jratsimandresy/generator-graphql-lambdas.git"
+    "url": "https://github.com/GameChangerCloud/generator-aws-server-gamechanger"
   },
   "author": "",
   "license": "ISC",
