@@ -20,7 +20,7 @@ Get the project and install its dependencies
 git clone https://github.com/GameChangerCloud/generator-aws-server-gamechanger
 ```
 ```
-cd generator-graphql-lambdas
+cd generator-aws-server-gamechanger
 ```
 ```
 npm install
@@ -36,7 +36,7 @@ Not available yet
 ## Usage
 Generate your server application
 ```
-yo graphql-lambdas <your-app-name> <your-graphql-schema>.graphql
+yo aws-server-gamechanger <your-app-name> <your-graphql-schema>.graphql
 ```
 Generate your AWS infrastructure
 ```
@@ -44,7 +44,7 @@ cd terraform
 terraform init
 terraform apply -var-file="terraform.tfvar"
 ```
-For destroy the infrastructure
+For destroying the infrastructure
 ```
 terraform destroy -var-file="terraform.tfvar"
 ```
@@ -220,9 +220,9 @@ Rule : (false -> 0 / true -> 1)
 
 2. Usage
 
-In the folder which contains your app named "yourAppName" 
+In the folder which contains your app named "<your-app-name>" 
 ```
-yo graphql-lambdas <your-app-name> <your-new-graphql-schema>.graphql
+yo aws-server-gamechanger <your-app-name> <your-new-graphql-schema>.graphql
 ```
 Then, send the request for update (see in the previous part)
 
