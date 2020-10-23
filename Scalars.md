@@ -90,7 +90,7 @@ scalar JSONObject
 scalar Byte
 ```
 
-For these types, just like traditional ones like String or Int, you won't have to manually set the files generated.
+For these types, just like traditional ones (String, Int...), you won't have to manually set the files generated.
 
 ## Personalized scalars 
 
