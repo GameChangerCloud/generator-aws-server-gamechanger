@@ -11,7 +11,7 @@ npm install -g yeoman
 - [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 - [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 - An AWS Account set up and configured on your machine ( best if you use the [aws-cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) to configure with `aws configure` command)
-- A valid graphQL schema (see supported graphQL featured [here](http://google.com))
+- A valid GraphQL schema
 
 ## Installation
 ### Locally
