@@ -31,7 +31,7 @@ npm link
 ```
 
 ### Using npm 
-Not available yet
+npm install -g generator-aws-server-gamechanger
 
 ## Usage
 Generate your server application
