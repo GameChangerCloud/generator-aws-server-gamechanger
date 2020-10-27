@@ -1,6 +1,6 @@
 # generator-aws-server-gamechanger
 
-Generator based on [Yeoman](https://yeoman.io/) in a project based on a graphQL schema.
+Generator based on [Yeoman](https://yeoman.io/) of a serverless GraphQL API that can be deployed on AWS from a GraphQL schema
 
 ## Requirement
 
