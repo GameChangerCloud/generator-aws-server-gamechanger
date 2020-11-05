@@ -7,6 +7,7 @@ resource "aws_cognito_user_pool" "pool" {
     require_numbers = false
     require_symbols = false
   }
+  auto_verified_attributes = ["email"]
   schema {
     name                     = "email"
     attribute_data_type      =  "String"
@@ -40,7 +41,7 @@ resource "aws_cognito_user_pool_domain" "main" {
 
 resource "null_resource" "createUserUnconfirmed" {
   provisioner "local-exec" {
-    command = "aws cognito-idp sign-up --region eu-west-1 --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --email admin@admin.fr --password password"
+    command = "aws cognito-idp sign-up --region eu-west-1 --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --user-attributes Name=\"email\",Value=\"admin@admin.fr\" --password password"
   }
 }
 
