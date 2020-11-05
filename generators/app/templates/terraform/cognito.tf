@@ -7,6 +7,17 @@ resource "aws_cognito_user_pool" "pool" {
     require_numbers = false
     require_symbols = false
   }
+  schema {
+    name                     = "email"
+    attribute_data_type      =  "String"
+    developer_only_attribute = false
+    mutable                  = true  # false for "sub"
+    required                 = true # true for "sub"
+    string_attribute_constraints {   # if it is a string
+      min_length = 0                 # 10 for "birthdate"
+      max_length = 2048              # 10 for "birthdate"
+    }
+  }
 }
 
 resource "aws_cognito_user_pool_client" "client" {
@@ -29,7 +40,7 @@ resource "aws_cognito_user_pool_domain" "main" {
 
 resource "null_resource" "createUserUnconfirmed" {
   provisioner "local-exec" {
-    command = "aws cognito-idp sign-up --region eu-west-1 --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --password password"
+    command = "aws cognito-idp sign-up --region eu-west-1 --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --email admin@admin.fr --password password"
   }
 }
 
