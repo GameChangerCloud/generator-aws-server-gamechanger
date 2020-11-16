@@ -1,6 +1,6 @@
 {
   "name": "generator-aws-server-gamechanger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Simple generator of a serverless GraphQL API that can be deployed on AWS from a GraphQL schema",
   "main": "index.js",
   "files": [
@@ -13,6 +13,9 @@
     "type": "git",
     "url": "https://github.com/GameChangerCloud/generator-aws-server-gamechanger"
   },
+  "keywords": [
+    "yeoman-generator"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
