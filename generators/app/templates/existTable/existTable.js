@@ -10,7 +10,9 @@ let sqlParams = {
     parameters: []
 }
 
+/******* Start of generated part using entitiesForExist */
     <%-entitiesForExist%>
+/******* End of generated part using entitiesForExist */
 
 async function transac(){
     let count = 0

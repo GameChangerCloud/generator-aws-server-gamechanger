@@ -15,8 +15,9 @@ let beginTransactionParams = {
     resourceArn: process.env.RESOURCEARN,
     database: process.env.DATABASE,
 }
-
-    <%-cleanTables%>
+/******* Start of generated part using tables */
+    const tables = '<% tables.forEach((table,idx,array) => { %>"<%= table.name %>"<% if (idx !== array.length - 1) { %>,<% } %><% }); %>'
+/******* End of generated part using tables   */
 
 async function transac(){
     const db = new rdsdata.RDSDatabase(beginTransactionParams).getInstance();
@@ -25,7 +26,7 @@ async function transac(){
         sqlParams.sql = 'TRUNCATE TABLE ' + tables + ' CASCADE;'
         await rdsDataService.executeStatement(sqlParams).promise().then(r => console.log(r)).catch(err => {console.log(err); hasFailed = true})
         if(!hasFailed) {
-            await db.commit(transactionId).then(r => {console.log("commit"); return "Tables dropped"});
+            await db.commit(transactionId).then(r => {console.log("commit"); return "Tables cleaned"});
         }
         else {
             console.log("Transaction rolled back")

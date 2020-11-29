@@ -30,7 +30,7 @@ module.exports = class extends Generator {
 		this.argument('appName', { required: true })
 
 		// Graphql schema
-		this.argument("graphqlFile", { type: String, required: false });
+		this.argument("graphqlFile", { type: String, required: true });
 	}
 
 
@@ -184,6 +184,14 @@ module.exports = class extends Generator {
 			this.tables.push(table)
 		})
 
+		this.fs.copyTpl(
+			this.templatePath('database/sqlUtils.ejs'),
+			this.destinationPath('database/sqlUtils.js'),
+			{
+				tables: this.tables
+			}
+		)
+
 		for (let index = 0; index < this.types.length; index++) {
 
 			let currentTypeName = this.typesName[index]
@@ -261,7 +269,7 @@ module.exports = class extends Generator {
 				}
 			}
 
-			else {
+			else {  // Should be GraphQLObjectType
 				// Check if it implements an interface (array non empty)
 				if (currentType.implementedTypes[0]) {
 					// Check if this.typesInterface is already initialised
@@ -467,7 +475,7 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/initDatabase.js'),
 			this.destinationPath('initDatabase/initDatabase.js'),
 			{
-				createTables: parsing.getInitCreateTable(this.tables),
+				tables: this.tables,
 				addConstraints: parsing.getInitAddConstraints(this.tables)
 			}
 		)
@@ -489,7 +497,7 @@ module.exports = class extends Generator {
 			this.templatePath('cleanDatabase/dropTables.js'),
 			this.destinationPath('cleanDatabase/dropTables.js'),
 			{
-				dropTables: parsing.getDropTables(this.tables),
+				tables: this.tables,
 			}
 		)
 
@@ -499,7 +507,7 @@ module.exports = class extends Generator {
 			this.templatePath('cleanDatabase/cleanTables.js'),
 			this.destinationPath('cleanDatabase/cleanTables.js'),
 			{
-				cleanTables: parsing.getCleanTables(this.tables),
+				tables: this.tables,
 			}
 		)
 
@@ -629,8 +637,7 @@ module.exports = class extends Generator {
 				this.templatePath('upgradeDatabase/upgradeDatabase.js'),
 				this.destinationPath('upgradeDatabase/upgradeDatabase.js'),
 				{
-					deleteTables: parsing.getDropTables(this.delete_entities),
-					createTables: parsing.getInitCreateTable(this.add_entities),
+					tables: this.tables,
 					addConstraints: parsing.getInitAddConstraints(this.add_entities),
 					deleteColumns: parsing.getQueriesDeleteFields(this.delete_fields),
 					addColumns: parsing.getQueriesAddFields(this.add_fields),
@@ -652,6 +659,7 @@ module.exports = class extends Generator {
 	// Where installations are run (npm, bower)
 	install() {
 		this.log("Install")
+		// todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
 		this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'faker', 'validator', 'graphql-scalars'])
 	}
 

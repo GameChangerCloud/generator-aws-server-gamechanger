@@ -37,5 +37,8 @@ module.exports = {
   Currency: "Currency",
   JSON: "JSON",
   JSONObject: "JSONObject",
-	Byte: "Byte"
+  Byte: "Byte", 
+  Point: "Point",
+  Linestring: "LineString",
+  Polygon: "Polygon"
 }

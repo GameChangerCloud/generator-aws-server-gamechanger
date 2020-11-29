@@ -2,6 +2,8 @@
 const AWS = require('aws-sdk');
 const rdsDataService = new AWS.RDSDataService()
 
+const sqlUtils = require('..database/sqlUtils.js');
+
 const databaseConnect = {
   secretArn: process.env.SECRETARN,
   resourceArn: process.env.RESOURCEARN,
@@ -10,10 +12,15 @@ const databaseConnect = {
 
 const postgisExt = [ "postgis", "fuzzystrmatch", "postgis_tiger_geocoder", "postgis_topology" ];
 
+let queriesAdd = sqlUtils.getSQLCreateTables();
 
-<%-createTables%>
-
+/*******
+ * Start of generated part using addConstraints
+ */
 <%-addConstraints%>
+/*******
+ * End of generated part using addConstraints
+ */
 
 const addPostGisSupport = async () => {
   let selectParams = {
@@ -47,7 +54,7 @@ const graphQLTables = async () => {
     let createTableParams = {
       secretArn: databaseConnect.secretArn,
       resourceArn: databaseConnect.resourceArn,
-      sql: queriesAdd[i].text,
+      sql: queriesAdd[i],
       database: databaseConnect.database
     }
     console.log("Executing SQL command "+createTableParams.sql);

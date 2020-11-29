@@ -889,6 +889,16 @@ const getUpdateMethodsField = (currentTypeName, fields, relations, manyToManyTab
             }
             else {
                 switch (field.type) {
+                    // todo
+                    case scalars.Point:
+                        break;
+
+                    case scalars.Linestring:
+                        break;
+                        
+                    case scalars.Polygon:
+                        break;
+
                     case scalars.NonPositiveInt:
                     case scalars.PositiveInt:
                     case scalars.NonNegativeInt:
@@ -1123,24 +1133,6 @@ const getAllTables = (types, typesName, relations, scalarTypeNames) => {
     return allTables
 }
 
-const getDropTables = (tables) => {
-    let s = 'const queriesDrop = [\n'
-    tables.forEach(table => {
-        s += '{tableName : "' + table.name + '", text: `DROP TABLE "' + table.name + '" CASCADE;`}, \n'
-    })
-    s += ']'
-    return s
-}
-
-const getCleanTables = (tables) => {
-    let s = 'const tables = \''
-    tables.forEach(table => {
-        s += '"' + table.name + '", '
-    })
-    s = s.substring(0, s.lastIndexOf(','))
-    s += "'"
-    return s
-}
 
 const getEntitiesForExist = (tables) => {
     let s = 'const entities = [\n'
@@ -1152,7 +1144,7 @@ const getEntitiesForExist = (tables) => {
 }
 
 // InitDatabase
-
+// todo :report if in 'columns.ejs' template
 const getInitCreateTable = (tables) => {
     let s = 'const queriesAdd = [\n'
     tables.forEach(table => {
@@ -2443,8 +2435,6 @@ module.exports = {
     getDeleteMethodsMany: getDeleteMethodsMany,
     getUpdateMethodsField: getUpdateMethodsField,
     getAllTables: getAllTables,
-    getDropTables: getDropTables,
-    getCleanTables: getCleanTables,
     getEntitiesForExist: getEntitiesForExist,
     getInitCreateTable: getInitCreateTable,
     getInitAddConstraints: getInitAddConstraints,
@@ -2467,7 +2457,6 @@ module.exports = {
     hasFieldType: hasFieldType,
     formatName: formatName,
     isSchemaValid: isSchemaValid,
-    getAllTables: getAllTables,
     getUpdateMethodsField: getUpdateMethodsField,
     getFieldsCreate: getFieldsCreate,
     getCreateMethodsField: getCreateMethodsField,

@@ -1,4 +1,5 @@
 const {
+	/*
 	GraphQLObjectType,
 	GraphQLID,
 	GraphQLString,
@@ -6,7 +7,7 @@ const {
 	GraphQLBoolean,
 	GraphQLNonNull,
 	GraphQLInt,
-	GraphQLInterfaceType,
+	GraphQLInterfaceType, */
 	GraphQLScalarType
 } = require('graphql')
 

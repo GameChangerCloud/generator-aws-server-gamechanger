@@ -139,19 +139,39 @@ async function transac(queriesInsert){
 module.exports.fillTables = (numberItem) => {
 
 
-// LIST OF METHODS FOR INIT
+/*******
+ * Start of generated part using listOfMethodsForInit
+ */
 <%-listOfMethodsForInit%>
+/*******
+ * End of generated part using listOfMethodsForInit
+ */
 
-// INIT EACH MODELS JS
+/*******
+ * Start of generated part using initEachModelsJS
+ */
 <%-initEachModelsJS%>
+/*******
+ * End of generated part using initEachModelsJS
+ */
 
-// INIT EACH FIELDS MODELS JS
+ /*******
+ * Start of generated part using initEachFieldsModelsJS
+ */
 <%-initEachFieldsModelsJS%>
+/*******
+ * End of generated part using initEachFieldsModelsJS
+ */
 
 const queriesInsert = []
 
+ /*******
+ * Start of generated part using initQueriesInsert
+ */
 <%-initQueriesInsert%>
-
+ /*******
+ * Start of generated part using initQueriesInsert
+ */
     transac(queriesInsert).then(r => console.log("Done: " +r));
 
 

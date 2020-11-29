@@ -7,13 +7,21 @@ function createStringJsonOfArray(array){
     }
     return tmp;
 }
-
+ /*******
+ * Start of generated part using functionAddQuery
+ */
 <%-functionAddQuery%>
-
+ /*******
+ * End of generated part using functionAddQuery
+ */
 
 module.exports = {
 
-
+ /*******
+ * Start of generated part using listOfFunction
+ */
     <%-listOfFunction%>
-
+ /*******
+ * End of generated part using listOfFunction
+ */
 }
