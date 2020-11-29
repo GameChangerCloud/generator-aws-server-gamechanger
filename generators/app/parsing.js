@@ -1143,36 +1143,6 @@ const getEntitiesForExist = (tables) => {
     return s
 }
 
-// InitDatabase
-// todo :report if in 'columns.ejs' template
-const getInitCreateTable = (tables) => {
-    let s = 'const queriesAdd = [\n'
-    tables.forEach(table => {
-        s += '{tableName : "' + table.name + '", text: `CREATE TABLE IF NOT EXISTS "' + table.name + '" ('
-        for (let index = 0; index < table.columns.length; index++) {
-            s += '"' + table.columns[index].field + '" ' + table.columns[index].fieldType + ' '
-            // Adding the constraint only on the Primary key
-            if (table.columns[index].field.includes("Pk")) {
-                s += "PRIMARY KEY NOT NULL "
-            }
-            else {
-                if (table.columns[index].noNull) {
-                    s += "NOT NULL"
-                }
-                if (table.columns[index].unique) {
-                    s += " UNIQUE"
-                }
-            }
-            if (index < table.columns.length - 1) {
-                s += ", "
-            }
-        }
-        s += ')`},\n'
-    })
-    s += ']'
-    return s
-}
-
 const getInitAddConstraints = (tables) => {
     let s = 'const queriesConstraint = [\n'
     tables.forEach(table => {
