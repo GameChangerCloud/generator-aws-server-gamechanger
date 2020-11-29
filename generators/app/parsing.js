@@ -2406,7 +2406,6 @@ module.exports = {
     getUpdateMethodsField: getUpdateMethodsField,
     getAllTables: getAllTables,
     getEntitiesForExist: getEntitiesForExist,
-    getInitCreateTable: getInitCreateTable,
     getInitAddConstraints: getInitAddConstraints,
     getListOfMethodsForInit: getListOfMethodsForInit,
     getInitEachModelsJS: getInitEachModelsJS,
