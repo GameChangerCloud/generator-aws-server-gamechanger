@@ -1,3 +1,3 @@
-<% columns.forEach((column,idx,array) => { %>
-+"\"<%= column.field %>\" <%= column.fieldType %><% if (column.field.startsWith("Pk")) { %> PRIMARY KEY NOT NULL<% } %><% if (idx !== array.length - 1) { %>,<% } %>"
-<% }); %>
+<% columns.forEach((column,idx,array) => { -%>
+"<%= column.field %>" <%= column.fieldType %><% if (column.field.startsWith("Pk")) { %> PRIMARY KEY NOT NULL<% } %><% if (idx !== array.length - 1) { %>,<% } -%>
+<% }); -%>

@@ -9,19 +9,20 @@ let beginTransactionParams = {
     }
 
 /******* Start of generated part using tables */
-    const tables = '<% tables.forEach((table,idx,array) => { %>"<%= table.name %>"<% if (idx !== array.length - 1) { %>,<% } %><% }); %>'
+    const tables = '"Tweet","User","Stat","Notification","Meta"'
 /******* End of generated part using tables   */
 
     let queriesAdd = sqlUtils.getSQLCreateTables();
     let sqlTables = sqlUtils.getSQLTables();
 
-    <%-addConstraints%>
+    const queriesConstraint = [
+]
 
-    <%-deleteColumns%>
+    const queriesDeleteFields = []
 
-    <%-addColumns%>
+    const queriesAddFields = []
 
-    <%-updateColumns%>
+    const queriesUpdateFields = []
 
     async function transac(){
         const db = new rdsdata.RDSDatabase(beginTransactionParams).getInstance();

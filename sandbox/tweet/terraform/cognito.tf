@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "pool" {
-  name = "pool-<%-appName%>"
+  name = "pool-tweet"
   password_policy {
     minimum_length = 6
     require_lowercase = false
@@ -22,7 +22,7 @@ resource "aws_cognito_user_pool" "pool" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "client-<%-appName%>"
+  name = "client-tweet"
 
   user_pool_id = aws_cognito_user_pool.pool.id
   callback_urls = ["http://localhost:3000/callback", "http://localhost:4200"]
@@ -35,7 +35,7 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "domain-<%-appName%>"
+  domain       = "domain-tweet"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
 

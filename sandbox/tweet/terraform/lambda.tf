@@ -9,7 +9,7 @@ data "archive_file" "init" {
 resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.init.output_base64sha256
   function_name = var.lambda_name
-  description = "Lamdba for  <%-appName%>"
+  description = "Lamdba for  tweet"
   role = aws_iam_role.instance.arn
   filename = data.archive_file.init.output_path
   handler = "index.handler"

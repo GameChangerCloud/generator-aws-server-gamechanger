@@ -1,6 +1,6 @@
 resource "aws_api_gateway_rest_api" "myAPI" {
   name        = var.api_name
-  description = "This is my API for <%-appName%> project"
+  description = "This is my API for tweet project"
 }
 
 resource "aws_api_gateway_resource" "myResource" {

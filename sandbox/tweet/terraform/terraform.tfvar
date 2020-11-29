@@ -1,0 +1,11 @@
+db_username = "postgres"
+db_password = "postgres"
+cluster_db = "aurora-tweet"
+db_name = "tweet_db"
+api_name = "tweet_api"
+policy_name = "tweet_policy"
+role_name = "tweet_role"
+lambda_name = "tweet_lambda"
+secret_name = "tweet-secret"
+
+

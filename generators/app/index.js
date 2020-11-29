@@ -524,7 +524,7 @@ module.exports = class extends Generator {
 			this.templatePath('terraform/apigateway.tf'),
 			this.destinationPath('terraform/apigateway.tf'),
 			{
-				appname: parsing.formatName(this.answers.name)
+				appName: parsing.formatName(this.answers.name)
 			}
 		)
 
@@ -532,21 +532,21 @@ module.exports = class extends Generator {
 			this.templatePath('terraform/cognito.tf'),
 			this.destinationPath('terraform/cognito.tf'),
 			{
-				appname: parsing.formatName(this.answers.name)
+				appName: parsing.formatName(this.answers.name)
 			}
 		)
 		this.fs.copyTpl(
 			this.templatePath('terraform/iam.tf'),
 			this.destinationPath('terraform/iam.tf'),
 			{
-				appname: parsing.formatName(this.answers.name)
+				appName: parsing.formatName(this.answers.name)
 			}
 		)
 		this.fs.copyTpl(
 			this.templatePath('terraform/lambda.tf'),
 			this.destinationPath('terraform/lambda.tf'),
 			{
-				appname: parsing.formatName(this.answers.name)
+				appName: parsing.formatName(this.answers.name)
 			}
 		)
 		this.fs.copyTpl(
@@ -569,7 +569,7 @@ module.exports = class extends Generator {
 			this.templatePath('terraform/terraform.tfvar'),
 			this.destinationPath('terraform/terraform.tfvar'),
 			{
-				appname: parsing.formatName(this.answers.name)
+				appName: parsing.formatName(this.answers.name)
 			}
 		)
 

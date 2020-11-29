@@ -26,13 +26,13 @@ data "aws_iam_policy_document" "example" {
 resource "aws_iam_policy" "example" {
   name        = var.policy_name
   path        = "/"
-  description = "Policy for  <%-appName%>"
+  description = "Policy for  tweet"
   policy      = data.aws_iam_policy_document.example.json
 }
 
 resource "aws_iam_role" "instance" {
   name               = var.role_name
-  description        = "Role for  <%-appName%>"
+  description        = "Role for  tweet"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
