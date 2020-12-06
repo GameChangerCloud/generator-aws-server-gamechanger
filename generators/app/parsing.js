@@ -512,70 +512,6 @@ const getMutationFields = (typesName, types, defaultScalars) => {
     return s
 }
 
-/** GLOBAL HANDLER  */
-
-const getHandlerRequire = (typesName, types) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "EnumTypeDefinition" && types[index].type !== "InterfaceTypeDefinition" && types[index].type !== "ScalarTypeDefinition") {
-            let name = typesName[index]
-            name = name[0].toUpperCase() + name.slice(1)
-            s += "const handler" + name + " = require('./handlers/handler" + name + "')\n";
-        }
-    }
-    return s
-}
-
-const getHandlerGetSwitchCase = (typesName, types) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "EnumTypeDefinition" && types[index].type !== "InterfaceTypeDefinition" && types[index].type !== "ScalarTypeDefinition") {
-            s += "case \"" + typesName[index] + "Type\": \n"
-            s += "\t\t\t\tif(args) {\n"
-            s += "\t\t\t\t\treturn handler" + typesName[index] + ".getMethodsByArgs(args)\n"
-            s += "\t\t\t\t}\n"
-            s += "\t\t\t\telse {\n"
-            s += "\t\t\t\t\treturn handler" + typesName[index] + ".getMethods()\n"
-            s += "\t\t\t\t}\n"
-        }
-    }
-    return s
-}
-
-const getHandlerDeleteSwitchCase = (typesName, types) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "EnumTypeDefinition" && types[index].type !== "InterfaceTypeDefinition" && types[index].type !== "ScalarTypeDefinition") {
-            s += "case \"" + typesName[index] + "Type\": \n"
-            s += "\t\t\t\t\treturn handler" + typesName[index] + ".deleteMethods(id)\n"
-        }
-    }
-    return s
-}
-
-const getHandlerCreateSwitchCase = (typesName, types) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "EnumTypeDefinition" && types[index].type !== "InterfaceTypeDefinition" && types[index].type !== "ScalarTypeDefinition") {
-            s += "case \"" + typesName[index] + "Type\": \n"
-            s += "\t\t\t\t\treturn handler" + typesName[index] + ".createMethods(args)\n"
-        }
-    }
-    return s
-
-}
-
-const getHandlerUpdateSwitchCase = (typesName, types) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "EnumTypeDefinition" && types[index].type !== "InterfaceTypeDefinition" && types[index].type !== "ScalarTypeDefinition") {
-            s += "case \"" + typesName[index] + "Type\": \n"
-            s += "\t\t\t\t\treturn handler" + typesName[index] + ".updateMethods(args)\n"
-        }
-    }
-    return s
-}
-
 /** TYPE HANDLER */
 
 const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent) => {
@@ -1041,6 +977,11 @@ const getAllTables = (types, typesName, relations, scalarTypeNames) => {
                         case scalars.Byte:
                             tableTemp.push({ field: field.name, fieldType: "bytea", noNull: field.noNull, unique: false, constraint: null })
                             break
+                        case scalars.Linestring:
+                        case scalars.Point:
+                        case scalars.Polygon:
+                            tableTemp.push({ field: field.name, fieldType: "geometry", noNull: field.noNull, unique: false, constraint: null })
+                            break
                         case scalars.UtcOffset:
                         case scalars.EmailAddress:
                         case scalars.URL:
@@ -1131,16 +1072,6 @@ const getAllTables = (types, typesName, relations, scalarTypeNames) => {
         }
     }
     return allTables
-}
-
-
-const getEntitiesForExist = (tables) => {
-    let s = 'const entities = [\n'
-    tables.forEach(table => {
-        s += '"' + table.name + '", '
-    })
-    s += ']'
-    return s
 }
 
 const getInitAddConstraints = (tables) => {
@@ -2394,18 +2325,12 @@ module.exports = {
     getResolveType: getResolveType,
     getEnumValues: getEnumValues,
     getMutationFields: getMutationFields,
-    getHandlerRequire: getHandlerRequire,
-    getHandlerGetSwitchCase: getHandlerGetSwitchCase,
-    getHandlerDeleteSwitchCase: getHandlerDeleteSwitchCase,
-    getHandlerCreateSwitchCase: getHandlerCreateSwitchCase,
-    getHandlerUpdateSwitchCase: getHandlerUpdateSwitchCase,
     getFieldsParsedHandler: getFieldsParsedHandler,
     getCreateMethodsField: getCreateMethodsField,
     getFieldsCreate: getFieldsCreate,
     getDeleteMethodsMany: getDeleteMethodsMany,
     getUpdateMethodsField: getUpdateMethodsField,
     getAllTables: getAllTables,
-    getEntitiesForExist: getEntitiesForExist,
     getInitAddConstraints: getInitAddConstraints,
     getListOfMethodsForInit: getListOfMethodsForInit,
     getInitEachModelsJS: getInitEachModelsJS,
@@ -2430,7 +2355,6 @@ module.exports = {
     getFieldsCreate: getFieldsCreate,
     getCreateMethodsField: getCreateMethodsField,
     formatName: formatName,
-    getEntitiesForExist: getEntitiesForExist,
     compareSchema: compareSchema,
     findTable: findTable,
     getQueriesDeleteFields: getQueriesDeleteFields,

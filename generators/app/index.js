@@ -427,11 +427,7 @@ module.exports = class extends Generator {
 			this.templatePath('database/globalHandler.js'),
 			this.destinationPath('database/handler.js'),
 			{
-				handlerRequire: parsing.getHandlerRequire(this.typesName, this.types),
-				handlerGetSwitchCase: parsing.getHandlerGetSwitchCase(this.typesName, this.types),
-				handlerDeleteSwitchCase: parsing.getHandlerDeleteSwitchCase(this.typesName, this.types),
-				handlerUpdateSwitchCase: parsing.getHandlerUpdateSwitchCase(this.typesName, this.types),
-				handlerCreateSwitchCase: parsing.getHandlerCreateSwitchCase(this.typesName, this.types)
+				tables: this.tables
 			}
 		)
 
@@ -507,7 +503,7 @@ module.exports = class extends Generator {
 			this.templatePath('cleanDatabase/cleanTables.js'),
 			this.destinationPath('cleanDatabase/cleanTables.js'),
 			{
-				tables: this.tables,
+				tables: this.tables
 			}
 		)
 
@@ -516,7 +512,7 @@ module.exports = class extends Generator {
 			this.templatePath('existTable/existTable.js'),
 			this.destinationPath('existTable/existTable.js'),
 			{
-				entitiesForExist: parsing.getEntitiesForExist(this.tables),
+				tables: this.tables
 			}
 		)
 

@@ -10,9 +10,9 @@ let sqlParams = {
     parameters: []
 }
 
-/******* Start of generated part using entitiesForExist */
-    <%-entitiesForExist%>
-/******* End of generated part using entitiesForExist */
+/******* Start of generated part using tables */
+    const entities = [ <% tables.forEach((table,idx,array) => { %>"<%= table.name %>"<% if (idx !== array.length - 1) { %>,<% } %><% }); %> ]
+/******* End of generated part using tables */
 
 async function transac(){
     let count = 0
