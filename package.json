@@ -7,7 +7,7 @@
     "generators"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "run": "node index.js"
   },
   "repository": {
@@ -21,14 +21,18 @@
   "license": "ISC",
   "dependencies": {
     "easygraphql-parser": "0.0.13",
+    "ejs": "^3.1.5",
+    "faker": "^4.1.0",
     "graphql": "^15.2.0",
     "pg": "^8.2.1",
     "pluralize": "^8.0.0",
     "rds-data": "^1.1.0",
-    "yeoman-generator": "^4.8.2",
-    "faker": "^4.1.0"
+    "yeoman-generator": "^4.8.2"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^8.2.1",
     "aws-sdk": "^2.709.0"
   }
 }
