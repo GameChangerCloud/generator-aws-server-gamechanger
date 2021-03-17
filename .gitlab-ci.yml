@@ -1,0 +1,8 @@
+stages:
+  - testing
+test:
+  stage: testing
+  image: node:boron
+  script:
+    - npm install
+    - npm test

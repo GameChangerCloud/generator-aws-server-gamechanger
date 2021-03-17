@@ -7,7 +7,7 @@
     "generators"
   ],
   "scripts": {
-    "test": "mocha",
+    "test": "./node_modules/.bin/mocha --reporter spec",
     "run": "node index.js"
   },
   "repository": {
