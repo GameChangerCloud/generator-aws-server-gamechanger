@@ -17,7 +17,7 @@ let queriesAdd = sqlUtils.getSQLCreateTables();
 /*******
  * Start of generated part using addConstraints
  */
-<%-addConstraints%>
+<%- include('../database/partials/queriesConstraint.ejs', {tables: tables}) %>
 /*******
  * End of generated part using addConstraints
  */
@@ -77,6 +77,7 @@ module.exports.initDatabase = () => {
   try {
     await addPostGisSupport();
     await graphQLTables();
+    //await addConstraints();
   }
   catch(e) {
     return "Init failed";

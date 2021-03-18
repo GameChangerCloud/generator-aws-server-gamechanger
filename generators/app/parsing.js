@@ -1074,18 +1074,18 @@ const getAllTables = (types, typesName, relations, scalarTypeNames) => {
     return allTables
 }
 
-const getInitAddConstraints = (tables) => {
-    let s = 'const queriesConstraint = [\n'
-    tables.forEach(table => {
-        for (let index = 0; index < table.columns.length; index++) {
-            if (table.columns[index].constraint != null && table.columns[index].constraint.includes("FOREIGN KEY")) {
-                s += '{tableName: "' + table.name + '", text: `ALTER TABLE "' + table.name + '" ADD ' + table.columns[index].constraint + ' DEFERRABLE INITIALLY DEFERRED`},'
-            }
-        }
-    })
-    s += ']'
-    return s
-}
+// const getInitAddConstraints = (tables) => {
+//     let s = 'const queriesConstraint = [\n'
+//     tables.forEach(table => {
+//         for (let index = 0; index < table.columns.length; index++) {
+//             if (table.columns[index].constraint != null && table.columns[index].constraint.includes("FOREIGN KEY")) {
+//                 s += '{tableName: "' + table.name + '", text: `ALTER TABLE "' + table.name + '" ADD ' + table.columns[index].constraint + ' DEFERRABLE INITIALLY DEFERRED`},'
+//             }
+//         }
+//     })
+//     s += ']'
+//     return s
+// }
 
 // FIllTable
 
@@ -1296,101 +1296,101 @@ const getInitQueriesInsert = (tables) => {
 
 }
 
-const getQueriesDeleteFields = (fields) => {
-    let s = "const queriesDeleteFields = ["
-    fields.forEach(table => {
-        s += '{tableName : "' + table.name + '", text: `ALTER TABLE "' + table.name + '" DROP COLUMN IF EXISTS "' + table.column + '" ;`},'
-    })
-    s += "]"
-    return s;
-}
+// const getQueriesDeleteFields = (fields) => {
+//     let s = "const queriesDeleteFields = ["
+//     fields.forEach(table => {
+//         s += '{tableName : "' + table.name + '", text: `ALTER TABLE "' + table.name + '" DROP COLUMN IF EXISTS "' + table.column + '" ;`},'
+//     })
+//     s += "]"
+//     return s;
+// }
 
 
-const getQueriesUpdateFields = (fields) => {
-    let s = 'const queriesUpdateFields = ['
-    fields.forEach(x => {
-        console.log("NAME : ", x.name)
-        console.log("OLD : ", x.column_old)
-        console.log("NEW : ", x.column_new)
-        let default_val = undefined;
-        switch (x.column_new.type) {
-            case "String":
-                default_val = "''"
-                break;
-            case "Int":
-                default_val = 0
-                break;
-            case "ID":
-                default_val = 1
-                break;
-            case "Boolean":
-                default_val = false;
-                break;
-            default:
-                break;
-        }
-        if (x.column_old.type != x.column_new.type) {
-            if (x.column_old.type == "String" && x.column_new.type == "Int") {
-                // STRING -> INT => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
-                // update "Meeting" SET name = REGEXP_REPLACE(COALESCE("name"::character varying, '0'), '[^0-9]*' ,'0')::integer
-                // ALTER TABLE "Meeting" ALTER COLUMN name TYPE INT USING name::integer;
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
-                s += '{tableName : "' + x.name + '", text: `UPDATE "' + x.name + '" SET "' + x.column_old.name + '" = REGEXP_REPLACE(COALESCE("' + x.column_old.name + '"::character varying, \'0\'), \'.*[^0-9].*\', \'0\', \'g\')::integer ;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" TYPE INT USING "' + x.column_old.name + '"::integer;`},'
-            }
-            else if (x.column_old.type == "Int" && x.column_new.type == "String") {
-                // INT -> STRING => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name SET DATA TYPE text
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DATA TYPE text ;`},'
-            }
-            else if (x.column_old.type == "String" && x.column_new.type == "Boolean") {
-                // STRING -> BOOL => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
-                // ALTER TABLE "Meeting" ALTER name TYPE bool USING CASE WHEN name='true' THEN TRUE ELSE FALSE END;
-                // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT FALSE;
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE bool USING CASE WHEN "' + x.column_old.name + '"=\'true\' THEN TRUE ELSE FALSE END;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT FALSE ;`},'
-            }
-            else if (x.column_old.type == "Boolean" && x.column_new.type == "String") {
-                // BOOL -> STRING => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name SET DATA TYPE text;
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DATA TYPE text ;`},'
-            }
-            else if (x.column_old.type == "Boolean" && x.column_new.type == "Int") {
-                // BOOL -> INT => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
-                // ALTER TABLE "Meeting" ALTER name TYPE int USING CASE WHEN name=false THEN 0 ELSE 1 END;
-                // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT 0;
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE INT USING CASE WHEN "' + x.column_old.name + '"=FALSE THEN 0 ELSE 1 END;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT 0 ;`},'
-            }
-            else if (x.column_old.type == "Int" && x.column_new.type == "Boolean") {
-                // INT -> BOOL => OK
-                // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
-                // ALTER TABLE "Meeting" ALTER name TYPE bool USING CASE WHEN name=0 THEN FALSE ELSE TRUE END;
-                // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT FALSE;
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE bool USING CASE WHEN "' + x.column_old.name + '"=0 THEN FALSE ELSE TRUE END;`},'
-                s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT FALSE ;`},'
-            }
-            else {
-                console.log("Not supported")
-            }
-        }
-        if (!x.column_old.noNull && x.column_new.noNull) {
-            s += '{tableName : "' + x.name + '", text: `UPDATE "' + x.name + '" SET "' + x.column_old.name + '" = ' + default_val + ' WHERE "' + x.column_old.name + '" IS NULL ;`},'
-            s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET NOT NULL ;`},'
-        }
-        else if (x.column_old.noNull && !x.column_new.noNull) {
-            s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP NOT NULL ;`},'
-        }
-    })
-    s += ']'
-    return s;
-}
+// const getQueriesUpdateFields = (fields) => {
+//     let s = 'const queriesUpdateFields = ['
+//     fields.forEach(x => {
+//         console.log("NAME : ", x.name)
+//         console.log("OLD : ", x.column_old)
+//         console.log("NEW : ", x.column_new)
+//         let default_val = undefined;
+//         switch (x.column_new.type) {
+//             case "String":
+//                 default_val = "''"
+//                 break;
+//             case "Int":
+//                 default_val = 0
+//                 break;
+//             case "ID":
+//                 default_val = 1
+//                 break;
+//             case "Boolean":
+//                 default_val = false;
+//                 break;
+//             default:
+//                 break;
+//         }
+//         if (x.column_old.type != x.column_new.type) {
+//             if (x.column_old.type == "String" && x.column_new.type == "Int") {
+//                 // STRING -> INT => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
+//                 // update "Meeting" SET name = REGEXP_REPLACE(COALESCE("name"::character varying, '0'), '[^0-9]*' ,'0')::integer
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name TYPE INT USING name::integer;
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
+//                 s += '{tableName : "' + x.name + '", text: `UPDATE "' + x.name + '" SET "' + x.column_old.name + '" = REGEXP_REPLACE(COALESCE("' + x.column_old.name + '"::character varying, \'0\'), \'.*[^0-9].*\', \'0\', \'g\')::integer ;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" TYPE INT USING "' + x.column_old.name + '"::integer;`},'
+//             }
+//             else if (x.column_old.type == "Int" && x.column_new.type == "String") {
+//                 // INT -> STRING => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name SET DATA TYPE text
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DATA TYPE text ;`},'
+//             }
+//             else if (x.column_old.type == "String" && x.column_new.type == "Boolean") {
+//                 // STRING -> BOOL => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
+//                 // ALTER TABLE "Meeting" ALTER name TYPE bool USING CASE WHEN name='true' THEN TRUE ELSE FALSE END;
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT FALSE;
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE bool USING CASE WHEN "' + x.column_old.name + '"=\'true\' THEN TRUE ELSE FALSE END;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT FALSE ;`},'
+//             }
+//             else if (x.column_old.type == "Boolean" && x.column_new.type == "String") {
+//                 // BOOL -> STRING => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name SET DATA TYPE text;
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DATA TYPE text ;`},'
+//             }
+//             else if (x.column_old.type == "Boolean" && x.column_new.type == "Int") {
+//                 // BOOL -> INT => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
+//                 // ALTER TABLE "Meeting" ALTER name TYPE int USING CASE WHEN name=false THEN 0 ELSE 1 END;
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT 0;
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE INT USING CASE WHEN "' + x.column_old.name + '"=FALSE THEN 0 ELSE 1 END;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT 0 ;`},'
+//             }
+//             else if (x.column_old.type == "Int" && x.column_new.type == "Boolean") {
+//                 // INT -> BOOL => OK
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name DROP DEFAULT;
+//                 // ALTER TABLE "Meeting" ALTER name TYPE bool USING CASE WHEN name=0 THEN FALSE ELSE TRUE END;
+//                 // ALTER TABLE "Meeting" ALTER COLUMN name SET DEFAULT FALSE;
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP DEFAULT ;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER "' + x.column_old.name + '" TYPE bool USING CASE WHEN "' + x.column_old.name + '"=0 THEN FALSE ELSE TRUE END;`},'
+//                 s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET DEFAULT FALSE ;`},'
+//             }
+//             else {
+//                 console.log("Not supported")
+//             }
+//         }
+//         if (!x.column_old.noNull && x.column_new.noNull) {
+//             s += '{tableName : "' + x.name + '", text: `UPDATE "' + x.name + '" SET "' + x.column_old.name + '" = ' + default_val + ' WHERE "' + x.column_old.name + '" IS NULL ;`},'
+//             s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" SET NOT NULL ;`},'
+//         }
+//         else if (x.column_old.noNull && !x.column_new.noNull) {
+//             s += '{tableName : "' + x.name + '", text: `ALTER TABLE "' + x.name + '" ALTER COLUMN "' + x.column_old.name + '" DROP NOT NULL ;`},'
+//         }
+//     })
+//     s += ']'
+//     return s;
+// }
 
 const formatTime = (date) => {
     var d = new Date(date),
@@ -1420,53 +1420,53 @@ const formatDate = (date) => {
     return [year, month, day].join('-');
 }
 
-const getQueriesAddFields = (fields) => {
-    let s = 'const queriesAddFields = ['
-    for (let field in fields) {
-        if (fields[field].column.noNull == false) {
-            s += '{tableName : "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ADD COLUMN "' + fields[field].column.field + '" ' + fields[field].column.fieldType + ';`},'
-            if (fields[field].column.constraint != null && fields[field].column.constraint.includes("FOREIGN KEY")) {
-                s += '{tableName: "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ADD ' + fields[field].column.constraint + ' DEFERRABLE INITIALLY DEFERRED`},'
-            }
-        }
-        else {
+// const getQueriesAddFields = (fields) => {
+//     let s = 'const queriesAddFields = ['
+//     for (let field in fields) {
+//         if (fields[field].column.noNull == false) {
+//             s += '{tableName : "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ADD COLUMN "' + fields[field].column.field + '" ' + fields[field].column.fieldType + ';`},'
+//             if (fields[field].column.constraint != null && fields[field].column.constraint.includes("FOREIGN KEY")) {
+//                 s += '{tableName: "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ADD ' + fields[field].column.constraint + ' DEFERRABLE INITIALLY DEFERRED`},'
+//             }
+//         }
+//         else {
 
-            let d = new Date()
+//             let d = new Date()
 
-            let request = '`ALTER TABLE "' + fields[field].name + '" ADD COLUMN "' + fields[field].column.field + '" ' + fields[field].column.fieldType + ' NOT NULL DEFAULT ';
-            switch (fields[field].column.fieldType) {
-                case "Int":
-                    request += '0 ;'
-                    break;
-                case "text":
-                    request += "'';"
-                    break;
-                case "Boolean":
-                    request += 'false;'
-                    break
-                case "date": // Date
-                    request += "'" + formatDate(d) + "'" + ';'
-                    break;
-                case "time": // Time
-                    request += "'" + formatTime(d) + "'" + ';'
-                    break;
-                case "timestamp": // DateTime
-                    request += "TO_TIMESTAMP('1970-01-01 01:00:00','YYYY-MM-DD HH:MI:SS');"
-                    break;
-                default:
-                    // TODO
-                    // Relation case
-                    // ID 0 + creation of object with id 0
-                    break;
-            }
-            s += '{tableName : "' + fields[field].name + '", text:' + request + '`},'
-            s += '{tableName : "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ALTER COLUMN ' + fields[field].column.field + ' DROP DEFAULT;`},'
+//             let request = '`ALTER TABLE "' + fields[field].name + '" ADD COLUMN "' + fields[field].column.field + '" ' + fields[field].column.fieldType + ' NOT NULL DEFAULT ';
+//             switch (fields[field].column.fieldType) {
+//                 case "Int":
+//                     request += '0 ;'
+//                     break;
+//                 case "text":
+//                     request += "'';"
+//                     break;
+//                 case "Boolean":
+//                     request += 'false;'
+//                     break
+//                 case "date": // Date
+//                     request += "'" + formatDate(d) + "'" + ';'
+//                     break;
+//                 case "time": // Time
+//                     request += "'" + formatTime(d) + "'" + ';'
+//                     break;
+//                 case "timestamp": // DateTime
+//                     request += "TO_TIMESTAMP('1970-01-01 01:00:00','YYYY-MM-DD HH:MI:SS');"
+//                     break;
+//                 default:
+//                     // TODO
+//                     // Relation case
+//                     // ID 0 + creation of object with id 0
+//                     break;
+//             }
+//             s += '{tableName : "' + fields[field].name + '", text:' + request + '`},'
+//             s += '{tableName : "' + fields[field].name + '", text: `ALTER TABLE "' + fields[field].name + '" ALTER COLUMN ' + fields[field].column.field + ' DROP DEFAULT;`},'
 
-        }
-    }
-    s += ']'
-    return s
-}
+//         }
+//     }
+//     s += ']'
+//     return s
+// }
 
 
 const getParametersForCreate = (typesName, currentType, currentTypeName, fields, relations) => {
@@ -2331,7 +2331,7 @@ module.exports = {
     getDeleteMethodsMany: getDeleteMethodsMany,
     getUpdateMethodsField: getUpdateMethodsField,
     getAllTables: getAllTables,
-    getInitAddConstraints: getInitAddConstraints,
+    //getInitAddConstraints: getInitAddConstraints,
     getListOfMethodsForInit: getListOfMethodsForInit,
     getInitEachModelsJS: getInitEachModelsJS,
     getInitEachFieldsModelsJS: getInitEachFieldsModelsJS,
@@ -2357,8 +2357,8 @@ module.exports = {
     formatName: formatName,
     compareSchema: compareSchema,
     findTable: findTable,
-    getQueriesDeleteFields: getQueriesDeleteFields,
-    getQueriesAddFields: getQueriesAddFields,
+    // getQueriesDeleteFields: getQueriesDeleteFields,
+    // getQueriesAddFields: getQueriesAddFields,
     findField: findField,
-    getQueriesUpdateFields: getQueriesUpdateFields
+    // getQueriesUpdateFields: getQueriesUpdateFields
 }

@@ -15,13 +15,14 @@ let beginTransactionParams = {
     let queriesAdd = sqlUtils.getSQLCreateTables();
     let sqlTables = sqlUtils.getSQLTables();
 
-    <%-addConstraints%>
-
-    <%-deleteColumns%>
-
-    <%-addColumns%>
-
-    <%-updateColumns%>
+    //<# addConstraints %>
+    <%- include('../database/partials/queriesConstraint.ejs', {tables: tables}) %>
+    //<# deleteColumns %>
+    <%- include('../database/partials/queriesDeleteFields', {fields: delete_fields}) %>
+    //<# addColumns %>
+    <%- include('../database/partials/queriesAddFields.ejs', {fields: add_fields}) %>
+    // <# updateColumns %>
+    <%- include('../database/partials/queriesUpdateFields.ejs', {fields: update_fields}) %>
 
     async function transac(){
         const db = new rdsdata.RDSDatabase(beginTransactionParams).getInstance();

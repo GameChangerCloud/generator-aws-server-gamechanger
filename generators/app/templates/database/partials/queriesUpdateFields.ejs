@@ -1,0 +1,42 @@
+const queriesUpdateFields = [
+<% fields.forEach(x => { 
+    console.log("NAME : ", x.name)
+    console.log("OLD : ", x.column_old)
+    console.log("NEW : ", x.column_new) 
+    if (x.column_old.type != x.column_new.type) { 
+        if (x.column_old.type == "String" && x.column_new.type == "Int") { _%>
+<%- include('./alter',{name: x.name, field: x.column_old.name, drop: "DEFAULT", alterCase : "AlterColumn"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, set : 'REGEXP_REPLACE(COALESCE("' + x.column_old.name + '"::character varying, \'0\'), \'.*[^0-9].*\', \'0\', \'g\')::integer', alterCase: "Update"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, type: "INT",defaultInit: "::integer", alterCase : "AlterType"}) %>
+        <% }
+        else if (x.column_old.type == "Int" && x.column_new.type == "String") { _%>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "DATA TYPE text", alterCase : "AlterColumnSet"}) %>
+        <% }
+        else if (x.column_old.type == "String" && x.column_new.type == "Boolean") { _%>
+<%- include('./alter',{name: x.name, field: x.column_old.name, drop: "DEFAULT", alterCase : "AlterColumn"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, type: "bool", defaultInit: "\'true\' THEN TRUE ELSE FALSE END", alterCase : "AlterUsingCase"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "DEFAULT FALSE", alterCase : "AlterColumnSet"}) %>
+        <% }
+        else if (x.column_old.type == "Boolean" && x.column_new.type == "String") { _%>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "DATA TYPE text", alterCase : "AlterColumnSet"}) %>
+        <%}
+        else if (x.column_old.type == "Boolean" && x.column_new.type == "Int") { _%>
+<%- include('./alter',{name: x.name, field: x.column_old.name, drop: "DEFAULT", alterCase : "AlterColumn"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, type: "INT", default: "FALSE THEN 0 ELSE 1 END", alterCase : "AlterUsingCase"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "DEFAULT 0", alterCase : "AlterColumnSet"}) %>
+        <%}
+        else if (x.column_old.type == "Int" && x.column_new.type == "Boolean") { _%>
+<%- include('./alter',{name: x.name, field: x.column_old.name, drop: "DEFAULT", alterCase : "AlterColumn"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, type: "bool", defaultInit: "0 THEN FALSE ELSE TRUE END", alterCase : "AlterUsingCase"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "DEFAULT FALSE", alterCase : "AlterColumnSet"}) %>
+        <%}
+        else { console.log("Not supported") }
+    }
+    if (!x.column_old.noNull && x.column_new.noNull) { _%>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, default_val: x.column_new.type, set :' WHERE "' + x.column_old.name + '" IS NULL', alterCase: "Update"}) %>
+<%- include('./alter',{name: x.name, old_name: x.column_old.name, datatype: "NOT NULL", alterCase : "AlterColumnSet"}) %>
+    <%}
+    else if (x.column_old.noNull && !x.column_new.noNull) {_%>
+<%- include('./alter',{name: x.name, field: x.column_old.name, drop: "NOT NULL", alterCase : "AlterColumn"}) %>
+    <% }}) _%>
+    ]

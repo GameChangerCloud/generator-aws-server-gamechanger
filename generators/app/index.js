@@ -255,6 +255,7 @@ module.exports = class extends Generator {
 					{
 						enumName: currentTypeName,
 						enumValues: parsing.getEnumValues(currentType),
+						
 					}
 				)
 			}
@@ -472,7 +473,7 @@ module.exports = class extends Generator {
 			this.destinationPath('initDatabase/initDatabase.js'),
 			{
 				tables: this.tables,
-				addConstraints: parsing.getInitAddConstraints(this.tables)
+				//addConstraints: parsing.getInitAddConstraints(this.tables)
 			}
 		)
 
@@ -634,12 +635,14 @@ module.exports = class extends Generator {
 				this.destinationPath('upgradeDatabase/upgradeDatabase.js'),
 				{
 					tables: this.tables,
-					addConstraints: parsing.getInitAddConstraints(this.add_entities),
-					deleteColumns: parsing.getQueriesDeleteFields(this.delete_fields),
-					addColumns: parsing.getQueriesAddFields(this.add_fields),
-					updateColumns: parsing.getQueriesUpdateFields(this.update_fields)
-
-
+					// addConstraints: parsing.getInitAddConstraints(this.add_entities),
+					// deleteColumns: parsing.getQueriesDeleteFields(this.delete_fields),
+					// addColumns: parsing.getQueriesAddFields(this.add_fields),
+					// updateColumns: parsing.getQueriesUpdateFields(this.update_fields),
+					add_entities: this.add_entities,
+					delete_fields: this.delete_fields,
+					add_fields: this.add_fields,
+					update_fields: this.update_fields
 				}
 			)
 		}
