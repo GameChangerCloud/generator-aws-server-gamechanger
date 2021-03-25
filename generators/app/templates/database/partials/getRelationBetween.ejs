@@ -1,0 +1,12 @@
+<% if (typeOne !== "Query" && typeTwo !== "Query") {_%>
+<% if (include('./relation/isManyToMany',{typeOne: typeOne,typeTwo: typeTwo,manyToMany: relations.manyToMany})) { %>manyToMany
+<% } else if (include('./relation/isOneToMany',{typeOne: typeOne,typeTwo: typeTwo,oneToMany: relations.oneToMany})){ %>oneToMany
+<% } else if (include('./relation/isManyToOne',{typeOne: typeOne,typeTwo: typeTwo,manyToOne: relations.manyToOne})){ %>manyToOne
+<% } else if (include('./relation/isOneToOne',{typeOne: typeOne,typeTwo: typeTwo,oneToOne: relations.oneToOne}).answers){ _%>
+<% if (typeOne === include('./relation/isOneToOne',{typeOne: typeOne,typeTwo: typeTwo,oneToOne: relations.oneToOne}).parent) {%>oneToOneParent
+<% } else {%>"oneToOneChild"<% } _%>
+<% } else if (include('./relation/isOneOnly',{typeOne: typeOne,typeTwo: typeTwo,oneOnly: relations.oneOnly})){ %>oneOnly
+<% } else if (include('./relation/isManyOnly',{typeOne: typeOne,typeTwo: typeTwo,manyOnly: relations.manyOnly})){ %>manyOnly
+<% } else if (include('./relation/isSelfJoinOne',{typeOne: typeOne,typeTwo: typeTwo,selfJoinOne: relations.selfJoinOne})){ %>selfJoinOne
+<% } else { %>"selfJoinMany"<%}_%>
+<% } else { %>"No relation"<% } _%>

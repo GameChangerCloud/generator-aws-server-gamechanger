@@ -1,0 +1,13 @@
+<% let answers = false
+manyToMany.forEach(relation => {
+if (typeOne === typeTwo) {
+        if (relation[0] === typeOne && relation[1] === typeTwo) {
+        answers = true
+        }
+}
+else {
+        if (relation.includes(typeOne) && relation.includes(typeTwo))
+        answers = true
+}
+})%>
+<%- answers %>

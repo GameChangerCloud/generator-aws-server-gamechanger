@@ -361,7 +361,13 @@ module.exports = class extends Generator {
 							queryManyToOne: queryManyToOne,
 							querySelfJoinOne: parsing.isSelfJoinOne(currentTypeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentTypeName, fields) : false,
 							querySelfJoinMany: parsing.isSelfJoinMany(currentTypeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentTypeName, fields) : false,
-							updateMethodsField: parsing.getUpdateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables, this.scalarTypeNames),
+							// updateMethodsField: parsing.getUpdateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables, this.scalarTypeNames),
+							fields: fields,
+							relations: this.relations,
+							manyToManyTables: this.manyToManyTables,
+							scalarTypeNames: this.scalarTypeNames,
+							scalars: constants,
+
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 							createMethodsField: parsing.getCreateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables)
 						}

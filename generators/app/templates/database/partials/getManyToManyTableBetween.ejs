@@ -1,0 +1,24 @@
+<% let result = "" %>
+<% manyToManyTables.forEach(table => { %>
+    <% if (table.name.includes(typeOne) && table.name.includes(typeTwo)) { %>
+        <% result = table %>
+        <% return result %>
+    <% } %>
+<% }) %>
+<% return result %>
+
+
+
+
+
+
+// const getManyToManyTableBetween = (typeOne, typeTwo, manyToManyTables) => {
+//     let result = ""
+//     manyToManyTables.forEach(table => {
+//         if (table.name.includes(typeOne) && table.name.includes(typeTwo)) {
+//             result = table
+//             return result
+//         }
+//     })
+//     return result
+// }

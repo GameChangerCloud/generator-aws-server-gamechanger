@@ -174,7 +174,7 @@ module.exports = {
 	async updateMethods(args) {
 
 		/******* Start of generated part using updateMethodsField */
-		<%-updateMethodsField%>
+		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error

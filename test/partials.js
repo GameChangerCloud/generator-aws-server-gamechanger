@@ -35,23 +35,7 @@ const columns = [
         "constraint": "FOREIGN KEY (\"Fk_User_id\") REFERENCES \"User\" (\"Pk_User_id\")"
     }
 ];
-//Without Foreign key
-const columns2 = [
-    {
-        "field": "Pk_Tweet_id",
-        "fieldType": "Int",
-        "noNull": false,
-        "unique": false,
-        "constraint": "PRIMARY KEY NOT NULL"
-    },
-    {
-        "field": "body",
-        "fieldType": "text",
-        "noNull": false,
-        "unique": false,
-        "constraint": null
-    },
-];
+
 const resultColumns = [
     '"Pk_Tweet_id" Int PRIMARY KEY NOT NULL',
     '"body" text',
@@ -65,11 +49,11 @@ const tables = [
         "columns" : columns
     }
 ]
-//Using columns 2
+//Using columns without FK
 const tables2 = [
     {
         "name" : "TableTest",
-        "columns" : columns2
+        "columns" : columns.slice(0,3)
     }
 ]
 
@@ -101,6 +85,79 @@ const updateFields = [
         }
     }
 ]
+
+const fields = [
+    {
+      name: "id",
+      arguments: [
+      ],
+      isDeprecated: false,
+      noNull: true,
+      isArray: false,
+      noNullArrayValues: false,
+      type: "ID",
+    },
+    {
+      name: "title",
+      arguments: [
+      ],
+      isDeprecated: false,
+      noNull: false,
+      isArray: false,
+      noNullArrayValues: false,
+      type: "String",
+    },
+    {
+      name: "actors",
+      arguments: [
+      ],
+      isDeprecated: false,
+      noNull: false,
+      isArray: true,
+      noNullArrayValues: false,
+      type: "Actor",
+    },
+  ]
+const scalarTypeNames =[
+    undefined,
+    undefined,
+]
+  
+const relations = {
+    oneToOne: [],
+    manyToMany: [
+        [
+        "Actor",
+        "Movie",
+        ],
+    ],
+    oneToMany: [],
+    manyToOne: [],
+    oneOnly: [],
+    manyOnly: [],
+    selfJoinOne: [],
+    selfJoinMany: [],
+}
+const manyToManyTables = [
+    {
+      name: "Actor_Movie",
+      columns: [
+        {
+          field: "Actor_id",
+          fieldType: "INTEGER",
+          constraint: "FOREIGN KEY (\"Actor_id\") REFERENCES \"Actor\"(\"Pk_Actor_id\") ON DELETE CASCADE",
+        },
+        {
+          field: "Movie_id",
+          fieldType: "INTEGER",
+          constraint: "FOREIGN KEY (\"Movie_id\") REFERENCES \"Movie\"(\"Pk_Movie_id\") ON DELETE CASCADE",
+        },
+      ],
+    },
+]
+
+const scalars = require('../generators/app/constants')
+
   
 
 describe('partials', function() {
@@ -134,7 +191,6 @@ describe('partials', function() {
             return ejs.renderFile(filename, {"entity": "Tweet"}).should.eventually.equal("const handlerTweet = require(\'./handlers/handlerTweet\')");
         });
     });
-    //veyrack's part
     describe('partials/alter', function() {
         const filename = './generators/app/templates/database/partials/alter.ejs';
         it('should render altered primary column', function() {
@@ -219,4 +275,46 @@ describe('partials', function() {
                                                                                         +"{tableName: \"User\", text: `ALTER TABLE \"User\" ALTER COLUMN \"username\" SET NOT NULL ;`}, ]")})
         });
     })
+    describe('partials/scalars', function() {
+        const filename = './generators/app/templates/database/partials/scalars.ejs';
+        it('should render scalar for ID ', function() {
+            return ejs.renderFile(filename, {"field": fields[0],"scalars": scalars}).then(result => {
+                result.replace(/\s\s+/g, ' ').should.equal("if(args.id !== undefined){ temp += args.id ? \"\\\"id\\\" = \'\" + utils.escapeQuote(args.name) + \"\', \" : \"\\\" id\\\" = null, \" } ")})
+        });
+        it('should render scalar for title ', function() {
+            return ejs.renderFile(filename, {"field": fields[1],"scalars": scalars}).then(result => {
+                result.replace(/\s\s+/g, ' ').should.equal("if(args.title !== undefined){ temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.name) + \"\', \" : \"\\\" title\\\" = null, \" } ")})
+        });
+    })
+    describe('partials/getRelationBetween', function() {
+        const filename = './generators/app/templates/database/partials/getRelationBetween.ejs';
+        it('should render relation manyToMany ', function() {
+            return ejs.renderFile(filename, {"typeOne": fields[0].type,"typeTwo": "Movie",relations: relations }).then(result => {
+                result.replace(/\s\s+/g, ' ').should.equal("manyToMany ")})
+        });
+    })
+    describe('partials/updateMethodsField', function() {
+        const filename = './generators/app/templates/database/partials/updateMethodsField.ejs';
+        it('should render fields update methods ', function() {
+            return ejs.renderFile(filename, {"fields": fields, "relations":relations, "manyToManyTables":manyToManyTables, "scalarTypeNames":scalarTypeNames, "scalars":scalars, "typeName":"Movie"}).then(result => {
+                result.replace(/\s\s+/g, ' ').should.equal("let temp = '' " 
+                    + "if(args.title !== undefined){ "
+                    + "temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.name) + \"', \" : \"\\\" title\\\" = null, \" } "
+                    + "// Field actors of type Actor "
+                    + "sqlParams.sql = \"SELECT * FROM \\\"Actor\\\" INNER JOIN \\\" Actor_Movie \\\" ON \\\"Pk_Actor_id\\\" = \\\"Actor_Movie\\\".\\\"Actor_id\\\" INNER JOIN \\\"Movie\\\" ON \\\"Pk_Movie_id\\\" = \\\" Actor_Movie\\\".\\\"Movie_id\\\" WHERE \\\"Pk_Movie_id\\\" = \" + args.id "
+                    + "rdsDataService.executeStatement(sqlParams, (err, data) => { if (err) {console.log(err, err.stack)} else { let currentActorState = utils.constructOutputArray(data, \"Actor\") "
+                    + "// Actor to add "
+                    + "let addedElementsActor = utils.getAddedElements(currentActorState, args.actors) "
+                    + "rdsDataService.beginTransaction(beginParams, function (err, data) { if (err) console.log(err, err.stack); "
+                    + "// an error occurred else { for (let index = 0; index < addedElementsActor.length; index++) { sqlParams.sql = \"INSERT INTO \\\"Actor_Movie\\\" (\\\"Movie_id\\\", \\\"Actor_id\\\") VALUES (\"+ args.id +\", \"+ addedElementsActor[index]+\")\" "
+                    + "rdsDataService.executeStatement(sqlParams, (err, data) => { if (err) console.log(err, err.stack); else console.log(data); }) } "
+                    + "commitParams.transactionId = data.transactionId rdsDataService.commitTransaction(commitParams, function (err, data) { if (err) console.log(err, err.stack); // an error occurred else console.log(data) }) } }); "
+                    + "// Actor to delete "
+                    + "let removedElementsActor = utils.getRemovedElements(currentActorState, args.actors) rdsDataService.beginTransaction(beginParams, function (err, data) { if (err) console.log(err, err.stack); // an error occurred else { "
+                    + "for (let index = 0; index < removedElementsActor.length; index++) { sqlParams.sql = \"DELETE FROM \\\"Actor_Movie\\\" WHERE \\\"Actor_id\\\" = \" + removedElementsActor[index] + \" AND \\\"Movie_id\\\" = \" + args.id "
+                    + "rdsDataService.executeStatement(sqlParams, (err, data) => { if (err) console.log(err, err.stack); else console.log(data); }) } commitParams.transactionId = data.transactionId rdsDataService.commitTransaction(commitParams, function (err, data) { if (err) console.log(err, err.stack); // an error occurred else console.log(data) }) } }) } }) "
+                )})
+        });
+    })
+    
 });

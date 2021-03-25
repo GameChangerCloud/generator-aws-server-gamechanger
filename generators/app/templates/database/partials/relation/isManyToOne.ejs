@@ -1,0 +1,7 @@
+<% let answers = false
+manyToOne.forEach(relation => {
+    if (relation[0] === typeOne && relation[1] === typeTwo) {
+        answers = true
+    }
+})%>
+<%- answers %>
