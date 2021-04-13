@@ -56,7 +56,7 @@ module.exports = class extends Generator {
 				type: "input",
 				name: "description",
 				message: "Project description",
-				default: ""
+				default: "none"
 			},
 			{
 				type: "input",

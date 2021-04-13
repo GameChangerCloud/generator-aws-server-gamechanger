@@ -55,6 +55,7 @@ resource "null_resource" "confirmUserCreate" {
 resource "null_resource" "getUserPool" {
   provisioner "local-exec" {
     command = "echo 'poolID: ${aws_cognito_user_pool.pool.id}\n\nclientID: ${aws_cognito_user_pool_client.client.id}' > ./cognito.txt"
+    interpreter = ["bash", "-c"]
   }
 }
 

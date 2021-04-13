@@ -123,5 +123,6 @@ resource "aws_api_gateway_integration_response" "typeOptionsIntegrationResponse"
 resource "null_resource" "getUrl" {
   provisioner "local-exec" {
     command = "echo '${aws_api_gateway_deployment.myDeployement.invoke_url}/${aws_api_gateway_resource.myResource.path_part}' > ./url.txt"
+    interpreter = ["bash", "-c"]
   }
 }
