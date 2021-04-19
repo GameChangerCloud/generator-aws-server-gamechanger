@@ -1,0 +1,89 @@
+    <% fields.map(field => { _%>
+        <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
+
+        <% if (field.type !== "ID") { _%>
+            <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") { _%>
+
+                <%  switch (s.trim()) {
+
+                   <% case "oneToMany": _%>
+                       <% break; %>
+                    <%case "oneOnly": _%>
+                    <%case "manyToOne":%>
+                       <% break _%>
+                    <%case "manyOnly":_%>
+                        <%let addedElements<%- field.type %> = utils.getAddedElements([], args.<%- field.name%>)
+                            for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
+                                sqlParams.sql = "UPDATE \"<%-field.type%>\" SET  \"Fk_<%- typeName %>_id\" = " + args.id + " WHERE \"Pk_<%- field.type %>_id\" = " + addedElements<%- field.type %>[index]
+                                rdsDataService.executeStatement(sqlParams, (err, data) => {
+                                    if (err) console.log(err, err.stack);
+                                    else console.log(data);   
+                                })
+                            }
+                        <%break
+                    case "manyToMany": _%>
+                        // Get the junction table
+                        <% let manyToManyTable = include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables}).name %>
+        // Field <%- field.name %> of type <%- field.type %> 
+        sqlParams.sql = "SELECT * FROM \"<%- field.type %>\" INNER JOIN \" <%- manyToManyTable %> \" ON \"Pk_<%- field.type %>_id\" = \"<%- manyToManyTable %>\".\"<%- field.type %>_id\" INNER JOIN \"<%- typeName %>\" ON \"Pk_<%- typeName %>_id\" = \" <%- manyToManyTable %>\".\"<%- typeName %>_id\" WHERE \"Pk_<%- typeName %>_id\" = " + args.id
+        rdsDataService.executeStatement(sqlParams, (err, data) => {
+            if (err) {console.log(err, err.stack)}
+            else {
+                let current<%- field.type %>State = utils.constructOutputArray(data, "<%- field.type %>")
+                // <%- field.type %> to add
+                let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
+                rdsDataService.beginTransaction(beginParams, function (err, data) {
+                    if (err) console.log(err, err.stack); // an error occurred
+                    else {
+                        for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
+                            sqlParams.sql = "INSERT INTO \"<%- manyToManyTable %>\" (\"<%- typeName %>_id\", \"<%- field.type %>_id\") VALUES ("+ args.id +", "+ addedElements<%- field.type%>[index]+")"
+                            rdsDataService.executeStatement(sqlParams, (err, data) => {
+                                if (err) console.log(err, err.stack);
+                                else console.log(data);   
+                            })
+                        }
+                        commitParams.transactionId = data.transactionId
+                        rdsDataService.commitTransaction(commitParams, function (err, data) {
+                            if (err) console.log(err, err.stack); // an error occurred
+                            else console.log(data)
+                        })
+                    }
+                });        
+                        }})%>
+                        <%break
+                    case "oneToOneParent": _%>
+                        // A child cannot change its parent in unidirectional
+                        if(args.<%- field.name %>) {
+            throw 'Error, a child in 1 - 1 unildirectional relation cannot modify its parent' 
+        }
+                        <# /* Case bidirectional not supported */ %>
+                        <% break
+                    case "oneToOneChild": _%>
+                        <% if (field.noNull) { _%>
+        // Case bidirectional, not supported
+        // Got the field
+                        <% } else { _%>
+        // Don't have the field
+        // Remove te previous child
+        sqlParams.sql = "UPDATE \"<%- field.type %>\" SET \"Fk_<%- typeName %>_id\" = null WHERE \"Pk_<%- field.type %>_id\" = (SELECT \"Pk_<%- field.type %>_id\" FROM \"<%- field.type %>\" WHERE \"Fk_<%- typeName %>_id\" = " + args.id + ")"
+        rdsDataService.executeStatement(sqlParams, (err, data) => {
+        if (err) {console.log(err, err.stack)}
+        else { 
+            sqlParams.sql = "UPDATE \"<%- field.type %>\" SET \"Fk_<%- typeName %>_id\" = " + args.id + " WHERE \"Pk_<%- field.type %>_id\" = " + args.<%- field.name %>
+                rdsDataService.executeStatement(sqlParams, (err, data) => {
+                    if (err) {console.log(err, err.stack)}
+                    else {console.log(data)}
+                })
+            }
+        })
+        <% } _%>
+                        <% break
+                    default: _%>
+                        <% console.log("Error in handling relationship") %>
+                        <% break %>
+                <% }
+            }
+        }
+    })%>
+    
+

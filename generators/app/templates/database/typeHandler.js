@@ -18,10 +18,10 @@ let sqlParams = {
 const constructSort = (args) => {
 	let sorting = "ORDER BY \""
 
-	if(args) {
+	if (args) {
 		// Sort field (default Fk_<%-typeName%>_id)
-		if(args.sort_field && args.sort_field !== "id") {
-			sorting += args.sort_field +"\" "
+		if (args.sort_field && args.sort_field !== "id") {
+			sorting += args.sort_field + "\" "
 		}
 		else {
 			/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
@@ -30,7 +30,7 @@ const constructSort = (args) => {
 		}
 
 		// Sort order (default ascendant)
-		if(args.sort_order === -1) {
+		if (args.sort_order === -1) {
 			sorting += "DESC"
 		}
 		else {
@@ -41,51 +41,51 @@ const constructSort = (args) => {
 	// No arguments
 	else {
 		/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
-		sorting +=  "Pk_<%-typeNameId%>_id\" ASC"
+		sorting += "Pk_<%-typeNameId%>_id\" ASC"
 		/******* End of generated part using typeNameId */
 	}
 
 	return sorting
 }
-    
+
 module.exports = {
-    
-	async getMethodsByArgs (args){
+
+	async getMethodsByArgs(args) {
 
 		// Sorting Field
 		const sorting = constructSort(args)
 
 		// Pagination
-		const limit = args.limit ? "LIMIT "+args.limit : ""
-		const offset = args.skip ? "OFFSET "+args.skip : ""
+		const limit = args.limit ? "LIMIT " + args.limit : ""
+		const offset = args.skip ? "OFFSET " + args.skip : ""
 
 		// From query, simple
-		if(args.id) {
+		if (args.id) {
 			const value = args.id
 			sqlParams.parameters.length = 0
-			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
+			sqlParams.parameters.push({ name: 'value', value: { longValue: value } })
 			/******* Start of generated part using typeName and typeNameId*/
 			sqlParams.sql = 'SELECT * from "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = :value'
 			/******* End of generated part using typeName and typeNameId */
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			return utils.constructOutputArray(res)[0] // only one row
 		}
-		
+
 		// Field from a parent type (other than query)
-		else if(args.parentId) {
+		else if (args.parentId) {
 			const value = args.parentId
 			const parentTypeName = args.parentTypeName.toString().replace("Type", "")
-			let res 
+			let res
 			sqlParams.parameters.length = 0
-			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
+			sqlParams.parameters.push({ name: 'value', value: { longValue: value } })
 
-			switch(args.relationType) {
-				
+			switch (args.relationType) {
+
 				// One unique currentType for N parentType
 				case "oneToMany":
 				case "oneOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = (SELECT "Fk_<%-typeNameId%>_id" FROM "'+parentTypeName+'" WHERE "'+parentTypeName+'"."Pk_'+parentTypeName+'_id" = :value)'
+					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = (SELECT "Fk_<%-typeNameId%>_id" FROM "' + parentTypeName + '" WHERE "' + parentTypeName + '"."Pk_' + parentTypeName + '_id" = :value)'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
@@ -94,7 +94,7 @@ module.exports = {
 				case "manyToOne":
 				case "manyOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeName%>"."Fk_'+parentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeName%>"."Fk_' + parentTypeName + '_id" = :value ' + sorting + ' ' + limit + ' ' + offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
@@ -102,7 +102,7 @@ module.exports = {
 				// N currentType for N parentType (Junction table)
 				case "manyToMany":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" INNER JOIN "'+args.tableJunction+'" ON "Pk_<%-typeName%>_id" = "'+args.tableJunction+'"."<%-typeName%>_id" INNER JOIN "'+parentTypeName+'" ON "Pk_'+parentTypeName+'_id" = "'+args.tableJunction+'"."'+parentTypeName+'_id" WHERE "Pk_'+parentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" INNER JOIN "' + args.tableJunction + '" ON "Pk_<%-typeName%>_id" = "' + args.tableJunction + '"."<%-typeName%>_id" INNER JOIN "' + parentTypeName + '" ON "Pk_' + parentTypeName + '_id" = "' + args.tableJunction + '"."' + parentTypeName + '_id" WHERE "Pk_' + parentTypeName + '_id" = :value ' + sorting + ' ' + limit + ' ' + offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res, TABLE)
@@ -118,94 +118,96 @@ module.exports = {
 				// One unique currentType for one unique parentType 
 				case "oneToOneChild":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeNameId%>".\"Pk_'+parentTypeName+'_id\" = :value'
+					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeNameId%>".\"Pk_' + parentTypeName + '_id\" = :value'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
 
-				/******* Conditional Block on querySelfJoinOne */
-				<%if(querySelfJoinOne){%>
+						/******* Conditional Block on querySelfJoinOne */
+						<%if (querySelfJoinOne) {%>
 					case "selfJoinOne":
-						sqlParams.sql = '<%-querySelfJoinOne%>'
-						res = await rdsDataService.executeStatement(sqlParams).promise()
-						return utils.constructOutputArray(res)[0]<%}%>
+					sqlParams.sql = '<%-querySelfJoinOne%>'
+					res = await rdsDataService.executeStatement(sqlParams).promise()
+					return utils.constructOutputArray(res)[0] <%}%>
 				/******* End of conditional Block on querySelfJoinOne */
-		
+
 				/******* Conditional Block on querySelfJoinMany */
-					<%if(querySelfJoinMany){%>
+					<%if (querySelfJoinMany) {%>
 						case "selfJoinMany":
-							sqlParams.sql = '<%-querySelfJoinMany%>'
+	sqlParams.sql = '<%-querySelfJoinMany%>'
 							res = await rdsDataService.executeStatement(sqlParams).promise()
-							return utils.constructOutputArray(res)<%}%>
+							return utils.constructOutputArray(res) <%} %>
 				/******* End of conditional Block on querySelfJoinMany */			
 
-				default: 
-					console.log('Error')
-					return
+				default:
+console.log('Error')
+return
 			}
 		}
 		// List of type, not a field
 		else {
 
-			sqlParams.sql = 'SELECT * from "<%-typeName%>" '+sorting+' '+limit+' '+offset
-			const res = await rdsDataService.executeStatement(sqlParams).promise()
-			return utils.constructOutputArray(res)
-		}
+	sqlParams.sql = 'SELECT * from "<%-typeName%>" ' + sorting + ' ' + limit + ' ' + offset
+	const res = await rdsDataService.executeStatement(sqlParams).promise()
+	return utils.constructOutputArray(res)
+}
 	},
 
-	async getMethods(){
-		const sorting = constructSort(null)
-		/******* Start of generated part using typeNameId */
-		sqlParams.sql = 'SELECT * from "<%-typeNameId%>" '+sorting
-		/******* End of generated part using typeNameId */
-		const res = await rdsDataService.executeStatement(sqlParams).promise()
-		return utils.constructOutputArray(res)
-	},
+async getMethods(){
+	const sorting = constructSort(null)
+	/******* Start of generated part using typeNameId */
+	sqlParams.sql = 'SELECT * from "<%-typeNameId%>" ' + sorting
+	/******* End of generated part using typeNameId */
+	const res = await rdsDataService.executeStatement(sqlParams).promise()
+	return utils.constructOutputArray(res)
+},
 
-	async deleteMethods(id){
-		/******* Start of generated part using typeName and typeNameId */
-		sqlParams.sql = 'DELETE FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = '+id
-		/******* End of generated part using typeName and typeNameId */
-		const res = await rdsDataService.executeStatement(sqlParams).promise()
-		return res
-	},
+async deleteMethods(id){
+	/******* Start of generated part using typeName and typeNameId */
+	sqlParams.sql = 'DELETE FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = ' + id
+	/******* End of generated part using typeName and typeNameId */
+	const res = await rdsDataService.executeStatement(sqlParams).promise()
+	return res
+},
 
 
-	async updateMethods(args) {
+async updateMethods(args) {
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars}) _%>
+		<% - include('../database/partials/updateMethodsField.ejs', { fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars }) _ %>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error
 		const input = temp.slice(0, temp.lastIndexOf(", "))
-		if(input !== ""){
-			/******* Start of generated part using typeName and typeNameId */
-			sqlParams.sql = "UPDATE \"<%-typeName%>\" SET " + input + " WHERE \"Pk_<%-typeName%>_id\" = " + args.id
-			/******* Start of generated part using typeName and typeNameId */
-			console.log(sqlParams.sql)
-			const res = await rdsDataService.executeStatement(sqlParams).promise()
-			return res
-		}
-		else{
-			// The value are the same
-			return
-		}		
-	},
+	if (input !== "") {
+		/******* Start of generated part using typeName and typeNameId */
+		sqlParams.sql = "UPDATE \"<%-typeName%>\" SET " + input + " WHERE \"Pk_<%-typeName%>_id\" = " + args.id
+		/******* Start of generated part using typeName and typeNameId */
+		console.log(sqlParams.sql)
+		const res = await rdsDataService.executeStatement(sqlParams).promise()
+		return res
+	}
+	else {
+		// The value are the same
+		return
+	}
+},
 
-	async createMethods(args) {
+async createMethods(args) {
 
-			/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
-			sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
-			/******* End of generated part using fieldsCreate */
+	/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
+	sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <% -fieldsCreate %> + ") "
+	/******* End of generated part using fieldsCreate */
 
-			const res = await rdsDataService.executeStatement(sqlParams).promise()
-			/******* Start of generated part using createMethodsField */
-				<%-createMethodsField%>
+	const res = await rdsDataService.executeStatement(sqlParams).promise()
+		/******* Start of generated part using createMethodsField */
+		//<% -createMethodsField %>
+		<% - include('../database/partials/createMethodsFields.ejs', { fields: fields, relations: relations, manyToManyTables: manyToManyTables }) _ %>
+
 			/******* End of generated part using createMethodsField */
 
 			return res
 
-	},
+},
 
 }

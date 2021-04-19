@@ -533,134 +533,134 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
     return result
 }
 
-const getCreateMethodsField = (currentTypeName, fields, relations, manyToManyTables) => {
-    let s = ""
-    fields.map(field => {
-        if (field.type !== "ID") {
-            if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") {
+// const getCreateMethodsField = (currentTypeName, fields, relations, manyToManyTables) => {
+//     let s = ""
+//     fields.map(field => {
+//         if (field.type !== "ID") {
+//             if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") {
 
-                switch (getRelationBetween(field.type, currentTypeName, relations)) {
+//                 switch (getRelationBetween(field.type, currentTypeName, relations)) {
 
-                    case "oneToMany":
-                    case "oneOnly":
-                    case "manyToOne":
-                        break
-                    case "manyOnly":
-                        s += `let addedElements` + field.type + ` = utils.getAddedElements([], args.` + field.name + `)
-                            for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
-                                sqlParams.sql = "UPDATE \\"`+ field.type + `\\" SET  \\"Fk_` + currentTypeName + `_id\\" = " + args.id + " WHERE \\"Pk_` + field.type + `_id\\" = " + addedElements` + field.type + `[index]
-                                rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                    if (err) console.log(err, err.stack);
-                                    else console.log(data);   
-                                })
-                            }
-                     `
-                        break
+//                     case "oneToMany":
+//                     case "oneOnly":
+//                     case "manyToOne":
+//                         break
+//                     case "manyOnly":
+//                         s += `let addedElements` + field.type + ` = utils.getAddedElements([], args.` + field.name + `)
+//                             for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
+//                                 sqlParams.sql = "UPDATE \\"`+ field.type + `\\" SET  \\"Fk_` + currentTypeName + `_id\\" = " + args.id + " WHERE \\"Pk_` + field.type + `_id\\" = " + addedElements` + field.type + `[index]
+//                                 rdsDataService.executeStatement(sqlParams, (err, data) => {
+//                                     if (err) console.log(err, err.stack);
+//                                     else console.log(data);   
+//                                 })
+//                             }
+//                      `
+//                         break
 
-                    case "manyToMany":
-                        // Get the junction table
-                        let manyToManyTable = getManyToManyTableBetween(currentTypeName, field.type, manyToManyTables).name
+//                     case "manyToMany":
+//                         // Get the junction table
+//                         let manyToManyTable = getManyToManyTableBetween(currentTypeName, field.type, manyToManyTables).name
 
-                        s += "// Field " + field.name + " of type " + field.type + "\n\n"
-                        s += "sqlParams.sql = \"SELECT * FROM \\\"" + field.type + "\\\" INNER JOIN \\\"" + manyToManyTable + "\\\" ON \\\"Pk_" + field.type + "_id\\\" = \\\"" + manyToManyTable + "\\\".\\\"" + field.type + "_id\\\" INNER JOIN \\\"" + currentTypeName + "\\\" ON \\\"Pk_" + currentTypeName + "_id\\\" = \\\"" + manyToManyTable + "\\\".\\\"" + currentTypeName + "_id\\\" WHERE \\\"Pk_" + currentTypeName + "_id\\\" = \" + args.id\n"
-                        s += "rdsDataService.executeStatement(sqlParams, (err, data) => {\n"
-                        s += "if (err) {console.log(err, err.stack)}\n"
-                        s += `else {
-                            let current`+ field.type + `State = utils.constructOutputArray(data, "` + field.type + `")
-            
-                            // `+ field.type + ` to add
-                            let addedElements`+ field.type + ` = utils.getAddedElements([], args.` + field.name + `)
-                            rdsDataService.beginTransaction(beginParams, function (err, data) {
-                                if (err) console.log(err, err.stack); // an error occurred
-                                else {
-                                    for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
-                                        sqlParams.sql = "INSERT INTO \\"`+ manyToManyTable + `\\" (\\"` + currentTypeName + `_id\\", \\"` + field.type + `_id\\") VALUES ("+args.id+", "+addedElements` + field.type + `[index]+")"
-                                        rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                            if (err) console.log(err, err.stack);
-                                            else console.log(data);   
-                                        })
-                                    }
-                                    commitParams.transactionId = data.transactionId
-                                    rdsDataService.commitTransaction(commitParams, function (err, data) {
-                                        if (err) console.log(err, err.stack); // an error occurred
-                                        else console.log(data)
-                                    })
-                                }
-                            });
-                            
-                        }})\n`
-                        break
+//                         s += "// Field " + field.name + " of type " + field.type + "\n\n"
+//                         s += "sqlParams.sql = \"SELECT * FROM \\\"" + field.type + "\\\" INNER JOIN \\\"" + manyToManyTable + "\\\" ON \\\"Pk_" + field.type + "_id\\\" = \\\"" + manyToManyTable + "\\\".\\\"" + field.type + "_id\\\" INNER JOIN \\\"" + currentTypeName + "\\\" ON \\\"Pk_" + currentTypeName + "_id\\\" = \\\"" + manyToManyTable + "\\\".\\\"" + currentTypeName + "_id\\\" WHERE \\\"Pk_" + currentTypeName + "_id\\\" = \" + args.id\n"
+//                         s += "rdsDataService.executeStatement(sqlParams, (err, data) => {\n"
+//                         s += "if (err) {console.log(err, err.stack)}\n"
+//                         s += `else {
+//                             let current`+ field.type + `State = utils.constructOutputArray(data, "` + field.type + `")
 
-                    case "oneToOneParent":
-                        // A child cannot change its parent in unidirectional
-                        s += "if(args." + field.name + ") {\n"
-                        s += "throw 'Error, a child in 1 - 1 unildirectional relation cannot modify its parent' \n}\n"
+//                             // `+ field.type + ` to add
+//                             let addedElements`+ field.type + ` = utils.getAddedElements([], args.` + field.name + `)
+//                             rdsDataService.beginTransaction(beginParams, function (err, data) {
+//                                 if (err) console.log(err, err.stack); // an error occurred
+//                                 else {
+//                                     for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
+//                                         sqlParams.sql = "INSERT INTO \\"`+ manyToManyTable + `\\" (\\"` + currentTypeName + `_id\\", \\"` + field.type + `_id\\") VALUES ("+args.id+", "+addedElements` + field.type + `[index]+")"
+//                                         rdsDataService.executeStatement(sqlParams, (err, data) => {
+//                                             if (err) console.log(err, err.stack);
+//                                             else console.log(data);   
+//                                         })
+//                                     }
+//                                     commitParams.transactionId = data.transactionId
+//                                     rdsDataService.commitTransaction(commitParams, function (err, data) {
+//                                         if (err) console.log(err, err.stack); // an error occurred
+//                                         else console.log(data)
+//                                     })
+//                                 }
+//                             });
 
-                        // Case bidirectional not supported
-                        break
+//                         }})\n`
+//                         break
 
-                    case "oneToOneChild":
-                        if (field.noNull) {
-                            // Case bidirectional, not supported
-                            // Got the field
-                        }
-                        else {
-                            // Don't have the field
-                            s += `sqlParams.sql = \"UPDATE \\\"` + field.type + `\\\" SET \\\"Fk_` + currentTypeName + `_id\\\" = \" + args.id + \" WHERE \\\"Pk_` + field.type + `_id\\\" = \" + args.` + field.name + `
-                                    rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                        if (err) {console.log(err, err.stack)}
-                                        else {console.log(data)}
-                                    })`
-                        }
-                        break
+//                     case "oneToOneParent":
+//                         // A child cannot change its parent in unidirectional
+//                         s += "if(args." + field.name + ") {\n"
+//                         s += "throw 'Error, a child in 1 - 1 unildirectional relation cannot modify its parent' \n}\n"
 
-                    default:
-                        console.log("Error in handling relationship")
-                        break
-                }
-            }
-        }
-    })
-    return s
+//                         // Case bidirectional not supported
+//                         break
 
-}
+//                     case "oneToOneChild":
+//                         if (field.noNull) {
+//                             // Case bidirectional, not supported
+//                             // Got the field
+//                         }
+//                         else {
+//                             // Don't have the field
+//                             s += `sqlParams.sql = \"UPDATE \\\"` + field.type + `\\\" SET \\\"Fk_` + currentTypeName + `_id\\\" = \" + args.id + \" WHERE \\\"Pk_` + field.type + `_id\\\" = \" + args.` + field.name + `
+//                                     rdsDataService.executeStatement(sqlParams, (err, data) => {
+//                                         if (err) {console.log(err, err.stack)}
+//                                         else {console.log(data)}
+//                                     })`
+//                         }
+//                         break
 
-const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
-    let s = ""
-    fields.map(field => {
-        switch (field.type) {
-            case "ID":
-            case "Boolean":
-            case "Int":
-                s += `args.${field.name} + "," +`
-                break;
-            case "String":
-            case "Date":
-            case "Time":
-                s += `"'" + utils.escapeQuote(args.${field.name}) + "'" + "," +`
-                break;
-            case "DateTime":
-                s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
-                break;
+//                     default:
+//                         console.log("Error in handling relationship")
+//                         break
+//                 }
+//             }
+//         }
+//     })
+//     return s
 
-            default:
-                switch (getRelationBetween(field.type, currentTypeName, relations)) {
+// }
 
-                    case "oneOnly":
-                    case "oneToMany":
-                        s += `args.${field.name} + "," +`
-                        break
+// const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
+//     let s = ""
+//     fields.map(field => {
+//         switch (field.type) {
+//             case "ID":
+//             case "Boolean":
+//             case "Int":
+//                 s += `args.${field.name} + "," +`
+//                 break;
+//             case "String":
+//             case "Date":
+//             case "Time":
+//                 s += `"'" + utils.escapeQuote(args.${field.name}) + "'" + "," +`
+//                 break;
+//             case "DateTime":
+//                 s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
+//                 break;
 
-                    default:
-                        break;
-                }
-                break;
-        }
-    })
-    s = s.substring(0, s.length - 7)
-    return s
+//             default:
+//                 switch (getRelationBetween(field.type, currentTypeName, relations)) {
 
-}
+//                     case "oneOnly":
+//                     case "oneToMany":
+//                         s += `args.${field.name} + "," +`
+//                         break
+
+//                     default:
+//                         break;
+//                 }
+//                 break;
+//         }
+//     })
+//     s = s.substring(0, s.length - 7)
+//     return s
+
+// }
 
 const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTables) => {
     let s = ''
@@ -714,7 +714,7 @@ const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTabl
 //                         s += "if (err) {console.log(err, err.stack)}\n"
 //                         s += `else {
 //                             let current`+ field.type + `State = utils.constructOutputArray(data)
-            
+
 //                             // `+ field.type + ` to add
 //                             let addedElements`+ field.type + ` = utils.getAddedElements(current` + field.type + `State, args.` + field.name + `)
 //                             for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
@@ -744,7 +744,7 @@ const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTabl
 //                         s += "if (err) {console.log(err, err.stack)}\n"
 //                         s += `else {
 //                             let current`+ field.type + `State = utils.constructOutputArray(data, "` + field.type + `")
-            
+
 //                             // `+ field.type + ` to add
 //                             let addedElements`+ field.type + ` = utils.getAddedElements(current` + field.type + `State, args.` + field.name + `)
 //                             rdsDataService.beginTransaction(beginParams, function (err, data) {
@@ -764,7 +764,7 @@ const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTabl
 //                                     })
 //                                 }
 //                             });
-                            
+
 //                             // `+ field.type + ` to delete
 //                             let removedElements`+ field.type + ` = utils.getRemovedElements(current` + field.type + `State, args.` + field.name + `)
 //                             rdsDataService.beginTransaction(beginParams, function (err, data) {
@@ -831,7 +831,7 @@ const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTabl
 
 //                     case scalars.Linestring:
 //                         break;
-                        
+
 //                     case scalars.Polygon:
 //                         break;
 
@@ -2326,8 +2326,8 @@ module.exports = {
     getEnumValues: getEnumValues,
     getMutationFields: getMutationFields,
     getFieldsParsedHandler: getFieldsParsedHandler,
-    getCreateMethodsField: getCreateMethodsField,
-    getFieldsCreate: getFieldsCreate,
+    //getCreateMethodsField: getCreateMethodsField,
+    //getFieldsCreate: getFieldsCreate,
     getDeleteMethodsMany: getDeleteMethodsMany,
     getAllTables: getAllTables,
     getListOfMethodsForInit: getListOfMethodsForInit,
@@ -2349,8 +2349,8 @@ module.exports = {
     hasFieldType: hasFieldType,
     formatName: formatName,
     isSchemaValid: isSchemaValid,
-    getFieldsCreate: getFieldsCreate,
-    getCreateMethodsField: getCreateMethodsField,
+    //getFieldsCreate: getFieldsCreate,
+    //getCreateMethodsField: getCreateMethodsField,
     formatName: formatName,
     compareSchema: compareSchema,
     findTable: findTable,

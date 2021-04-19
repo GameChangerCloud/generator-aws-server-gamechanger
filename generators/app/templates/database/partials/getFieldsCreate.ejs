@@ -1,0 +1,39 @@
+
+    <%fields.map(field => { _%>
+        <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
+        <%switch (field.type) { 
+            case "ID": _%>
+                <% break;
+            case "Boolean": _%>
+                <% break;
+            case "Int": _%>
+                (args.<%-field.name%> + ",").substring(0, s.length - 7)
+                <% break;
+            case "String": _%>
+                <% break;
+            case "Date": _%>
+                <% break;
+            case "Time": _%>
+                "'" + utils.escapeQuote(args.<%-field.name%>) + "'" + ",").substring(0, s.length - 7)
+                <% break;
+            case "DateTime":
+                ("'" + args.<%-field.name%>.toISOString() + "'" + ",").substring(0, s.length - 7)
+                <% break;
+
+            <%default:
+                <%switch (s.trim()) { 
+
+                    case "oneOnly":_%>
+                        <% break;
+                    case "oneToMany":_%>
+                        (args.<%-field.name%> + ",").substring(0, s.length - 7)
+                        <% break;
+
+                    default:_%>
+                    <% break;
+                } _%>
+                <% break;
+        } _%>
+   <% }) %>
+
+
