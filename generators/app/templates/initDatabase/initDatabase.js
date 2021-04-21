@@ -2,7 +2,7 @@
 const AWS = require('aws-sdk');
 const rdsDataService = new AWS.RDSDataService()
 
-const sqlUtils = require('..database/sqlUtils.js');
+const sqlUtils = require('../database/sqlUtils.js');
 
 const databaseConnect = {
   secretArn: process.env.SECRETARN,
@@ -73,7 +73,7 @@ const graphQLTables = async () => {
   return "All OK";
 }
 
-module.exports.initDatabase = () => {
+module.exports.initDatabase = async () => {
   try {
     await addPostGisSupport();
     await graphQLTables();
