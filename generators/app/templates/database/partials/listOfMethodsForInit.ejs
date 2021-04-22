@@ -1,34 +1,45 @@
-    
-    
-<!-- // ON progress    
     <% for (let index = 0; index < types.length; index++) { _%>
         <%  if (typesName[index] !== "Query" && typesName[index] !== "Mutation") {
                 let fields = getFields(types[index]) %>
-                let typesName[index].toLowerCase() + 'Tab = []\nfunction init'<%-typesName%>[index]'(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-                typesName[index].toLowerCase() + 'Tab.push(new model.' + typesName[index] + '(' + getParametersForCreate(typesName, types[index], typesName[index], fields, relations) + '));\n\t}\n}\n\n'
-                getUpdateForModel(types[index], typesName[index], fields, types, typesName, relations)
-        }%>
+                let <%- typesName[index].toLowerCase()_%>Tab = []
+                function init<%-typesName[index]%>(){
+                    for(let i = 0; i < 5; i++){
+                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(getParametersForCreate(typesName, types[index], typesName[index], fields, relations)));
+                    }
+                }
+                <%- include('./getUpdateForModel'{currentType : currentType, currentTypeName : currentTypeName, fields : fields, types : types, typesName : typesName, relations : relations})%>
+        <% }%>
     }
 
     // Other tables
-    <% relations.selfJoinMany.forEach(relation => { _%>
+    <% relations.selfJoinMany.forEach(relation => { 
         for (let index = 0; index < typesName.length; index++) {
             if (typesName[index] === relation[0]) {
                 types[index].fields.forEach(field => {
                     if (field.type === typesName[index]) {
-                        const nameTable = relation[0] + "_" + <%- field.name %>
-                        let nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-                        let _relation[0].toLowerCase() + 'Position, _' + <%-field.name %> + 'Position\n'
-                        do { _' + relation[0].toLowerCase() + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n _' + field.name + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n'
-                        s += '} while(_' + relation[0].toLowerCase() + 'Position === _' + field.name + 'Position)\n'
-                        s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[_' + relation[0].toLowerCase() + 'Position].id, ' + field.name.toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[_' + field.name.toLowerCase() + 'Position].id});\n\t}\n}\n\n'
-                    }
+                        const nameTable = relation[0] + "_" + field.name _%>
+                        let <%= nameTable.toLowerCase()%>Tab = []
+                        function init<%=nameTable%>(){
+                            for(let i = 0; i < 5; i++){
+                                let _<%- relation[0].toLowerCase()%>Position, _<%-field.name %>Position
+                                do { _<%-relation[0].toLowerCase()%>Position = pickOne(<%relation[0].toLowerCase()Tab)
+                                     _<%- field.name%>Position = pickOne(<%- relation[0].toLowerCase()%>Tab)
+                                } while(_<%-relation[0].toLowerCase()%>Position === _<%-field.name%>Position)
+                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : <%-relation[0].toLowerCase()%>Tab[_<%relation[0].toLowerCase()%>Position].id, <%-field.name.toLowerCase()%>_id : <%-relation[1].toLowerCase()%>Tab[_<%-field.name.toLowerCase()%>Position].id});
+                                    }
+                                }
+                   <% }
                 })
             }
         }
-    })
-    relations.manyToMany.forEach(relation => {
-        const nameTable = relation[0] + "_" + relation[1]
-        s += 'let ' + nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-        s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[pickOne(' + relation[0].toLowerCase() + 'Tab)].id, ' + relation[1].toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[pickOne(' + relation[1].toLowerCase() + 'Tab)].id});\n\t}\n}\n\n'
-    }) _%> -->
+    })_%>
+    <%relations.manyToMany.forEach(relation => {
+        const nameTable = relation[0] + "_" + relation[1]%>
+        let <%- nameTable.toLowerCase()%>Tab = []
+        function init<%-nameTable%>(){
+            for(let i = 0; i < 5; i++){
+                
+                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : <%-relation[0].toLowerCase()%>Tab[pickOne(<%- relation[0].toLowerCase()%>Tab)].id, <%-relation[1].toLowerCase()%>_id : <%-relation[1].toLowerCase()%>Tab[pickOne(<%-relation[1].toLowerCase()%>Tab)].id})
+            }
+        }
+    <%}) _%> 

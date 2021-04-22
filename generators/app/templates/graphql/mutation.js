@@ -1,16 +1,16 @@
 const {
-	GraphQLObjectType,
-	GraphQLID,
-	GraphQLString,
-	GraphQLList,
-	GraphQLNonNull,
-	GraphQLInt,
-	GraphQLBoolean,
-	GraphQLInterfaceType
+  GraphQLObjectType,
+  GraphQLID,
+  GraphQLString,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLInt,
+  GraphQLBoolean,
+  GraphQLInterfaceType
 } = require('graphql')
 
 const {
-	ObjectID,
+  ObjectID,
   Date: DateGraphQL, // Avoid same name issue when casting into a new Date()
   Time,
   DateTime,
@@ -46,23 +46,28 @@ const {
   Currency,
   JSON,
   JSONObject,
-	Byte
+  Byte
 } = require('../defaultScalarsMap')
 
 const dbHandler = require('../../database/handler')
+const { types } = require('pg')
 
 
 module.exports = new GraphQLObjectType({
-	name: 'MutationType',
-	description: '',
-	fields: () => ({
-		<%-mutationFields%>
-		<%-otherMutation%>
+  name: 'MutationType',
+  description: '',
+  fields: () => ({
+
+    <% - include('../database/partials/getMutationFields.ejs', { typesName: typesName, types: types, defaultScalars: defaultScalars }) _%>
+  //<% -mutationFields %>
+
+
+		<% -otherMutation %>
 	}),
-	
+
 
 
 })
 
-<%typesName.forEach(typeName => {%><%if (typeName !== "Query" && typeName !== "Mutation" && !defaultScalars.includes(typeName)){%>const <%-typeName%>Type = require('./<%-typeName.toLowerCase()%>')
-<%}%><%})%>
+  <% typesName.forEach(typeName => {%><%if (typeName !== "Query" && typeName !== "Mutation" && !defaultScalars.includes(typeName)) {%>const <% -typeName %> Type = require('./<%-typeName.toLowerCase()%>')
+    <%}%><%}) %>

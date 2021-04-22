@@ -394,123 +394,123 @@ const getEnumValues = (currentType) => {
     return result
 }
 
-const getMutationFields = (typesName, types, defaultScalars) => {
-    let s = ""
-    for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && !defaultScalars.includes(typesName[index])) {
-            s += `${typesName[index].toLowerCase()}Delete: { 
-			    type: ${typesName[index]}Type,
-			    args: {
-				    id: { type: new GraphQLNonNull(GraphQLID) },
-			    },
-			    resolve: (obj, args, context, info) => {
-				    const recordToDelete = dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
-                        // Query to delete
-                        return dbHandler.handleDelete(args.id, '${typesName[index]}Type').then(() => {
-                            return record
-                        })
-				    })
-				    return recordToDelete
-			    }
-		    },
-            ${typesName[index].toLowerCase()}Update: { 
-			    type: ${typesName[index]}Type,
-			    args: {
-                    id: { type: new GraphQLNonNull(GraphQLID) },\n`
-            for (let j = 0; j < types[index].fields.length; j++) {
-                let field = types[index].fields[j]
-                if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) {
-                    if (field.isArray) {
-                        s += field.name + ": {type: new GraphQLList(GraphQLID)},"
-                    }
-                    else {
-                        s += field.name + ": {type: GraphQLID},"
-                    }
-                    s += "\n"
-                }
-                else {
-                    if (field.type !== "ID") {
-                        if (field.isArray) {
-                            if (defaultScalars.includes(field.type)) {
-                                s += field.name + ": {type: new GraphQLList(" + field.type + ")},"
-                            }
-                            else {
-                                s += field.name + ": {type: new GraphQLList(GraphQL" + field.type + ")},"
-                            }
-                        }
-                        else {
-                            if (defaultScalars.includes(field.type)) {
-                                s += field.name + ": {type: " + field.type + "},"
-                            }
-                            else {
-                                s += field.name + ": {type: GraphQL" + field.type + "},"
-                            }
-                        }
-                        s += "\n"
-                    }
-                }
-            }
-            s += `},
-			    resolve: (obj, args, context, info) => {
-                    const recordUpdated = dbHandler.handleUpdate(args, '${typesName[index]}Type').then(record => {
-                        return dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
-                            return record
-                        })
-                    })
-                    return recordUpdated
-			    }
-		    },
-	        ${typesName[index].toLowerCase()}Create: {
-                type: ${typesName[index]}Type,
-                args: {
-                    id: { type: new GraphQLNonNull(GraphQLID) },\n`
-            for (let j = 0; j < types[index].fields.length; j++) {
-                let field = types[index].fields[j]
-                if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) {
-                    if (field.isArray) {
-                        s += field.name + ": {type: new GraphQLList(GraphQLID)},"
-                    }
-                    else {
-                        s += field.name + ": {type: GraphQLID},"
-                    }
-                    s += "\n"
-                }
-                else {
-                    if (field.type !== "ID") {
-                        if (field.isArray) {
-                            if (defaultScalars.includes(field.type)) {
-                                s += field.name + ": {type: new GraphQLList(" + field.type + ")},"
-                            }
-                            else {
-                                s += field.name + ": {type: new GraphQLList(GraphQL" + field.type + ")},"
-                            }
-                        }
-                        else {
-                            if (defaultScalars.includes(field.type)) {
-                                s += field.name + ": {type: " + field.type + "},"
-                            }
-                            else {
-                                s += field.name + ": {type: GraphQL" + field.type + "},"
-                            }
-                        }
-                        s += "\n"
-                    }
-                }
-            }
-            s += `},
-                resolve: (obj, args, context, info) => {
-                    const recordCreated = dbHandler.handleCreate(args, '${typesName[index]}Type').then(record => {
-                        return dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
-                            return record
-                        })
-                    })
-                    return recordCreated
-                }
-            },\n\n`
-        }
-    }
-    return s
-}
+// const getMutationFields = (typesName, types, defaultScalars) => {
+//     let s = ""
+//     for (let index = 0; index < typesName.length; index++) {
+//         if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && !defaultScalars.includes(typesName[index])) {
+//             s += `${typesName[index].toLowerCase()}Delete: { 
+// 			    type: ${typesName[index]}Type,
+// 			    args: {
+// 				    id: { type: new GraphQLNonNull(GraphQLID) },
+// 			    },
+// 			    resolve: (obj, args, context, info) => {
+// 				    const recordToDelete = dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
+//                         // Query to delete
+//                         return dbHandler.handleDelete(args.id, '${typesName[index]}Type').then(() => {
+//                             return record
+//                         })
+// 				    })
+// 				    return recordToDelete
+// 			    }
+// 		    },
+//             ${typesName[index].toLowerCase()}Update: { 
+// 			    type: ${typesName[index]}Type,
+// 			    args: {
+//                     id: { type: new GraphQLNonNull(GraphQLID) },\n`
+//             for (let j = 0; j < types[index].fields.length; j++) {
+//                 let field = types[index].fields[j]
+//                 if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) {
+//                     if (field.isArray) {
+//                         s += field.name + ": {type: new GraphQLList(GraphQLID)},"
+//                     }
+//                     else {
+//                         s += field.name + ": {type: GraphQLID},"
+//                     }
+//                     s += "\n"
+//                 }
+//                 else {
+//                     if (field.type !== "ID") {
+//                         if (field.isArray) {
+//                             if (defaultScalars.includes(field.type)) {
+//                                 s += field.name + ": {type: new GraphQLList(" + field.type + ")},"
+//                             }
+//                             else {
+//                                 s += field.name + ": {type: new GraphQLList(GraphQL" + field.type + ")},"
+//                             }
+//                         }
+//                         else {
+//                             if (defaultScalars.includes(field.type)) {
+//                                 s += field.name + ": {type: " + field.type + "},"
+//                             }
+//                             else {
+//                                 s += field.name + ": {type: GraphQL" + field.type + "},"
+//                             }
+//                         }
+//                         s += "\n"
+//                     }
+//                 }
+//             }
+//             s += `},
+// 			    resolve: (obj, args, context, info) => {
+//                     const recordUpdated = dbHandler.handleUpdate(args, '${typesName[index]}Type').then(record => {
+//                         return dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
+//                             return record
+//                         })
+//                     })
+//                     return recordUpdated
+// 			    }
+// 		    },
+// 	        ${typesName[index].toLowerCase()}Create: {
+//                 type: ${typesName[index]}Type,
+//                 args: {
+//                     id: { type: new GraphQLNonNull(GraphQLID) },\n`
+//             for (let j = 0; j < types[index].fields.length; j++) {
+//                 let field = types[index].fields[j]
+//                 if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) {
+//                     if (field.isArray) {
+//                         s += field.name + ": {type: new GraphQLList(GraphQLID)},"
+//                     }
+//                     else {
+//                         s += field.name + ": {type: GraphQLID},"
+//                     }
+//                     s += "\n"
+//                 }
+//                 else {
+//                     if (field.type !== "ID") {
+//                         if (field.isArray) {
+//                             if (defaultScalars.includes(field.type)) {
+//                                 s += field.name + ": {type: new GraphQLList(" + field.type + ")},"
+//                             }
+//                             else {
+//                                 s += field.name + ": {type: new GraphQLList(GraphQL" + field.type + ")},"
+//                             }
+//                         }
+//                         else {
+//                             if (defaultScalars.includes(field.type)) {
+//                                 s += field.name + ": {type: " + field.type + "},"
+//                             }
+//                             else {
+//                                 s += field.name + ": {type: GraphQL" + field.type + "},"
+//                             }
+//                         }
+//                         s += "\n"
+//                     }
+//                 }
+//             }
+//             s += `},
+//                 resolve: (obj, args, context, info) => {
+//                     const recordCreated = dbHandler.handleCreate(args, '${typesName[index]}Type').then(record => {
+//                         return dbHandler.handleGet(args, '${typesName[index]}Type').then(record => {
+//                             return record
+//                         })
+//                     })
+//                     return recordCreated
+//                 }
+//             },\n\n`
+//         }
+//     }
+//     return s
+// }
 
 /** TYPE HANDLER */
 
@@ -1089,138 +1089,138 @@ const getAllTables = (types, typesName, relations, scalarTypeNames) => {
 
 // FIllTable
 
-const getUpdateForModel = (currentType, currentTypeName, fields, types, typesName, relations) => {
-    let result = "function update" + currentTypeName + "(" + currentTypeName.toLowerCase() + "){\n"
-    for (let index = 0; index < fields.length; index++) {
-        if (fields[index].isArray) {
-            // nothing
-        }
-        else {
-            switch (fields[index].type) {
-                case "String":
-                case "ID":
-                case "Int":
-                    break;
-                default:
-                    break
-            }
-        }
-    }
-    // We check relations between the current type table with all the types
-    for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
-        let s = currentTypeName.toLowerCase().substring(0, 5) + typesName[index] + 'Bis';
-        switch (relationType) {
+// const getUpdateForModel = (currentType, currentTypeName, fields, types, typesName, relations) => {
+//     let result = "function update" + currentTypeName + "(" + currentTypeName.toLowerCase() + "){\n"
+//     for (let index = 0; index < fields.length; index++) {
+//         if (fields[index].isArray) {
+//             // nothing
+//         }
+//         else {
+//             switch (fields[index].type) {
+//                 case "String":
+//                 case "ID":
+//                 case "Int":
+//                     break;
+//                 default:
+//                     break
+//             }
+//         }
+//     }
+//     // We check relations between the current type table with all the types
+//     for (let index = 0; index < typesName.length; index++) {
+//         let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+//         let s = currentTypeName.toLowerCase().substring(0, 5) + typesName[index] + 'Bis';
+//         switch (relationType) {
 
-            case "manyOnly":
-                // Only if the current type DOES NOT have the field type 
-                if (!hasFieldType(currentType, typesName[index]).answers) {
-                    result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
-                    result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
-                    result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
-                    result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                    result += '}\n'
-                }
-                break
+//             case "manyOnly":
+//                 // Only if the current type DOES NOT have the field type 
+//                 if (!hasFieldType(currentType, typesName[index]).answers) {
+//                     result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
+//                     result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
+//                     result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
+//                     result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                     result += '}\n'
+//                 }
+//                 break
 
-            case "manyToOne":
-                result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
-                result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
-                result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
-                result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                result += '}\n'
-                break
+//             case "manyToOne":
+//                 result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
+//                 result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
+//                 result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
+//                 result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                 result += '}\n'
+//                 break
 
-            case "oneToOneParent":
-                result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + ' == null) {\n'
-                result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
-                result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
-                result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                result += '}\n'
-                break
+//             case "oneToOneParent":
+//                 result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + ' == null) {\n'
+//                 result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
+//                 result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
+//                 result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                 result += '}\n'
+//                 break
 
-            case "oneToOneChild":
-                result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + ' == null) {\n'
-                result += 'let _position\n'
-                result += 'let ' + s + '\n'
-                result += 'do {'
-                result += '_position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
-                result += s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
-                result += '} while(!isUnique(' + s + ', ' + currentTypeName.toLowerCase() + 'Tab))\n'
-                result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                result += '}\n'
-                break;
+//             case "oneToOneChild":
+//                 result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + ' == null) {\n'
+//                 result += 'let _position\n'
+//                 result += 'let ' + s + '\n'
+//                 result += 'do {'
+//                 result += '_position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
+//                 result += s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
+//                 result += '} while(!isUnique(' + s + ', ' + currentTypeName.toLowerCase() + 'Tab))\n'
+//                 result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                 result += '}\n'
+//                 break;
 
-            case "selfJoinOne":
-                // Check field with the same type 
-                const fields = getFields(currentType)
-                fields.forEach(field => {
-                    if (field.type === currentTypeName) {
-                        result += 'if(' + currentTypeName.toLowerCase() + '.' + field.name + '_id == null) {\n'
-                        result += 'let _position\n'
-                        result += 'let ' + s + '\n'
-                        result += 'do {'
-                        result += '_position = pickOne(' + currentTypeName.toLowerCase() + 'Tab);\n'
-                        result += s + ' = ' + currentTypeName.toLowerCase() + 'Tab[_position];\n'
-                        result += '} while(' + currentTypeName.toLowerCase() + '.id === ' + s + '.id)\n'
-                        result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + field.name.toLowerCase() + '_id", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                        result += '}\n'
-                    }
-                })
-                break
-            case "oneOnly":
-                // Only if the current type DOES have the field type
-                if (hasFieldType(currentType, typesName[index]).answers) {
-                    result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
-                    result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
-                    result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
-                    result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
-                    result += '}\n'
-                }
-                break
-        }
-    }
-    result += 'return ' + currentTypeName.toLowerCase() + ';}\n\n'
-    return result;
-}
+//             case "selfJoinOne":
+//                 // Check field with the same type 
+//                 const fields = getFields(currentType)
+//                 fields.forEach(field => {
+//                     if (field.type === currentTypeName) {
+//                         result += 'if(' + currentTypeName.toLowerCase() + '.' + field.name + '_id == null) {\n'
+//                         result += 'let _position\n'
+//                         result += 'let ' + s + '\n'
+//                         result += 'do {'
+//                         result += '_position = pickOne(' + currentTypeName.toLowerCase() + 'Tab);\n'
+//                         result += s + ' = ' + currentTypeName.toLowerCase() + 'Tab[_position];\n'
+//                         result += '} while(' + currentTypeName.toLowerCase() + '.id === ' + s + '.id)\n'
+//                         result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + field.name.toLowerCase() + '_id", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                         result += '}\n'
+//                     }
+//                 })
+//                 break
+//             case "oneOnly":
+//                 // Only if the current type DOES have the field type
+//                 if (hasFieldType(currentType, typesName[index]).answers) {
+//                     result += 'if(' + currentTypeName.toLowerCase() + '.' + typesName[index].toLowerCase() + '_id == null) {\n'
+//                     result += 'let _position = pickOne(' + typesName[index].toLowerCase() + 'Tab);\n'
+//                     result += 'let ' + s + ' = ' + typesName[index].toLowerCase() + 'Tab[_position];\n'
+//                     result += currentTypeName.toLowerCase() + ' = update(' + currentTypeName.toLowerCase() + ', "' + typesName[index].toLowerCase() + '", ' + s + '.id, ' + 'new model.' + currentTypeName + ');\n';
+//                     result += '}\n'
+//                 }
+//                 break
+//         }
+//     }
+//     result += 'return ' + currentTypeName.toLowerCase() + ';}\n\n'
+//     return result;
+// }
 
-const getListOfMethodsForInit = (types, typesName, relations) => {
-    let s = '';
-    for (let index = 0; index < types.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation") {
-            let fields = getFields(types[index])
-            s += 'let ' + typesName[index].toLowerCase() + 'Tab = []\nfunction init' + typesName[index] + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-            s += typesName[index].toLowerCase() + 'Tab.push(new model.' + typesName[index] + '(' + getParametersForCreate(typesName, types[index], typesName[index], fields, relations) + '));\n\t}\n}\n\n'
-            s += getUpdateForModel(types[index], typesName[index], fields, types, typesName, relations)
-        }
-    }
+// const getListOfMethodsForInit = (types, typesName, relations) => {
+//     let s = '';
+//     for (let index = 0; index < types.length; index++) {
+//         if (typesName[index] !== "Query" && typesName[index] !== "Mutation") {
+//             let fields = getFields(types[index])
+//             s += 'let ' + typesName[index].toLowerCase() + 'Tab = []\nfunction init' + typesName[index] + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
+//             s += typesName[index].toLowerCase() + 'Tab.push(new model.' + typesName[index] + '(' + getParametersForCreate(typesName, types[index], typesName[index], fields, relations) + '));\n\t}\n}\n\n'
+//             s += getUpdateForModel(types[index], typesName[index], fields, types, typesName, relations)
+//         }
+//     }
 
-    // Other tables
-    relations.selfJoinMany.forEach(relation => {
-        for (let index = 0; index < typesName.length; index++) {
-            if (typesName[index] === relation[0]) {
-                types[index].fields.forEach(field => {
-                    if (field.type === typesName[index]) {
-                        const nameTable = relation[0] + "_" + field.name
-                        s += 'let ' + nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-                        s += 'let _' + relation[0].toLowerCase() + 'Position, _' + field.name + 'Position\n'
-                        s += 'do { _' + relation[0].toLowerCase() + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n _' + field.name + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n'
-                        s += '} while(_' + relation[0].toLowerCase() + 'Position === _' + field.name + 'Position)\n'
-                        s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[_' + relation[0].toLowerCase() + 'Position].id, ' + field.name.toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[_' + field.name.toLowerCase() + 'Position].id});\n\t}\n}\n\n'
-                    }
-                })
-            }
-        }
-    })
-    relations.manyToMany.forEach(relation => {
-        const nameTable = relation[0] + "_" + relation[1]
-        s += 'let ' + nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
-        s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[pickOne(' + relation[0].toLowerCase() + 'Tab)].id, ' + relation[1].toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[pickOne(' + relation[1].toLowerCase() + 'Tab)].id});\n\t}\n}\n\n'
-    })
+//     // Other tables
+//     relations.selfJoinMany.forEach(relation => {
+//         for (let index = 0; index < typesName.length; index++) {
+//             if (typesName[index] === relation[0]) {
+//                 types[index].fields.forEach(field => {
+//                     if (field.type === typesName[index]) {
+//                         const nameTable = relation[0] + "_" + field.name
+//                         s += 'let ' + nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
+//                         s += 'let _' + relation[0].toLowerCase() + 'Position, _' + field.name + 'Position\n'
+//                         s += 'do { _' + relation[0].toLowerCase() + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n _' + field.name + 'Position = pickOne(' + relation[0].toLowerCase() + 'Tab)\n'
+//                         s += '} while(_' + relation[0].toLowerCase() + 'Position === _' + field.name + 'Position)\n'
+//                         s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[_' + relation[0].toLowerCase() + 'Position].id, ' + field.name.toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[_' + field.name.toLowerCase() + 'Position].id});\n\t}\n}\n\n'
+//                     }
+//                 })
+//             }
+//         }
+//     })
+//     relations.manyToMany.forEach(relation => {
+//         const nameTable = relation[0] + "_" + relation[1]
+//         s += 'let ' + nameTable.toLowerCase() + 'Tab = []\nfunction init' + nameTable + '(){\n\tfor(let i = 0; i < 5; i++){\n\t\t'
+//         s += nameTable.toLowerCase() + 'Tab.push({' + relation[0].toLowerCase() + '_id : ' + relation[0].toLowerCase() + 'Tab[pickOne(' + relation[0].toLowerCase() + 'Tab)].id, ' + relation[1].toLowerCase() + '_id : ' + relation[1].toLowerCase() + 'Tab[pickOne(' + relation[1].toLowerCase() + 'Tab)].id});\n\t}\n}\n\n'
+//     })
 
-    return s;
+//     return s;
 
-}
+// }
 
 const getInitEachModelsJS = (tables) => {
     let s = '';
@@ -2324,7 +2324,7 @@ module.exports = {
     getGraphqlType: getGraphqlType,
     getResolveType: getResolveType,
     getEnumValues: getEnumValues,
-    getMutationFields: getMutationFields,
+    //getMutationFields: getMutationFields,
     getFieldsParsedHandler: getFieldsParsedHandler,
     //getCreateMethodsField: getCreateMethodsField,
     //getFieldsCreate: getFieldsCreate,
