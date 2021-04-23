@@ -37,7 +37,7 @@ async function transac(){
 }
 
 
-module.exports.cleanTables = () => {
+module.exports.dropTables = () => {
 
     transac().then(r => console.log("Done :" + r));
 
