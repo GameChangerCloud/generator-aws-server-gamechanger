@@ -1,4 +1,3 @@
-
     <%fields.map(field => { _%>
         <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
         <%switch (field.type) { 

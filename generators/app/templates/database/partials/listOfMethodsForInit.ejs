@@ -1,38 +1,44 @@
     <% for (let index = 0; index < types.length; index++) { _%>
         <%  if (typesName[index] !== "Query" && typesName[index] !== "Mutation") {
-                let fields = getFields(types[index]) %>
+                //let fields = getFields(types[index])
+                let type = types[index]
+                let fields = []
+                for (let index = 0; index < type["fields"].length; index++) {
+                    fields.push(type["fields"][index])
+                } _%>
                 let <%- typesName[index].toLowerCase()_%>Tab = []
                 function init<%-typesName[index]%>(){
                     for(let i = 0; i < 5; i++){
-                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(getParametersForCreate(typesName, types[index], typesName[index], fields, relations)));
+                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching })%>));
                     }
                 }
-                <%- include('./getUpdateForModel'{currentType : currentType, currentTypeName : currentTypeName, fields : fields, types : types, typesName : typesName, relations : relations})%>
-        <% }%>
-    }
+                <%- include('./getUpdateForModel', {currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations}) %>
+        <% }
+    } %>
 
-    // Other tables
+    // Other  tables
     <% relations.selfJoinMany.forEach(relation => { 
         for (let index = 0; index < typesName.length; index++) {
             if (typesName[index] === relation[0]) {
                 types[index].fields.forEach(field => {
-                    if (field.type === typesName[index]) {
-                        const nameTable = relation[0] + "_" + field.name _%>
+                    if (field.type === typesName[index]) { _%>
+                       <% const nameTable = relation[0] + "_" + field.name %>
                         let <%= nameTable.toLowerCase()%>Tab = []
                         function init<%=nameTable%>(){
                             for(let i = 0; i < 5; i++){
                                 let _<%- relation[0].toLowerCase()%>Position, _<%-field.name %>Position
-                                do { _<%-relation[0].toLowerCase()%>Position = pickOne(<%relation[0].toLowerCase()Tab)
+                                do { _<%-relation[0].toLowerCase()%>Position = pickOne(<%-relation[0].toLowerCase()%>Tab)
                                      _<%- field.name%>Position = pickOne(<%- relation[0].toLowerCase()%>Tab)
                                 } while(_<%-relation[0].toLowerCase()%>Position === _<%-field.name%>Position)
                                     <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : <%-relation[0].toLowerCase()%>Tab[_<%relation[0].toLowerCase()%>Position].id, <%-field.name.toLowerCase()%>_id : <%-relation[1].toLowerCase()%>Tab[_<%-field.name.toLowerCase()%>Position].id});
-                                    }
-                                }
+                                    
+                            }
+                        }
                    <% }
-                })
+               })
             }
         }
-    })_%>
+    }) _%>
     <%relations.manyToMany.forEach(relation => {
         const nameTable = relation[0] + "_" + relation[1]%>
         let <%- nameTable.toLowerCase()%>Tab = []

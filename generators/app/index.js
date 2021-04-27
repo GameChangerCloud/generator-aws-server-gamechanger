@@ -4,6 +4,9 @@ const parsing = require('./parsing')
 const easygraphqlSchemaParser = require('easygraphql-parser')
 const constants = require('./constants');
 
+const matching = require('./matching')
+
+
 const sdlSchema =
 	`type User {
   id: ID!
@@ -368,7 +371,7 @@ module.exports = class extends Generator {
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
 
-							//fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
+							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 							//createMethodsField: parsing.getCreateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables)
 						}
 					)
@@ -388,7 +391,7 @@ module.exports = class extends Generator {
 					defaultScalars: this.defaultScalars,
 					typesName: this.typesName,
 					types: this.types,
-					mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
+					//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 					otherMutation: ""
 				}
 			)
@@ -488,7 +491,10 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/fillTables.js'),
 			this.destinationPath('initDatabase/fillTables.js'),
 			{
-				listOfMethodsForInit: parsing.getListOfMethodsForInit(this.types, this.typesName, this.relations),
+				types: this.types, 
+				typesName: this.typesName, 
+				relations: this.relations,
+				matching : matching,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
 				initQueriesInsert: parsing.getInitQueriesInsert(this.tables)

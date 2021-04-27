@@ -16,9 +16,10 @@
             }
         }
     }%>
-    // We check relations between the current type table with all the types
+    <%# // We check relations between the current type table with all the types %>
     <%for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+        //let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+        let relationType = include('./getRelationBetween',{typeOne: currentTypeName, typeTwo: typesName[index], relations: relations})
         let s = currentTypeName.toLowerCase().substring(0, 5) + typesName[index] + 'Bis';
         switch (relationType) {
 
@@ -29,16 +30,15 @@
                 <%}%>
                 <%break
 
-            case "manyToOne":%_>
-                if(<%-currentTypeName.toLowerCase()%>.<%-typesName[index].toLowerCase()%>_id == null) {
+            case "manyToOne": _%>
                     <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
                 <%break
 
-            case "oneToOneParent":_%>
-            <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
+            case "oneToOneParent": _%>
+                    <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
                 <%break
 
-            case "oneToOneChild":%_>
+            case "oneToOneChild": _%>
                 if(<%-currentTypeName.toLowerCase()%>.<%-typesName[index].toLowerCase()%>  == null) {
                 let _position
                 let <%- s %>
@@ -77,5 +77,3 @@
     } %>
     return <%- currentTypeName.toLowerCase()%>
 }
-    
-<%}%>

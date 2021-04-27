@@ -27,29 +27,29 @@
                     <%}
                     else {_%>
                         <%- field.name %> : {type: GraphQLID},
-                    <%}
+                    <%}%>
                     
-                } _%>
-                <%else {
-                    if (field.type !== "ID") {
+                <%} 
+                else { _%>
+                    <% if (field.type !== "ID") {
                         if (field.isArray) {
                             if (defaultScalars.includes(field.type)) { _%>
                                 <%- field.name %>: {type: new GraphQLList(<%- field.type %>)},
                             <% }
                             else {_%>
                                 <%- field.name %> : {type: new GraphQLList(GraphQL<%-field.type%>)},
-                            <%}
-                        }%>
-                        <%else {
-                            if (defaultScalars.includes(field.type)) { _%>
+                            <%}%>
+                        <%}
+                        else { _%>
+                            <% if (defaultScalars.includes(field.type)) { _%>
                                 <%-field.name %>: {type: <%- field.type %>},
                             <%}
                             else { _%>
                                 <%- field.name %> : {type: GraphQL<%- field.type %>},
-                            <%}
-                        }
+                            <%}%>
+                        <%}%>
                 
-                    }
+                    <%}
                 }
             } _%>
             },
@@ -63,7 +63,7 @@
 			    }
 		    },
 	        <%- typesName[index].toLowerCase()%>Create: {
-                type: ${typesName[index]}Type,
+                type: <%- typesName[index] %>Type,
                 args: {
                     id: { type: new GraphQLNonNull(GraphQLID) },
             <% for (let j = 0; j < types[index].fields.length; j++) {
@@ -74,29 +74,29 @@
                     <%}
                     else {_%>
                         <%- field.name %> : {type: GraphQLID},
-                    <%}
+                    <%}%>
                     
-                }_%>
-                <%else {
-                    if (field.type !== "ID") {
+                <%}
+                else {_%>
+                    <%if (field.type !== "ID") {
                         if (field.isArray) {
                             if (defaultScalars.includes(field.type)) { _%>
                                 <%- field.name %> : {type: new GraphQLList(<%- field.type %>)},
                             <%}
                             else { _%>
                                 <%- field.name %> : {type: new GraphQLList(GraphQL<%- field.type %>)},
-                            <%}
-                        }%>
-                        <%else {
-                            if (defaultScalars.includes(field.type)) { _%>
+                            <%}%>
+                        <%}
+                        else { _%>
+                            <%if (defaultScalars.includes(field.type)) { _%>
                                 <%- field.name %> : {type: <%- field.type %>},
                             <%}
                             else {_%>
                                 <%-field.name %> : {type: GraphQL<%- field.type %> },
-                            <%}
-                        }
+                            <%}%>
+                        <%}%>
                         
-                    }
+                    <%}
                 }
             }_%>
             },
@@ -110,6 +110,5 @@
                 }
             },
         <%}
-    }
+    }%>
     
-}%>
