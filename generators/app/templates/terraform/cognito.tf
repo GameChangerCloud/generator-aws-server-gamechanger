@@ -41,14 +41,16 @@ resource "aws_cognito_user_pool_domain" "main" {
 
 resource "null_resource" "createUserUnconfirmed" {
   provisioner "local-exec" {
-    command = "aws cognito-idp sign-up --region eu-west-1 --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --user-attributes Name=\"email\",Value=\"admin@admin.fr\" --password password"
+    command = "aws cognito-idp sign-up --region $AWS_DEFAULT_REGION --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --user-attributes Name=\"email\",Value=\"admin@admin.fr\" --password password"
+    interpreter = ["bash", "-c"]  
   }
 }
 
 resource "null_resource" "confirmUserCreate" {
   depends_on = [null_resource.createUserUnconfirmed]
   provisioner "local-exec" {
-    command = "aws cognito-idp admin-confirm-sign-up --region eu-west-1 --user-pool-id ${aws_cognito_user_pool.pool.id} --username admin@admin.fr"
+    command = "aws cognito-idp admin-confirm-sign-up --region $AWS_DEFAULT_REGION --user-pool-id ${aws_cognito_user_pool.pool.id} --username admin@admin.fr"
+    interpreter = ["bash", "-c"]
   }
 }
 

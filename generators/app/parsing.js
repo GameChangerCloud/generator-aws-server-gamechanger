@@ -546,8 +546,8 @@ const getCreateMethodsField = (currentTypeName, fields, relations, manyToManyTab
                     case "manyToOne":
                         break
                     case "manyOnly":
-                        s += `let addedElements` + field.type + ` = utils.getAddedElements([], args.` + field.name + `)
-                            for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
+                        s += `let addedElements` + field.type + `_`+ field.name + ` = utils.getAddedElements([], args.` + field.name + `)
+                            for (let index = 0; index < addedElements`+ field.type + `_`+ field.name + `.length; index++) {					
                                 sqlParams.sql = "UPDATE \\"`+ field.type + `\\" SET  \\"Fk_` + currentTypeName + `_id\\" = " + args.id + " WHERE \\"Pk_` + field.type + `_id\\" = " + addedElements` + field.type + `[index]
                                 rdsDataService.executeStatement(sqlParams, (err, data) => {
                                     if (err) console.log(err, err.stack);
@@ -569,11 +569,11 @@ const getCreateMethodsField = (currentTypeName, fields, relations, manyToManyTab
                             let current`+ field.type + `State = utils.constructOutputArray(data, "` + field.type + `")
             
                             // `+ field.type + ` to add
-                            let addedElements`+ field.type + ` = utils.getAddedElements([], args.` + field.name + `)
+                            let addedElements`+ field.type + `_`+ field.name + ` = utils.getAddedElements([], args.` + field.name + `)
                             rdsDataService.beginTransaction(beginParams, function (err, data) {
                                 if (err) console.log(err, err.stack); // an error occurred
                                 else {
-                                    for (let index = 0; index < addedElements`+ field.type + `.length; index++) {					
+                                    for (let index = 0; index < addedElements`+ field.type + `_`+ field.name + `.length; index++) {					
                                         sqlParams.sql = "INSERT INTO \\"`+ manyToManyTable + `\\" (\\"` + currentTypeName + `_id\\", \\"` + field.type + `_id\\") VALUES ("+args.id+", "+addedElements` + field.type + `[index]+")"
                                         rdsDataService.executeStatement(sqlParams, (err, data) => {
                                             if (err) console.log(err, err.stack);

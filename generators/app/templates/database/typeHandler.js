@@ -201,7 +201,7 @@ module.exports = {
 
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			/******* Start of generated part using createMethodsField */
-				<%-createMethodsField%>
+			<%-createMethodsField%>
 			/******* End of generated part using createMethodsField */
 
 			return res
