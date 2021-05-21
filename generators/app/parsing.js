@@ -2252,7 +2252,7 @@ const isSchemaValid = (typesName, types) => {
 
 const typesHaveId = (typesName, types) => {
     for (let index = 0; index < types.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "ScalarTypeDefinition") {
+        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "ScalarTypeDefinition" && types[index].type !== "EnumTypeDefinition") {
             if (!types[index].fields.find(field => field.type === "ID" && field.name === "id")) {
                 return false
             }
@@ -2266,7 +2266,7 @@ const fieldTypeExists = (typesName, types) => {
     for (let i = 0; i < types.length; i++) {
         let fields = getFields(types[i])
         for (let j = 0; j < fields.length; j++) {
-            if (fields[j].type !== "ID" && fields[j].type !== "String" && fields[j].type !== "Int" && fields[j].type !== "Boolean") {  // Default scalar
+            if (fields[j].type !== "ID" && fields[j].type !== "String" && fields[j].type !== "Int" && fields[j].type !== "Boolean" && fields[j].type !== "Float") {  // Default scalar
                 if (!typesName.includes(fields[j].type)) { // User scalars or Entities
                     return false
                 }
