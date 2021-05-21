@@ -364,15 +364,12 @@ module.exports = class extends Generator {
 							queryManyToOne: queryManyToOne,
 							querySelfJoinOne: parsing.isSelfJoinOne(currentTypeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentTypeName, fields) : false,
 							querySelfJoinMany: parsing.isSelfJoinMany(currentTypeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentTypeName, fields) : false,
-							// updateMethodsField: parsing.getUpdateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables, this.scalarTypeNames),
 							fields: fields,
 							relations: this.relations,
 							manyToManyTables: this.manyToManyTables,
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
-
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
-							//createMethodsField: parsing.getCreateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables)
 						}
 					)
 				}
@@ -391,7 +388,6 @@ module.exports = class extends Generator {
 					defaultScalars: this.defaultScalars,
 					typesName: this.typesName,
 					types: this.types,
-					//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 					otherMutation: ""
 				}
 			)
@@ -482,7 +478,6 @@ module.exports = class extends Generator {
 			this.destinationPath('initDatabase/initDatabase.js'),
 			{
 				tables: this.tables,
-				//addConstraints: parsing.getInitAddConstraints(this.tables)
 			}
 		)
 
@@ -647,10 +642,6 @@ module.exports = class extends Generator {
 				this.destinationPath('upgradeDatabase/upgradeDatabase.js'),
 				{
 					tables: this.tables,
-					// addConstraints: parsing.getInitAddConstraints(this.add_entities),
-					// deleteColumns: parsing.getQueriesDeleteFields(this.delete_fields),
-					// addColumns: parsing.getQueriesAddFields(this.add_fields),
-					// updateColumns: parsing.getQueriesUpdateFields(this.update_fields),
 					add_entities: this.add_entities,
 					delete_fields: this.delete_fields,
 					add_fields: this.add_fields,
