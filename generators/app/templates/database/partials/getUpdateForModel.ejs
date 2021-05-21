@@ -1,0 +1,79 @@
+    function update<%- currentTypeName%>(<%-currentTypeName.toLowerCase()%>){
+    <%for (let index = 0; index < fields.length; index++) {
+        if (fields[index].isArray) {_%>
+            // nothing
+        <%}
+        else {_%>
+            <%switch (fields[index].type) {
+                case "String":_%>
+                    <% break
+                case "ID":_%>
+                    <% break
+                case "Int":_%>
+                   <% break;
+                default: _%>
+                    <% break
+            }
+        }
+    }%>
+    <%# // We check relations between the current type table with all the types %>
+    <%for (let index = 0; index < typesName.length; index++) {
+        //let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+        let relationType = include('./getRelationBetween',{typeOne: currentTypeName, typeTwo: typesName[index], relations: relations})
+        let s = currentTypeName.toLowerCase().substring(0, 5) + typesName[index] + 'Bis';
+        switch (relationType) {
+
+            case "manyOnly":
+                // Only if the current type DOES NOT have the field type 
+                if (!hasFieldType(currentType, typesName[index]).answers) { _%>
+                    <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
+                <%}%>
+                <%break
+
+            case "manyToOne": _%>
+                    <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
+                <%break
+
+            case "oneToOneParent": _%>
+                    <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
+                <%break
+
+            case "oneToOneChild": _%>
+                if(<%-currentTypeName.toLowerCase()%>.<%-typesName[index].toLowerCase()%>  == null) {
+                let _position
+                let <%- s %>
+                do {
+                    _position = pickOne(<%- typesName[index].toLowerCase() %>Tab);
+                    <%- s %>  = <%-typesName[index].toLowerCase()%>Tab[_position];
+                } while(!isUnique(<%- s %> , <%-currentTypeName.toLowerCase()%>Tab))
+                    <%- currentTypeName.toLowerCase()%> = update(<%- currentTypeName.toLowerCase() %> , <%-typesName[index].toLowerCase() %> , <%= s %>.id, new model.<%- currentTypeName %>);
+                }
+                <% break;
+
+            case "selfJoinOne": _%>
+                <%// Check field with the same type%> 
+                <%const fields = getFields(currentType)
+                fields.forEach(field => {
+                    if (field.type === currentTypeName) { _%>
+                        if(<%- currentTypeName.toLowerCase()%>.<%- field.name %>_id == null) {
+                        let _position
+                        let <%- s %>
+                        do {
+                            _position = pickOne(<%- currentTypeName.toLowerCase() %>Tab);
+                            <%- s %> = <%- currentTypeName.toLowerCase() %>Tab[_position];
+                        } while(<%- currentTypeName.toLowerCase() %>.id === <%- s %>.id)
+                            <%-currentTypeName.toLowerCase() %> = update(<%- currentTypeName.toLowerCase()%> , <%- field.name.toLowerCase() %>_id , <%- s %>.id , new model.<%- currentTypeName %>);
+                        }
+                    <%}
+                })%>
+                <%break
+            case "oneOnly":_%>
+                // Only if the current type DOES have the field type
+                <%if (hasFieldType(currentType, typesName[index]).answers) {%>
+                    <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], nameBis : s}) %>
+                <%}%>
+                <%break
+        }
+    } %>
+    return <%- currentTypeName.toLowerCase()%>
+}

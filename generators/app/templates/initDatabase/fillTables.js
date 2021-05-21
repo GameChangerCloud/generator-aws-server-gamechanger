@@ -2,6 +2,8 @@ const faker = require('faker');
 const model = require('./models');
 const rdsdata = require("rds-data");
 
+
+
 function formatDate(date) {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -142,7 +144,9 @@ module.exports.fillTables = (numberItem) => {
 /*******
  * Start of generated part using listOfMethodsForInit
  */
-<%-listOfMethodsForInit%>
+<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching : matching}) _%>
+//<ListofMethodsForInit>
+
 /*******
  * End of generated part using listOfMethodsForInit
  */

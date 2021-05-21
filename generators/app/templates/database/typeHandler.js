@@ -195,16 +195,18 @@ module.exports = {
 
 	async createMethods(args) {
 
-			/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
-			sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
-			/******* End of generated part using fieldsCreate */
+		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
+		sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
+		/******* End of generated part using fieldsCreate */
 
-			const res = await rdsDataService.executeStatement(sqlParams).promise()
-			/******* Start of generated part using createMethodsField */
-			<%-createMethodsField%>
-			/******* End of generated part using createMethodsField */
+		const res = await rdsDataService.executeStatement(sqlParams).promise()
+		/******* Start of generated part using createMethodsField */
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables}) _%>
 
-			return res
+			
+		/******* End of generated part using createMethodsField */
+
+		return res
 
 	},
 

@@ -4,6 +4,9 @@ const parsing = require('./parsing')
 const easygraphqlSchemaParser = require('easygraphql-parser')
 const constants = require('./constants');
 
+const matching = require('./matching')
+
+
 const sdlSchema =
 	`type User {
   id: ID!
@@ -85,9 +88,9 @@ module.exports = class extends Generator {
 				}
 			])
 
-			if(this.override.value){
+			if (this.override.value) {
 				this.override = true
-				this.file_old_json = this.fs.read(this.answers.name+'/schema.json')
+				this.file_old_json = this.fs.read(this.answers.name + '/schema.json')
 			}
 
 		}
@@ -120,7 +123,7 @@ module.exports = class extends Generator {
 
 				// Check if the schema is valid
 				let isValidSchema = parsing.isSchemaValid(this.typesName, this.types)
-				if(!isValidSchema.response) {
+				if (!isValidSchema.response) {
 					throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason)
 				}
 				else {
@@ -255,7 +258,7 @@ module.exports = class extends Generator {
 					{
 						enumName: currentTypeName,
 						enumValues: parsing.getEnumValues(currentType),
-						
+
 					}
 				)
 			}
@@ -369,7 +372,7 @@ module.exports = class extends Generator {
 							scalars: constants,
 
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
-							createMethodsField: parsing.getCreateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables)
+							//createMethodsField: parsing.getCreateMethodsField(currentTypeName, fields, this.relations, this.manyToManyTables)
 						}
 					)
 				}
@@ -388,7 +391,7 @@ module.exports = class extends Generator {
 					defaultScalars: this.defaultScalars,
 					typesName: this.typesName,
 					types: this.types,
-					mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
+					//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 					otherMutation: ""
 				}
 			)
@@ -406,7 +409,7 @@ module.exports = class extends Generator {
 				}
 			)
 		}
-		
+
 		// Adding the rootQuery Schema
 		let paramsSchema
 		if (this.typesInterface) {
@@ -447,7 +450,7 @@ module.exports = class extends Generator {
 		// Entry point of the lambdas function (index.js)
 		let importUpdateLine = ''
 		let requestUpdate = ''
-		if(this.override === true){
+		if (this.override === true) {
 			importUpdateLine = 'const updateDatabase = require (\'./upgradeDatabase/upgradeDatabase\')'
 			requestUpdate = 'else if(event["updateDatabase"]) {\n' +
 				'    updateDatabase.updateDatabase()\n' +
@@ -458,8 +461,8 @@ module.exports = class extends Generator {
 			this.templatePath('index.js'),
 			this.destinationPath('index.js'),
 			{
-				importUpdate : importUpdateLine,
-				updateRequest : requestUpdate
+				importUpdate: importUpdateLine,
+				updateRequest: requestUpdate
 			}
 		)
 
@@ -488,7 +491,10 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/fillTables.js'),
 			this.destinationPath('initDatabase/fillTables.js'),
 			{
-				listOfMethodsForInit: parsing.getListOfMethodsForInit(this.types, this.typesName, this.relations),
+				types: this.types, 
+				typesName: this.typesName, 
+				relations: this.relations,
+				matching : matching,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
 				initQueriesInsert: parsing.getInitQueriesInsert(this.tables)
@@ -591,7 +597,7 @@ module.exports = class extends Generator {
 		this.add_entities = []
 		this.update_entities = []
 		this.delete_entities = []
-		if(this.override == true){
+		if (this.override == true) {
 			this.old_schema = JSON.parse(this.file_old_json)
 			this.new_schema = this.schemaJSON
 			let arr = parsing.compareSchema(this.old_schema, this.new_schema)
@@ -603,23 +609,23 @@ module.exports = class extends Generator {
 			console.log("DELETE ENTITIES - ", this.delete_entities)
 			console.log("UPDATE : ", this.update_entities)
 			this.update_entities[0].forEach(add => {
-				if(add.length > 0) {
+				if (add.length > 0) {
 					add.forEach(x => {
 						let table = parsing.findTable(this.tables, x.name)
 						let name = x.column.name
 						let type = x.column.type
 						if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
-						&& type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
+							&& type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
 							name = "Fk_" + type + "_id"
 						}
-						this.add_fields.push({name: x.name, column: parsing.findField(table.columns, name)})
+						this.add_fields.push({ name: x.name, column: parsing.findField(table.columns, name) })
 
 					})
 				}
 			})
 			this.update_fields = []
 			this.update_entities[1].forEach(up => {
-				if(up.length > 0) {
+				if (up.length > 0) {
 					up.forEach(x => {
 						this.update_fields.push(x)
 					})
@@ -627,7 +633,7 @@ module.exports = class extends Generator {
 			})
 			this.delete_fields = []
 			this.update_entities[2].forEach(del => {
-				if(del.length > 0) {
+				if (del.length > 0) {
 					del.forEach(x => {
 						this.delete_fields.push(x)
 					})

@@ -1,0 +1,75 @@
+<% for (let index = 0; index < fields.length; index++) { _%>
+    <%if (fields[index].isArray) { _%>
+       <% switch (fields[index].type) { 
+            case "String": _%>
+                constructFakerListString(<%- fields[index].name %>)
+                <%break;
+            case "ID": _%>
+                generateRandomListID()
+                <%break;
+            case "Boolean": _%>
+                generateRandomListBoolean()
+                <%break;
+            case "Int": _%>
+                generateRandomListInt()
+                <%break;
+            default: _%>
+                null
+                <%break;
+       }
+    }
+    else {%>
+        <%switch (fields[index].type) { 
+
+            case "String": _%>
+                <%- matching.matchString( fields[index].name ) _%>
+                <% break;
+            case "ID": 
+                let oneToOne = false
+                let parent
+                typesName.forEach(type => {
+                    if (include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).answers) {
+                        oneToOne = true
+                        parent = include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).parent
+                    }
+                }) _%>
+                pad(faker.random.number(), 3)
+                <%break;
+            case "Boolean": _%>
+                faker.random.boolean()
+                <%break;
+            case "Int": _%>
+                faker.random.number()
+                <%break;
+            case "Date": _%>
+                getRandomDate()
+                <% break
+            case "DateTime": _%>
+                getRandomDateTime().toISOString()
+                <%break
+            case "Time": _%>
+                getRandomTime()
+                <% break
+            case "URL":_%>
+                <%if (fields[index].name.includes("avatar") || fields[index].name.includes("profile")){%>
+                    faker.image.avatar()
+                <%}else if (fields[index].name.includes("image") || fields[index].name.includes("picture")){%>
+                    faker.image.image()
+                <%}else{%>
+                    faker.internet.url()
+                <%}%>
+                <%break
+            case "EmailAddress": _%>
+                faker.internet.email()
+                <%break
+            case "HexColorCode":_%>
+                faker.internet.color()
+                <%break
+            // TODO : Handle all the scalar type from graphql-scalar module, see faker
+            default:_%>
+                null
+                <%break;
+        }%>
+    <%}%>
+    , 
+<%}%>
