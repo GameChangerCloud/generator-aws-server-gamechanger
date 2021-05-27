@@ -63,7 +63,7 @@
 			    }
 		    },
 	        <%- typesName[index].toLowerCase()%>Create: {
-                type: <%- typesName[index] %>Type,
+                type: <%- typesName[index] %>Type ,
                 args: {
                     id: { type: new GraphQLNonNull(GraphQLID) },
             <% for (let j = 0; j < types[index].fields.length; j++) {
@@ -92,7 +92,8 @@
                                 <%- field.name %> : {type: <%- field.type %>},
                             <%}
                             else {_%>
-                                <%-field.name %> : {type: GraphQL<%- field.type %> },
+                                
+                                <%-field.name %> : {type: GraphQL<%- field.type %>},
                             <%}%>
                         <%}%>
                         
@@ -101,7 +102,21 @@
             }_%>
             },
                 resolve: (obj, args, context, info) => {
-                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type').then(record => {
+
+                    <% let schemaDir = types[index].directives%>
+                    const directives = {
+                        
+                        <%- include('./getDirectivesForResolve.ejs', {directive : schemaDir, name : typesName[index]}) %>,
+                        <% for (let j = 0; j < types[index].fields.length; j++) { 
+                       let field = types[index].fields[j] %>
+                       
+
+                       
+                       
+                       <%- include('./getDirectivesForResolve.ejs', {directive : field.directives, name : field.name}) %>,
+                    <%}%>}
+                    
+                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type', directives).then(record => {
                         return dbHandler.handleGet(args, '<%- typesName[index] %>Type').then(record => {
                             return record
                         })

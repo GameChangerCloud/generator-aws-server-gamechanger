@@ -1,0 +1,39 @@
+
+
+
+ 
+    <%- name %> :<% if(directive.length > 0){_%>
+    [
+    <%for (let i= 0; i < directive.length; i++){ _%>
+       {name : "<%- directive[i].name %>",
+       args: 
+       <% if (directive[i].args.length > 0 ){_%>
+        [
+        <%for (let j= 0; j < directive[i].args.length; j++){ _%>
+            {  
+                name : "<%- directive[i].args[j].name%>" ,
+                <%if(isNaN(directive[i].args[j].value) == false){ _%>
+                    value : <%- directive[i].args[j].value%>
+                <%}else{%>
+                    value : "<%- directive[i].args[j].value%>"
+                <%}%>
+                
+                
+            },
+
+        <%}%>
+        ]
+       <%}
+       else{_%>
+            null
+       <%}%>
+    },
+  <%}%> 
+]
+<%}else{_%>
+    null
+
+<%}%>
+
+
+           

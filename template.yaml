@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lamda local demo
+  
+Resources:
+  LambdaDemoFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: testrefactoring/ # le format est projectPath/
+      Handler: index.handler # le format est filename.functionName
+      Runtime: nodejs12.x 
+      Timeout: 120  # par defaut 3s
+      Policies: AWSLambdaDynamoDBExecutionRole
+      Environment : #Variables d'environement necessaires aux lambdas
+        Variables :
+          DATABASE: "testrefactoring_db"
+          RESOURCEARN: "arn:aws:rds:eu-west-1:448878779811:cluster:aurora-testrefactoring"
+          SECRETARN: "arn:aws:secretsmanager:eu-west-1:448878779811:secret:testrefactoring-secret-coZ1UeidJOk-SQUSO9"
+          
+          
+
+                  

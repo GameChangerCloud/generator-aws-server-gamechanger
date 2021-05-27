@@ -15,6 +15,10 @@ let sqlParams = {
 	parameters: []
 }
 
+const resolvers = require('../utils/<%= typeName.toLowerCase() %>DirectiveResolvers')
+
+const directiveResolver = require('../utils/runtimeDirectiveResolver')
+
 const constructSort = (args) => {
 	let sorting = "ORDER BY \""
 
@@ -193,9 +197,14 @@ module.exports = {
 		}		
 	},
 
-	async createMethods(args) {
+	async createMethods(args, directives) {
 
+		for(a in args){
+			args[a] = directiveResolver.directiveResolver(a, args, directives, resolvers)
+		}
+		
 		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
+		
 		sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
 		/******* End of generated part using fieldsCreate */
 
