@@ -13,18 +13,19 @@ type Tweet {
 scalar DateTime
 
 
-type User {
+type User @auth(requires: USER) {
     id: ID!
-    username: String
+    username: String @length(min : 4, max : 35) @format(formatType : "UTF-8")
     firstname: String
     lastname: String
     fullname: String
+    age : Int @valueReducer(reduceby : 10)
     name: String @deprecated
 }
 
 type Stat {
     id: ID!
-    views: Int
+    views: Int @valueReducer(reduceby : 10)
     likes: Int
     retweets: Int
     responses: Int
@@ -52,4 +53,6 @@ type Query {
 
 type Mutation {
     Tweet(id: ID!): Tweet
+    ucreate(username : String! , firstname: String!) : User!
+    uagecreate(age : Int!) : User!
 }

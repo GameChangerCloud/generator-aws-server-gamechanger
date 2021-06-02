@@ -1,10 +1,11 @@
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
 const parsing = require('./parsing')
-const easygraphqlSchemaParser = require('easygraphql-parser')
+const easygraphqlSchemaParser = require('../../../graphql-parser/easygraphql-parser/lib/schemaParser')
 const constants = require('./constants');
 
 const matching = require('./matching')
+
 
 
 const sdlSchema =
@@ -120,6 +121,7 @@ module.exports = class extends Generator {
 				this.types = parsing.getAllTypes(this.schemaJSON)
 				// Get all the types Name
 				this.typesName = parsing.getAllTypesName(this.schemaJSON)
+				
 
 				// Check if the schema is valid
 				let isValidSchema = parsing.isSchemaValid(this.typesName, this.types)
@@ -197,6 +199,7 @@ module.exports = class extends Generator {
 
 		for (let index = 0; index < this.types.length; index++) {
 
+
 			let currentTypeName = this.typesName[index]
 			let currentType = this.types[index]
 			let isQuery = currentTypeName === "Query" ? true : false
@@ -205,6 +208,10 @@ module.exports = class extends Generator {
 
 			// Fetch all the fields for one type
 			let fields = parsing.getFields(currentType)
+
+			// Get all the fields directives names
+
+			let directiveNames = parsing.getFieldsDirectiveNames(fields , this.types[index])
 
 			// Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
 			let fieldsParsed = parsing.getFieldsParsed(currentTypeName, fields, currentType.type, this.relations, this.manyToManyTables, this.typesName, this.defaultScalars)
@@ -218,6 +225,26 @@ module.exports = class extends Generator {
 			// Check if it's a child in one to one relations
 			let isOneToOneChild = false
 			let parent = ""
+			// Create File with directives by type
+
+			if (index == 0){
+				this.fs.copyTpl(
+					this.templatePath('graphql/directives/directivesOnTypes.js'),
+					this.destinationPath('directives/directivesOnTypes.js'),
+					{
+						defaultScalars: this.defaultScalars,
+						typesName: this.typesName,
+						types: this.types,
+						fields : fields,
+						//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
+						otherMutation: fieldsParsed
+					}
+				)
+			}
+
+
+
+
 			fields.forEach(field => {
 				if (parsing.getRelationBetween(currentTypeName, field.type, this.relations) === "oneToOneChild") {
 					isOneToOneChild = true
@@ -315,7 +342,8 @@ module.exports = class extends Generator {
 							defaultScalars: this.defaultScalars,
 							typesName: this.typesName,
 							types: this.types,
-							mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
+							fields : fields,
+							//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 							otherMutation: fieldsParsed
 						}
 					)
@@ -365,6 +393,7 @@ module.exports = class extends Generator {
 							querySelfJoinOne: parsing.isSelfJoinOne(currentTypeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentTypeName, fields) : false,
 							querySelfJoinMany: parsing.isSelfJoinMany(currentTypeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentTypeName, fields) : false,
 							fields: fields,
+							directiveNames : directiveNames,
 							relations: this.relations,
 							manyToManyTables: this.manyToManyTables,
 							scalarTypeNames: this.scalarTypeNames,
@@ -372,6 +401,19 @@ module.exports = class extends Generator {
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 						}
 					)
+					
+
+					//Adding DirectiveResolvers
+					this.fs.copyTpl(
+						this.templatePath('graphql/directives/directiveResolvers.js'),
+						this.destinationPath('database/utils/' + currentTypeName.toLocaleLowerCase() + 'DirectiveResolvers.js'),
+						{
+							dirNames : directiveNames
+						}
+					)
+					
+
+
 				}
 			}
 
@@ -428,6 +470,7 @@ module.exports = class extends Generator {
 			this.destinationPath('graphql/defaultScalarsMap.js'),
 		)
 
+		
 		//Adding the handler.js file (main handler)
 		this.fs.copyTpl(
 			this.templatePath('database/globalHandler.js'),
@@ -441,6 +484,13 @@ module.exports = class extends Generator {
 		this.fs.copyTpl(
 			this.templatePath('database/utils.js'),
 			this.destinationPath('database/utils/index.js'),
+		)
+
+	
+		//Adding RuntimeDirectiveResolver
+		this.fs.copyTpl(
+			this.templatePath('graphql/runtimeDirectiveResolver.js'),
+			this.destinationPath('database/utils/runtimeDirectiveResolver.js'),
 		)
 
 		// Entry point of the lambdas function (index.js)
@@ -577,6 +627,33 @@ module.exports = class extends Generator {
 			}
 		)
 
+		// Adding lambda local test dependencies
+
+		this.fs.copyTpl(
+			this.templatePath('testLambdas/template.yaml'),
+			this.destinationPath('template.yaml'),
+			{
+				appName: parsing.formatName(this.answers.name)
+			}
+		)
+		this.fs.copyTpl(
+			this.templatePath('readmes/README.md'),
+			this.destinationPath('README.md'),
+			{
+				appName: parsing.formatName(this.answers.name)
+			}
+		)
+
+		// Adding README
+
+		this.fs.copyTpl(
+			this.templatePath('testLambdas/template.yaml'),
+			this.destinationPath('template.yaml'),
+			{
+				appName: parsing.formatName(this.answers.name)
+			}
+		)
+
 		// Adding the package.json config file
 		this.fs.copyTpl(
 			this.templatePath('package.json'),
@@ -600,9 +677,9 @@ module.exports = class extends Generator {
 			this.update_entities = arr[1]
 			this.delete_entities = arr[2]
 			this.add_fields = []
-			console.log("ADD ENTITIES - ", this.add_entities)
-			console.log("DELETE ENTITIES - ", this.delete_entities)
-			console.log("UPDATE : ", this.update_entities)
+			// console.log("ADD ENTITIES - ", this.add_entities)
+			// console.log("DELETE ENTITIES - ", this.delete_entities)
+			// console.log("UPDATE : ", this.update_entities)
 			this.update_entities[0].forEach(add => {
 				if (add.length > 0) {
 					add.forEach(x => {
@@ -664,7 +741,7 @@ module.exports = class extends Generator {
 		// todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
 		this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'faker', 'validator', 'graphql-scalars'])
 	}
-
+	
 	// Called last, cleanup, say good bye, etc
 	end() {
 		this.log("Done, now use the terraform commands writtent in README.md to deploy your lambdas")
