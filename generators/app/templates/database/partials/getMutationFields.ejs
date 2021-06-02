@@ -6,9 +6,9 @@
 				    id: { type: new GraphQLNonNull(GraphQLID) },
 			    },
 			    resolve: (obj, args, context, info) => {
-				    const recordToDelete = dbHandler.handleGet(args, '<%- typesName[index] %>Type').then(record => {
+				    const recordToDelete = dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
                         // Query to delete
-                        return dbHandler.handleDelete(args.id, '<%- typesName[index] %>Type').then(() => {
+                        return dbHandler.handleDelete(args.id, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(() => {
                             return record
                         })
 				    })
@@ -54,8 +54,8 @@
             } _%>
             },
 			    resolve: (obj, args, context, info) => {
-                    const recordUpdated = dbHandler.handleUpdate(args, '<%- typesName[index] %>Type').then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index]%>Type').then(record => {
+                    const recordUpdated = dbHandler.handleUpdate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                        return dbHandler.handleGet(args, '<%- typesName[index]%>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
                             return record
                         })
                     })
@@ -102,22 +102,9 @@
             }_%>
             },
                 resolve: (obj, args, context, info) => {
-
-                    <% let schemaDir = types[index].directives%>
-                    const directives = {
-                        
-                        <%- include('./getDirectivesForResolve.ejs', {directive : schemaDir, name : typesName[index]}) %>,
-                        <% for (let j = 0; j < types[index].fields.length; j++) { 
-                       let field = types[index].fields[j] %>
-                       
-
-                       
-                       
-                       <%- include('./getDirectivesForResolve.ejs', {directive : field.directives, name : field.name}) %>,
-                    <%}%>}
                     
-                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type', directives).then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index] %>Type').then(record => {
+                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                        return dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
                             return record
                         })
                     })

@@ -8,7 +8,16 @@ const directiveResolver =(a, args,directives, resolvers) =>{
         //console.log("----"+ JSON.stringify(a)+"-----")
 
         for (dir in directives[a] ){
-            let passedArgs = [args[a]]
+            let passedArgs = []
+
+            if (args[a] == undefined){
+                passedArgs.push(a)
+
+            }
+            else{
+                passedArgs = [args[a]]
+
+            }
             //console.log(resolvers[directives[a][dir].name].getType())
             if (directives[a][dir].args != null){
                 for (i in directives[a][dir].args){
