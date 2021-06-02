@@ -1,7 +1,7 @@
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
 const parsing = require('./parsing')
-const easygraphqlSchemaParser = require('../../../graphql-parser/easygraphql-parser/lib/schemaParser')
+const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger')
 const constants = require('./constants');
 
 const matching = require('./matching')
