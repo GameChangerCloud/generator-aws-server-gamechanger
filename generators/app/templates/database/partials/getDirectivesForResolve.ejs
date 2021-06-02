@@ -1,8 +1,4 @@
-
-
-
- 
-    <%- name %> :<% if(directive.length > 0){_%>
+<%- name %> :<% if(directive.length > 0){_%>
     [
     <%for (let i= 0; i < directive.length; i++){ _%>
        {name : "<%- directive[i].name %>",
@@ -17,10 +13,7 @@
                 <%}else{%>
                     value : "<%- directive[i].args[j].value%>"
                 <%}%>
-                
-                
             },
-
         <%}%>
         ]
        <%}
@@ -32,8 +25,4 @@
 ]
 <%}else{_%>
     null
-
 <%}%>
-
-
-           

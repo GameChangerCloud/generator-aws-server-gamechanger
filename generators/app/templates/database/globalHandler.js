@@ -9,13 +9,13 @@
 
 module.exports = {
 
-	handleGet: (args, type) => {
+	handleGet: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
 			<% tables.forEach(table => { %>
 			case "<%= table.name %>Type":
 				if(args) {
-					return handler<%= table.name %>.getMethodsByArgs(args)
+					return handler<%= table.name %>.getMethodsByArgs(args, directives)
 				}
 				else {
 					return handler<%= table.name %>.getMethods()
@@ -27,12 +27,12 @@ module.exports = {
 		}
 	},
 
-	handleDelete: (id, type) => {
+	handleDelete: (id, type , directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
 			<% tables.forEach(table => { %>
 				case "<%= table.name %>Type":
-					return handler<%= table.name %>.deleteMethods(id)
+					return handler<%= table.name %>.deleteMethods(id, directives)
 			<% }); %>
 			/******* End of generated part using tables */
 			default:
@@ -40,12 +40,12 @@ module.exports = {
 		}
 	},
 
-	handleUpdate: (args, type) => {
+	handleUpdate: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
 			<% tables.forEach(table => { %>
 				case "<%= table.name %>Type":
-					return handler<%= table.name %>.updateMethods(args)
+					return handler<%= table.name %>.updateMethods(args, directives)
 			<% }); %>
 			/******* End of generated part using tables */
 			default:

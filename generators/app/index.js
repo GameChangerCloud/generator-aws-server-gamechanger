@@ -201,6 +201,7 @@ module.exports = class extends Generator {
 
 		for (let index = 0; index < this.types.length; index++) {
 
+
 			let currentTypeName = this.typesName[index]
 			let currentSQLTypeName = this.sqlTypesName[index]
 			let currentType = this.types[index]
@@ -227,6 +228,26 @@ module.exports = class extends Generator {
 			// Check if it's a child in one to one relations
 			let isOneToOneChild = false
 			let parent = ""
+			// Create File with directives by type
+
+			if (index == 0){
+				this.fs.copyTpl(
+					this.templatePath('graphql/directives/directivesOnTypes.js'),
+					this.destinationPath('directives/directivesOnTypes.js'),
+					{
+						defaultScalars: this.defaultScalars,
+						typesName: this.typesName,
+						types: this.types,
+						fields : fields,
+						//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
+						otherMutation: fieldsParsed
+					}
+				)
+			}
+
+
+
+
 			fields.forEach(field => {
 				if (parsing.getRelationBetween(currentTypeName, field.type, this.relations) === "oneToOneChild") {
 					isOneToOneChild = true
@@ -326,6 +347,7 @@ module.exports = class extends Generator {
 							defaultScalars: this.defaultScalars,
 							typesName: this.typesName,
 							types: this.types,
+							fields : fields,
 							otherMutation: fieldsParsed
 						}
 					)
