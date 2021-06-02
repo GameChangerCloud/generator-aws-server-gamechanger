@@ -4,6 +4,9 @@
 <% }); %>
 /******* End of generated part using tables */
 
+ /** field directive resolver */
+//const directiveResolver = require('./directiveResolvers')
+
 module.exports = {
 
 	handleGet: (args, type) => {
@@ -50,12 +53,12 @@ module.exports = {
 		}
 	},
 
-	handleCreate: (args, type) => {
+	handleCreate: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
 			<% tables.forEach(table => { %>
 				case "<%= table.name %>Type":
-					return handler<%= table.name %>.createMethods(args)
+					return handler<%= table.name %>.createMethods(args, directives)
 			<% }); %>
 			/******* End of generated part using tables */
 			default:

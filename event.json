@@ -1,0 +1,3 @@
+{
+"query": "mutation {userCreate(id : 12 , username : \"JAZZZZ\", firstname : \"aa\", lastname : \"zzz\", fullname : \"ss\" , age : 20 , name : \"oof\"){id , username, firstname, lastname, fullname, age, name}}"
+}

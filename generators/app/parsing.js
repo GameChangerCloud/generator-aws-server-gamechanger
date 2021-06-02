@@ -42,6 +42,27 @@ const getFields = (type) => {
     return fields
 }
 
+// Get all directive names from the fields of a type object
+const getFieldsDirectiveNames = (fields, typeObject) =>{
+    let directiveNames = []
+    if(typeObject.directives.length > 0){
+        for( let index = 0 ; index < typeObject.directives.length; index++){
+            directiveNames.push(typeObject.directives[index].name)
+        }
+    }
+    
+    for (let index = 0; index < fields.length ; index++){
+        if(fields[index].directives.length > 0){
+            for( let j = 0 ; j < fields[index].directives.length ; j++){
+                directiveNames.push(fields[index].directives[j].name)
+                //console.log("*********" + JSON.stringify(fields[index].directives[j]))
+            }
+        }
+        //console.log("*********" + JSON.stringify(fields[index].directives))
+    }
+    return directiveNames
+}
+
 
 /** GRAPHQL files parsing */
 
@@ -1571,6 +1592,7 @@ module.exports = {
     getAllTypesName: getAllTypesName,
     getAllSQLTypesName: getAllSQLTypesName,
     getFields: getFields,
+    getFieldsDirectiveNames : getFieldsDirectiveNames,
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,
     buildResolverInterface: buildResolverInterface,
