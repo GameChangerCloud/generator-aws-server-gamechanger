@@ -1,9 +1,9 @@
 const queriesAddFields = [ 
 <% for(let field in fields) { if (fields[field].column.noNull == false ) { _%>
-<%- include('./alter',{name: fields[field].name, columns: fields[field].column, alterCase: "AddColumn"}) _%>
-<%- include('./alter',{name: fields[field].name, columns: fields[field].column, alterCase: "Deferred"}) %>
+<%- include('./alter',{name: fields[field].sqlname, columns: fields[field].column, alterCase: "AddColumn"}) _%>
+<%- include('./alter',{name: fields[field].sqlname, columns: fields[field].column, alterCase: "Deferred"}) %>
 <% } else { _%>
-<%- include('./alter',{name: fields[field].name, columns: fields[field].column, alterCase: "AddColumnNotNull"}) %>
-<%- include('./alter',{name: fields[field].name, field: fields[field].column.field, drop: "DEFAULT", alterCase: "AlterColumn"}) %>
+<%- include('./alter',{name: fields[field].sqlname, columns: fields[field].column, alterCase: "AddColumnNotNull"}) %>
+<%- include('./alter',{name: fields[field].sqlname, field: fields[field].column.field, drop: "DEFAULT", alterCase: "AlterColumn"}) %>
 <% }} _%>
     ]

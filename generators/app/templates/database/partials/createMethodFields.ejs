@@ -1,6 +1,8 @@
 <% fields.map(field => { _%>
     <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
-
+    <% let sqltype = field.type.charAt(0).toLowerCase() + field.type.slice(1);
+    sqltype = sqltype.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+    sqltype = sqltype.replace(/(__)/g, (e) => { return '_'}) _%>
     <% if (field.type !== "ID") { _%>
         <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") { _%>
 
@@ -13,9 +15,9 @@
                 case "manyToOne":%>
                    <% break 
                 case "manyOnly":_%>
-                    let addedElements<%- field.type %> = utils.getAddedElements([], args.<%- field.name%>)
-                        for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
-                            sqlParams.sql = "UPDATE \"<%-field.type%>\" SET  \"Fk_<%- typeName %>_id\" = " + args.id + " WHERE \"Pk_<%- field.type %>_id\" = " + addedElements<%- field.type %>[index]
+                    let addedElements<%- sqltype %> = utils.getAddedElements([], args.<%- field.name%>)
+                        for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
+                            sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- sqltype %>[index]
                             rdsDataService.executeStatement(sqlParams, (err, data) => {
                                 if (err) console.log(err, err.stack);
                                 else console.log(data);   
@@ -25,19 +27,19 @@
                 case "manyToMany": _%>
                     // Get the junction table
                     <% let manyToManyTable = include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables}).name %>
-    // Field <%- field.name %> of type <%- field.type %> 
-    sqlParams.sql = "SELECT * FROM \"<%- field.type %>\" INNER JOIN \" <%- manyToManyTable %> \" ON \"Pk_<%- field.type %>_id\" = \"<%- manyToManyTable %>\".\"<%- field.type %>_id\" INNER JOIN \"<%- typeName %>\" ON \"Pk_<%- typeName %>_id\" = \" <%- manyToManyTable %>\".\"<%- typeName %>_id\" WHERE \"Pk_<%- typeName %>_id\" = " + args.id
+    // Field <%- field.name %> of type <%- sqltype %> 
+    sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \" <%- manyToManyTable %> \" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \" <%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
     rdsDataService.executeStatement(sqlParams, (err, data) => {
         if (err) {console.log(err, err.stack)}
         else {
-            let current<%- field.type %>State = utils.constructOutputArray(data, "<%- field.type %>")
-            // <%- field.type %> to add
-            let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
+            let current<%- sqltype %>State = utils.constructOutputArray(data, "<%- sqltype %>")
+            // <%- sqltype %> to add
+            let addedElements<%- sqltype %> = utils.getAddedElements(current<%- sqltype %>State, args.<%- field.name %>)
             rdsDataService.beginTransaction(beginParams, function (err, data) {
                 if (err) console.log(err, err.stack); // an error occurred
                 else {
-                    for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
-                        sqlParams.sql = "INSERT INTO \"<%- manyToManyTable %>\" (\"<%- typeName %>_id\", \"<%- field.type %>_id\") VALUES ("+ args.id +", "+ addedElements<%- field.type%>[index]+")"
+                    for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
+                        sqlParams.sql = "INSERT INTO \"<%- manyToManyTable %>\" (\"<%- sqltypeName %>_id\", \"<%- sqltype %>_id\") VALUES ("+ args.id +", "+ addedElements<%- sqltype%>[index]+")"
                         rdsDataService.executeStatement(sqlParams, (err, data) => {
                             if (err) console.log(err, err.stack);
                             else console.log(data);   
@@ -67,11 +69,11 @@
                     <% } else { _%>
     // Don't have the field
     // Remove te previous child
-    sqlParams.sql = "UPDATE \"<%- field.type %>\" SET \"Fk_<%- typeName %>_id\" = null WHERE \"Pk_<%- field.type %>_id\" = (SELECT \"Pk_<%- field.type %>_id\" FROM \"<%- field.type %>\" WHERE \"Fk_<%- typeName %>_id\" = " + args.id + ")"
+    sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = null WHERE \"Pk_<%- sqltype %>_id\" = (SELECT \"Pk_<%- sqltype %>_id\" FROM \"<%- sqltype %>\" WHERE \"Fk_<%- sqltypeName %>_id\" = " + args.id + ")"
     rdsDataService.executeStatement(sqlParams, (err, data) => {
     if (err) {console.log(err, err.stack)}
     else { 
-        sqlParams.sql = "UPDATE \"<%- field.type %>\" SET \"Fk_<%- typeName %>_id\" = " + args.id + " WHERE \"Pk_<%- field.type %>_id\" = " + args.<%- field.name %>
+        sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%- field.name %>
             rdsDataService.executeStatement(sqlParams, (err, data) => {
                 if (err) {console.log(err, err.stack)}
                 else {console.log(data)}

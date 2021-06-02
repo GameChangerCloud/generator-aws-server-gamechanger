@@ -120,8 +120,11 @@ module.exports = class extends Generator {
 				this.types = parsing.getAllTypes(this.schemaJSON)
 				// Get all the types Name
 				this.typesName = parsing.getAllTypesName(this.schemaJSON)
+				// Get all the SQL types Name
+				this.sqlTypesName = parsing.getAllSQLTypesName(this.schemaJSON)
 
-				// Check if the schema is valid
+				this.types = parsing.addIdTypes(this.typesName, this.types)
+				// Check if the schema is valid 
 				let isValidSchema = parsing.isSchemaValid(this.typesName, this.types)
 				if (!isValidSchema.response) {
 					throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason)
@@ -180,7 +183,7 @@ module.exports = class extends Generator {
 		this.manyToManyTables = parsing.getManyToManyTables(this.relations, this.types, this.typesName)
 
 		// Will hold all the informations on the tables 
-		this.tables = parsing.getAllTables(this.types, this.typesName, this.relations, this.scalarTypeNames)
+		this.tables = parsing.getAllTables(this.types, this.typesName, this.relations, this.scalarTypeNames, this.sqlTypesName)
 
 		// Adding the junction table if some exeits
 		this.manyToManyTables.forEach(table => {
@@ -198,6 +201,7 @@ module.exports = class extends Generator {
 		for (let index = 0; index < this.types.length; index++) {
 
 			let currentTypeName = this.typesName[index]
+			let currentSQLTypeName = this.sqlTypesName[index]
 			let currentType = this.types[index]
 			let isQuery = currentTypeName === "Query" ? true : false
 
@@ -225,7 +229,9 @@ module.exports = class extends Generator {
 				}
 			})
 			let typeNameId = isOneToOneChild ? parent : currentTypeName
-
+			let sqltypeNameId = typeNameId.charAt(0).toLowerCase() + typeNameId.slice(1);
+			sqltypeNameId = sqltypeNameId.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+			sqltypeNameId = sqltypeNameId.replace(/(__)/g, (e) => { return '_'})
 			if (graphqlType === "GraphQLInterfaceType") {
 
 				// Check if this.typesInterface is already initialised
@@ -315,7 +321,6 @@ module.exports = class extends Generator {
 							defaultScalars: this.defaultScalars,
 							typesName: this.typesName,
 							types: this.types,
-							mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 							otherMutation: fieldsParsed
 						}
 					)
@@ -340,14 +345,14 @@ module.exports = class extends Generator {
 
 				// No need for a queryType handler
 				if (!isQuery && currentTypeName !== "Mutation") {
-					let queryManyToMany = "SELECT * FROM \"" + currentTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
-					let queryOneToMany = "SELECT * FROM \"" + currentTypeName + "\" WHERE \"Pk_" + typeNameId + "_id\" = (SELECT \"Fk_" + typeNameId + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
-					let queryManyToOne = "SELECT * FROM \"" + currentTypeName + "\" WHERE \"" + currentTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
+					let queryManyToMany = "SELECT * FROM \"" + currentSQLTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentSQLTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentSQLTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
+					let queryOneToMany = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"Pk_" + sqltypeNameId + "_id\" = (SELECT \"Fk_" + sqltypeNameId + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
+					let queryManyToOne = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + currentSQLTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
 					// One To One queries
 					// Parent
-					let queryOneToOneParent = "SELECT * FROM \"" + currentTypeName + "\" WHERE \"" + currentTypeName + "\".\"Pk_" + typeNameId + "_id\" = $1"
+					let queryOneToOneParent = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + currentSQLTypeName + "\".\"Pk_" + sqltypeNameId + "_id\" = $1"
 					// Child
-					let queryOneToOneChild = "SELECT * FROM \"" + currentTypeName + "\" WHERE \"" + typeNameId + "\".\"Fk_'+parentTypeName+'_id\" = $1"
+					let queryOneToOneChild = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + sqltypeNameId + "\".\"Fk_'+parentTypeName+'_id\" = $1"
 
 					// Adding the handlerType.js file
 					this.fs.copyTpl(
@@ -355,7 +360,9 @@ module.exports = class extends Generator {
 						this.destinationPath('database/handlers/handler' + currentTypeName + '.js'),
 						{
 							typeName: currentTypeName,
-							typeNameId: typeNameId,
+							sqltypeName: currentSQLTypeName,
+							typeNameId: sqltypeNameId,
+							sqltypeNameId: sqltypeNameId,
 							typeFieldsParsed: parsing.getFieldsParsedHandler(currentTypeName, fields, isOneToOneChild, parent),
 							queryManyToMany: queryManyToMany,
 							queryOneToMany: queryOneToMany,
@@ -608,12 +615,15 @@ module.exports = class extends Generator {
 					add.forEach(x => {
 						let table = parsing.findTable(this.tables, x.name)
 						let name = x.column.name
+						let sqlname = x.name.charAt(0).toLowerCase() + x.name.slice(1);
+						sqlname = sqlname.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+						sqlname = sqlname.replace(/(__)/g, (e) => { return '_'})
 						let type = x.column.type
 						if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
 							&& type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
 							name = "Fk_" + type + "_id"
 						}
-						this.add_fields.push({ name: x.name, column: parsing.findField(table.columns, name) })
+						this.add_fields.push({ name: x.name, sqlname: sqlname, column: parsing.findField(table.columns, name) })
 
 					})
 				}
@@ -621,7 +631,7 @@ module.exports = class extends Generator {
 			this.update_fields = []
 			this.update_entities[1].forEach(up => {
 				if (up.length > 0) {
-					up.forEach(x => {
+					up.forEach(x => {// TODO change x to match sql table names
 						this.update_fields.push(x)
 					})
 				}
@@ -629,7 +639,7 @@ module.exports = class extends Generator {
 			this.delete_fields = []
 			this.update_entities[2].forEach(del => {
 				if (del.length > 0) {
-					del.forEach(x => {
+					del.forEach(x => {// TODO change x to match sql table names
 						this.delete_fields.push(x)
 					})
 				}

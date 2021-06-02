@@ -16,7 +16,7 @@ let beginTransactionParams = {
     database: process.env.DATABASE,
 }
 /******* Start of generated part using tables */
-    const tables = '<% tables.forEach((table,idx,array) => { %>"<%= table.name %>"<% if (idx !== array.length - 1) { %>,<% } %><% }); %>'
+    const tables = '<% tables.forEach((table,idx,array) => { %>"<%= table.sqlname %>"<% if (idx !== array.length - 1) { %>,<% } %><% }); %>'
 /******* End of generated part using tables   */
 
 async function transac(){

@@ -3,7 +3,7 @@ const rdsDataService = new AWS.RDSDataService()
 const utils = require('../utils/index')
 
 /******* Start of generated part (except for 'const TABLE = ' ) using typeName */
-const TABLE = "<%-typeName%>"
+const TABLE = "<%-sqltypeName%>"
 /******* End of generated part using typeName */
 
 let sqlParams = {
@@ -19,13 +19,13 @@ const constructSort = (args) => {
 	let sorting = "ORDER BY \""
 
 	if(args) {
-		// Sort field (default Fk_<%-typeName%>_id)
+		// Sort field (default Fk_<%-sqltypeName%>_id)
 		if(args.sort_field && args.sort_field !== "id") {
 			sorting += args.sort_field +"\" "
 		}
 		else {
 			/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
-			sorting += "Pk_<%-typeNameId%>_id\" "
+			sorting += "Pk_<%-sqltypeNameId%>_id\" "
 			/******* End of generated part using typeNameId */
 		}
 
@@ -41,7 +41,7 @@ const constructSort = (args) => {
 	// No arguments
 	else {
 		/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
-		sorting +=  "Pk_<%-typeNameId%>_id\" ASC"
+		sorting +=  "Pk_<%-sqltypeNameId%>_id\" ASC"
 		/******* End of generated part using typeNameId */
 	}
 
@@ -65,7 +65,7 @@ module.exports = {
 			sqlParams.parameters.length = 0
 			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
 			/******* Start of generated part using typeName and typeNameId*/
-			sqlParams.sql = 'SELECT * from "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = :value'
+			sqlParams.sql = 'SELECT * from "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = :value'
 			/******* End of generated part using typeName and typeNameId */
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			return utils.constructOutputArray(res)[0] // only one row
@@ -74,7 +74,11 @@ module.exports = {
 		// Field from a parent type (other than query)
 		else if(args.parentId) {
 			const value = args.parentId
-			const parentTypeName = args.parentTypeName.toString().replace("Type", "")
+			const minifiedparentTypeName = args.minifiedparentTypeName.toString().replace("Type", "")
+			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1);
+			minifiedparentTypeName = minifiedparentTypeName.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+			minifiedparentTypeName = minifiedparentTypeName.replace(/(__)/g, (e) => { return '_'})
+			
 			let res 
 			sqlParams.parameters.length = 0
 			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
@@ -85,7 +89,7 @@ module.exports = {
 				case "oneToMany":
 				case "oneOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = (SELECT "Fk_<%-typeNameId%>_id" FROM "'+parentTypeName+'" WHERE "'+parentTypeName+'"."Pk_'+parentTypeName+'_id" = :value)'
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = (SELECT "Fk_<%-sqltypeNameId%>_id" FROM "'+minifiedparentTypeName+'" WHERE "'+minifiedparentTypeName+'"."Pk_'+minifiedparentTypeName+'_id" = :value)'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
@@ -94,7 +98,7 @@ module.exports = {
 				case "manyToOne":
 				case "manyOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeName%>"."Fk_'+parentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
@@ -102,7 +106,7 @@ module.exports = {
 				// N currentType for N parentType (Junction table)
 				case "manyToMany":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" INNER JOIN "'+args.tableJunction+'" ON "Pk_<%-typeName%>_id" = "'+args.tableJunction+'"."<%-typeName%>_id" INNER JOIN "'+parentTypeName+'" ON "Pk_'+parentTypeName+'_id" = "'+args.tableJunction+'"."'+parentTypeName+'_id" WHERE "Pk_'+parentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.tableJunction+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.tableJunction+'"."<%-sqltypeName%>_id" INNER JOIN "'+minifiedparentTypeName+'" ON "Pk_'+minifiedparentTypeName+'_id" = "'+args.tableJunction+'"."'+minifiedparentTypeName+'_id" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res, TABLE)
@@ -110,7 +114,7 @@ module.exports = {
 				// One unique currentType for one unique parentType 
 				case "oneToOneParent":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeName%>"."Pk_<%-typeNameId%>_id" = :value'
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Pk_<%-sqltypeNameId%>_id" = :value'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
@@ -118,7 +122,7 @@ module.exports = {
 				// One unique currentType for one unique parentType 
 				case "oneToOneChild":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-typeName%>" WHERE "<%-typeNameId%>".\"Pk_'+parentTypeName+'_id\" = :value'
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeNameId%>".\"Pk_'+minifiedparentTypeName+'_id\" = :value'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
@@ -134,7 +138,7 @@ module.exports = {
 				/******* Conditional Block on querySelfJoinMany */
 					<%if(querySelfJoinMany){%>
 						case "selfJoinMany":
-							sqlParams.sql = '<%-querySelfJoinMany%>'
+							sqlParams.sql = '<%-querySelfJoinMany%>
 							res = await rdsDataService.executeStatement(sqlParams).promise()
 							return utils.constructOutputArray(res)<%}%>
 				/******* End of conditional Block on querySelfJoinMany */			
@@ -147,7 +151,7 @@ module.exports = {
 		// List of type, not a field
 		else {
 
-			sqlParams.sql = 'SELECT * from "<%-typeName%>" '+sorting+' '+limit+' '+offset
+			sqlParams.sql = 'SELECT * from "<%-sqltypeName%>" '+sorting+' '+limit+' '+offset
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			return utils.constructOutputArray(res)
 		}
@@ -156,7 +160,7 @@ module.exports = {
 	async getMethods(){
 		const sorting = constructSort(null)
 		/******* Start of generated part using typeNameId */
-		sqlParams.sql = 'SELECT * from "<%-typeNameId%>" '+sorting
+		sqlParams.sql = 'SELECT * from "<%-sqltypeNameId%>" '+sorting
 		/******* End of generated part using typeNameId */
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
 		return utils.constructOutputArray(res)
@@ -164,7 +168,7 @@ module.exports = {
 
 	async deleteMethods(id){
 		/******* Start of generated part using typeName and typeNameId */
-		sqlParams.sql = 'DELETE FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = '+id
+		sqlParams.sql = 'DELETE FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = '+id
 		/******* End of generated part using typeName and typeNameId */
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
 		return res
@@ -181,7 +185,7 @@ module.exports = {
 		const input = temp.slice(0, temp.lastIndexOf(", "))
 		if(input !== ""){
 			/******* Start of generated part using typeName and typeNameId */
-			sqlParams.sql = "UPDATE \"<%-typeName%>\" SET " + input + " WHERE \"Pk_<%-typeName%>_id\" = " + args.id
+			sqlParams.sql = "UPDATE \"<%-sqltypeName%>\" SET " + input + " WHERE \"Pk_<%-sqltypeName%>_id\" = " + args.id
 			/******* Start of generated part using typeName and typeNameId */
 			console.log(sqlParams.sql)
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
@@ -195,8 +199,8 @@ module.exports = {
 
 	async createMethods(args) {
 
-		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
-		sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
+		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (') using fieldsCreate */
+		sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
 		/******* End of generated part using fieldsCreate */
 
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
