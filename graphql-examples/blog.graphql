@@ -1,6 +1,6 @@
-type User @auth(requires: USER) {
+type User {
     id: ID!
-    username: String! @length(min : 4, max : 35) @format(formatType : "UTF-8")
+    username: String!
     email: String!
 }
 
@@ -10,8 +10,4 @@ type Post {
 
 type Blog {
     id: ID!
-}
-
-type Query {
-    Users: [User]
 }

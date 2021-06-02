@@ -2,11 +2,7 @@ const faker = require('faker');
 const model = require('./models');
 const rdsdata = require("rds-data");
 
-const directivesOnTypes = require('../directives/directivesOnTypes')
 
-
-
-const directiveResolver = require('../database/utils/runtimeDirectiveResolver')
 
 function formatDate(date) {
     var d = new Date(date),

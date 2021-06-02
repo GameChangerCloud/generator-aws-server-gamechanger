@@ -1,3 +1,0 @@
-{
-    "fillTable" : "query notifications(1) {users {username} }"
-    }

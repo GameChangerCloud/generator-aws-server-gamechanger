@@ -6,9 +6,9 @@
 				    id: { type: new GraphQLNonNull(GraphQLID) },
 			    },
 			    resolve: (obj, args, context, info) => {
-				    const recordToDelete = dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+				    const recordToDelete = dbHandler.handleGet(args, '<%- typesName[index] %>Type').then(record => {
                         // Query to delete
-                        return dbHandler.handleDelete(args.id, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(() => {
+                        return dbHandler.handleDelete(args.id, '<%- typesName[index] %>Type').then(() => {
                             return record
                         })
 				    })
@@ -54,8 +54,8 @@
             } _%>
             },
 			    resolve: (obj, args, context, info) => {
-                    const recordUpdated = dbHandler.handleUpdate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index]%>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                    const recordUpdated = dbHandler.handleUpdate(args, '<%- typesName[index] %>Type').then(record => {
+                        return dbHandler.handleGet(args, '<%- typesName[index]%>Type').then(record => {
                             return record
                         })
                     })
@@ -63,7 +63,7 @@
 			    }
 		    },
 	        <%- typesName[index].toLowerCase()%>Create: {
-                type: <%- typesName[index] %>Type ,
+                type: <%- typesName[index] %>Type,
                 args: {
                     id: { type: new GraphQLNonNull(GraphQLID) },
             <% for (let j = 0; j < types[index].fields.length; j++) {
@@ -92,8 +92,7 @@
                                 <%- field.name %> : {type: <%- field.type %>},
                             <%}
                             else {_%>
-                                
-                                <%-field.name %> : {type: GraphQL<%- field.type %>},
+                                <%-field.name %> : {type: GraphQL<%- field.type %> },
                             <%}%>
                         <%}%>
                         
@@ -102,9 +101,8 @@
             }_%>
             },
                 resolve: (obj, args, context, info) => {
-                    
-                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type').then(record => {
+                        return dbHandler.handleGet(args, '<%- typesName[index] %>Type').then(record => {
                             return record
                         })
                     })

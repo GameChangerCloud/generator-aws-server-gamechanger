@@ -15,10 +15,6 @@ let sqlParams = {
 	parameters: []
 }
 
-const resolvers = require('../utils/<%= typeName.toLowerCase() %>DirectiveResolvers')
-
-const directiveResolver = require('../utils/runtimeDirectiveResolver')
-
 const constructSort = (args) => {
 	let sorting = "ORDER BY \""
 
@@ -54,7 +50,7 @@ const constructSort = (args) => {
     
 module.exports = {
     
-	async getMethodsByArgs (args , directives){
+	async getMethodsByArgs (args){
 
 		// Sorting Field
 		const sorting = constructSort(args)
@@ -166,7 +162,7 @@ module.exports = {
 		return utils.constructOutputArray(res)
 	},
 
-	async deleteMethods(id, directives){
+	async deleteMethods(id){
 		/******* Start of generated part using typeName and typeNameId */
 		sqlParams.sql = 'DELETE FROM "<%-typeName%>" WHERE "Pk_<%-typeNameId%>_id" = '+id
 		/******* End of generated part using typeName and typeNameId */
@@ -175,7 +171,7 @@ module.exports = {
 	},
 
 
-	async updateMethods(args, directives) {
+	async updateMethods(args) {
 
 		/******* Start of generated part using updateMethodsField */
 		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars}) _%>
@@ -197,18 +193,9 @@ module.exports = {
 		}		
 	},
 
-	async createMethods(args, directives) {
+	async createMethods(args) {
 
-		if("<%-typeName%>" in directives){
-			directiveResolver.directiveResolver("<%-typeName%>", args, directives, resolvers)
-		}
-
-		for(a in args){
-			args[a] = directiveResolver.directiveResolver(a, args, directives, resolvers)
-		}
-		
 		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (') using fieldsCreate */
-		
 		sqlParams.sql = "INSERT INTO \"<%-typeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
 		/******* End of generated part using fieldsCreate */
 

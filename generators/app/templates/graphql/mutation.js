@@ -53,15 +53,6 @@ const dbHandler = require('../../database/handler')
 const { types } = require('pg')
 
 
-const directivesOnTypes = require('../../directives/directivesOnTypes')
-
-
-
-
-
-
-
-
 module.exports = new GraphQLObjectType({
   name: 'MutationType',
   description: '',
