@@ -1,8 +1,8 @@
-<% for (let index = 0; index < fields.length; index++) { _%>
-    <%if (fields[index].isArray) { _%>
-       <% switch (fields[index].type) { 
+<% for (let index = 0; index < table.length; index++) { _%>
+    <%if (table[index].isArray) { _%>
+       <% switch (table[index].gqlType) { 
             case "String": _%>
-                constructFakerListString(<%- fields[index].name %>)
+                constructFakerListString(<%- tableName %>)
                 <%break;
             case "ID": _%>
                 generateRandomListID()
@@ -19,10 +19,10 @@
        }
     }
     else {%>
-        <%switch (fields[index].type) { 
+        <%switch (table[index].gqlType) { 
 
             case "String": _%>
-                <%- matching.matchString( fields[index].name ) _%>
+                <%- matching.matchString( tableName ) _%>
                 <% break;
             case "ID": 
                 let oneToOne = false
@@ -51,9 +51,9 @@
                 getRandomTime()
                 <% break
             case "URL":_%>
-                <%if (fields[index].name.includes("avatar") || fields[index].name.includes("profile")){%>
+                <%if (tableName.includes("avatar") || tableName.includes("profile")){%>
                     faker.image.avatar()
-                <%}else if (fields[index].name.includes("image") || fields[index].name.includes("picture")){%>
+                <%}else if (tableName.includes("image") || tableName.includes("picture")){%>
                     faker.image.image()
                 <%}else{%>
                     faker.internet.url()

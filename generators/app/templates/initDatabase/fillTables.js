@@ -148,7 +148,7 @@ module.exports.fillTables = (numberItem) => {
 /*******
  * Start of generated part using listOfMethodsForInit
  */
-<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching : matching}) _%>
+<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables}) _%>
 //<ListofMethodsForInit>
 
 /*******

@@ -523,7 +523,7 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/models.js'),
 			this.destinationPath('initDatabase/models.js'),
 			{
-				creationOfModels: parsing.getCreationOfModels(this.types, this.typesName, this.relations, this.scalarTypeNames),
+				creationOfModels: parsing.getCreationOfModels(this.types, this.typesName, this.sqlTypesName, this.relations, this.scalarTypeNames),
 				listOfModelsExport: parsing.getListOfModelsExport(this.typesName, this.types)
 			}
 		)
@@ -546,6 +546,7 @@ module.exports = class extends Generator {
 				typesName: this.typesName, 
 				relations: this.relations,
 				matching : matching,
+				tables: this.tables,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
 				initQueriesInsert: parsing.getInitQueriesInsert(this.tables)

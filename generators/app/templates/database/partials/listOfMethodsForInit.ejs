@@ -9,7 +9,7 @@
                 let <%- typesName[index].toLowerCase()_%>Tab = []
                 function init<%-typesName[index]%>(){
                     for(let i = 0; i < 5; i++){
-                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching })%>));
+                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
                     }
                 }
                 <%- include('./getUpdateForModel', {currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations}) %>
