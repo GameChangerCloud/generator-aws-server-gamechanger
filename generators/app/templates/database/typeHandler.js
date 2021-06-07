@@ -78,7 +78,7 @@ module.exports = {
 		// Field from a parent type (other than query)
 		else if(args.parentId) {
 			const value = args.parentId
-			const minifiedparentTypeName = args.minifiedparentTypeName.toString().replace("Type", "")
+			let minifiedparentTypeName = args.parentTypeName.toString().replace("Type", "")
 			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1);
 			minifiedparentTypeName = minifiedparentTypeName.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
 			minifiedparentTypeName = minifiedparentTypeName.replace(/(__)/g, (e) => { return '_'})
