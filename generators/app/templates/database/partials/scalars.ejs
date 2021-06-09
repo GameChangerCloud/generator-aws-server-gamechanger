@@ -87,7 +87,7 @@ if(args.<%- field.name %> !== undefined){
         <% break;
     default: _%>
 if(args.<%- field.name %> !== undefined){
-            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = '" + utils.escapeQuote(args.name) + "', " : "\" <%- field.name %>\" = null, "
+            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = '" + utils.escapeQuote(args.<%- field.name %>) + "', " : "\" <%- field.name %>\" = null, "
         }
         <% break; 
     }_%>
