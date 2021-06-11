@@ -459,34 +459,47 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
             case "ID":
             case "Boolean":
             case "Int":
-                s += `args.${field.name} + "," +`
+                s += `(args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") ) + "," +`
                 break;
             case "String":
             case "Date":
             case "Time":
-                s += `"'" + utils.escapeQuote(args.${field.name}) + "'" + "," +`
+                s += `"'" + utils.escapeQuote((args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") )) + "'" + "," +`
                 break;
             case "DateTime":
-                s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
+                s += `"'" + (args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") ).toISOString() + "'" + "," +`
                 break;
-
             default:
-                switch (getRelationBetween(field.type, currentTypeName, relations)) {
-
-                    case "oneOnly":
-                    case "oneToMany":
-                        s += `args.${field.name} + "," +`
-                        break
-
-                    default:
-                        break;
-                }
                 break;
         }
     })
     s = s.substring(0, s.length - 7)
     return s
 
+}
+
+const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relations) => {
+    let s = '('
+    // let table = tables.find(t => t.name === currentTypeName)
+    fields.forEach((c) => {
+        switch (c.type) {
+            case "ID":
+                s += "\\\"Pk_" + currentSQLTypeName + "_id\\\","
+                break;
+            case "Boolean":
+            case "Int":
+            case "String":
+            case "Date":
+            case "Time":
+            case "DateTime":
+                s += "\\\"" + c.name + "\\\","
+                break;
+            default:
+                break;
+        }
+    })
+    s = s.substring(0, s.length - 1) + ')'
+    return s
 }
 
 const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTables) => {
@@ -1154,6 +1167,7 @@ const getRelations = (types, typenames, scalarTypeNames) => {
                     else if (out == 2 && inn == 0) {
                         manyOnly.push([lst[i].type, typenames[index]])
                     }
+                    types[index].fields = types[index].fields.filter((e)=> e !== lst[i])
                 }
 
             }
@@ -1603,7 +1617,6 @@ module.exports = {
     getResolveType: getResolveType,
     getEnumValues: getEnumValues,
     getFieldsParsedHandler: getFieldsParsedHandler,
-    getFieldsCreate: getFieldsCreate,
     getDeleteMethodsMany: getDeleteMethodsMany,
     getAllTables: getAllTables,
     getInitEachModelsJS: getInitEachModelsJS,
@@ -1626,6 +1639,7 @@ module.exports = {
     addIdTypes: addIdTypes,
     isSchemaValid: isSchemaValid,
     getFieldsCreate: getFieldsCreate,
+    getFieldsName: getFieldsName,
     formatName: formatName,
     compareSchema: compareSchema,
     findTable: findTable,

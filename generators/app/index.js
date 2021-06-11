@@ -178,7 +178,8 @@ module.exports = class extends Generator {
 		}
 
 		// Get all the relations between entities
-		this.relations = parsing.getRelations(this.types, this.typesName, this.scalarTypeNames)
+		const tmpTypes = JSON.parse(JSON.stringify(this.types));
+		this.relations = parsing.getRelations(tmpTypes, this.typesName, this.scalarTypeNames)
 
 		// Get all the name of manyToMany relation table
 		this.manyToManyTables = parsing.getManyToManyTables(this.relations, this.types, this.typesName)
@@ -248,7 +249,7 @@ module.exports = class extends Generator {
 
 
 
-			fields.forEach(field => {
+			fields.forEach((field,index) => {
 				if (parsing.getRelationBetween(currentTypeName, field.type, this.relations) === "oneToOneChild") {
 					isOneToOneChild = true
 					parent = field.type
@@ -388,7 +389,6 @@ module.exports = class extends Generator {
 						{
 							typeName: currentTypeName,
 							sqltypeName: currentSQLTypeName,
-							typeNameId: sqltypeNameId,
 							sqltypeNameId: sqltypeNameId,
 							typeFieldsParsed: parsing.getFieldsParsedHandler(currentTypeName, fields, isOneToOneChild, parent),
 							queryManyToMany: queryManyToMany,
@@ -405,6 +405,7 @@ module.exports = class extends Generator {
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
+							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations)
 						}
 					)
 					

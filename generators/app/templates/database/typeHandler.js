@@ -212,7 +212,7 @@ module.exports = {
 		}
 		
 		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (') using fieldsCreate */
-		sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (" + <%-fieldsCreate%> + ") "
+		sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" <%-fieldsName%> VALUES (" + <%-fieldsCreate%> + ") "
 		/******* End of generated part using fieldsCreate */
 
 		const res = await rdsDataService.executeStatement(sqlParams).promise()

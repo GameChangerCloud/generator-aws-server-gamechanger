@@ -26,7 +26,7 @@
     "ejs": "^3.1.5",
     "faker": "^4.1.0",
     "graphql": "^15.5.0",
-    "graphql-scalars": "^1.9.3",
+    "graphql-scalars": "^1.10.0",
     "pg": "^8.6.0",
     "pluralize": "^8.0.0",
     "rds-data": "^1.1.0",
@@ -35,7 +35,7 @@
     "yeoman-generator": "^4.8.2"
   },
   "devDependencies": {
-    "aws-sdk": "^2.921.0",
+    "aws-sdk": "^2.926.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^8.2.1"
