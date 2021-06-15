@@ -1,6 +1,6 @@
 {
   "name": "generator-aws-server-gamechanger",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "Simple generator of a serverless GraphQL API that can be deployed on AWS from a GraphQL schema",
   "main": "index.js",
   "files": [
@@ -21,7 +21,6 @@
   "license": "ISC",
   "dependencies": {
     "chai-string": "^1.5.0",
-    "easygraphql-parser": "0.0.13",
     "easygraphql-parser-gamechanger": "0.0.15",
     "ejs": "^3.1.5",
     "faker": "^4.1.0",

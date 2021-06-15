@@ -25,10 +25,7 @@ const getAllTypesName = (schemaJSON) => {
 const getAllSQLTypesName = (schemaJSON) => {
     let typesName = []
     for (const typeName in schemaJSON) {
-        let minifiedType = typeName.charAt(0).toLowerCase() + typeName.slice(1);
-        minifiedType = minifiedType.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-        minifiedType = minifiedType.replace(/(__)/g, (e) => { return '_'})
-        typesName.push(minifiedType)
+        typesName.push(getSQLTableName(typeName))
     }
     return typesName
 }
@@ -646,9 +643,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
 
             // Then, we check relations between the current type table with all the types to add the correct foreigns key and references
             typesName.forEach((typeTable,index) => {
-                let sqltypeTable = typeTable.charAt(0).toLowerCase() + typeTable.slice(1);
-                sqltypeTable = sqltypeTable.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-                sqltypeTable = sqltypeTable.replace(/(__)/g, (e) => { return '_'})
+                let sqltypeTable = getSQLTableName(typeTable);
                 if (!scalarTypeNames.includes(typeTable)) {
                     let fieldChild
                     let relationType = getRelationBetween(currentTypeName, typeTable, relations)
@@ -712,7 +707,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
                     }
                 }
             })
-            allTables.push({ name: currentTypeName, sqlname: currentSQLTypeName, columns: tableTemp })
+            allTables.push({ name: currentTypeName, sqlname: currentSQLTypeName, columns: tableTemp, isJoinTable: false })
         }
     }
     return allTables
@@ -1337,19 +1332,23 @@ const getManyToManyTables = (relations, types, typesName) => {
         }
     })
     relations.manyToMany.forEach(element => {
+        let elt0 = getSQLTableName(element[0])
+        let elt1 = getSQLTableName(element[1])
         result.push(
             {
                 name: element[0] + "_" + element[1],
+                sqlname:  elt0 + "_" + elt1,
+                isJoinTable: true,
                 columns: [
                     {
                         field: element[0] + '_id',
                         fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + element[0] + '_id") REFERENCES "' + element[0] + '"("Pk_' + element[0] + '_id") ON DELETE CASCADE'
+                        constraint: 'FOREIGN KEY ("' + element[0] + '_id") REFERENCES "' + elt0 + '"("Pk_' + element[0] + '_id") ON DELETE CASCADE'
                     },
                     {
                         field: element[1] + '_id',
                         fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + element[1] + '_id") REFERENCES "' + element[1] + '"("Pk_' + element[1] + '_id") ON DELETE CASCADE'
+                        constraint: 'FOREIGN KEY ("' + element[1] + '_id") REFERENCES "' + elt1 + '"("Pk_' + element[1] + '_id") ON DELETE CASCADE'
                     },
                 ]
             }
@@ -1357,6 +1356,13 @@ const getManyToManyTables = (relations, types, typesName) => {
 
     })
     return result
+}
+
+const getSQLTableName = (typeName) => {
+    let minifiedType = typeName.charAt(0).toLowerCase() + typeName.slice(1);    
+    minifiedType = minifiedType.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+    minifiedType = minifiedType.replace(/(__)/g, (e) => { return '_'})
+    return minifiedType;
 }
 
 const getManyToManyTableBetween = (typeOne, typeTwo, manyToManyTables) => {
