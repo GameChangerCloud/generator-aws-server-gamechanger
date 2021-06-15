@@ -1,8 +1,5 @@
-<% let result = "" %>
-<% manyToManyTables.forEach(table => { %>
-    <% if (table.name.includes(typeOne) && table.name.includes(typeTwo)) { %>
-        <% result = table %>
-        <% return result %>
-    <% } %>
-<% }) %>
-<% return result %>
+<%_ manyToManyTables.forEach(table => { _%>
+    <%_ if (table.name.includes(typeOne) && table.name.includes(typeTwo)) { _%>
+<%- JSON.stringify(table) -%> <%_ } _%>
+<%_ }) _%>
+

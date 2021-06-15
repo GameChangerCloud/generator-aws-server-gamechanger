@@ -96,7 +96,7 @@ const utils = {
 
 	escapeQuote(stringInput) {
 		let regex = /'/
-		return stringInput.replace(regex, '\'\'')
+	    return stringInput === undefined || stringInput === "null" ? 'NULL' : "'" + stringInput.replace(regex, "''") + "'"
 	}
 
 }

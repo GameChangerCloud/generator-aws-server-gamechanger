@@ -1,6 +1,6 @@
 let temp = ''
 <% fields.map(field => {_%>
-    <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: sqltypeName,relations: relations}) _%>
+    <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
     <% let sqltype = field.type.charAt(0).toLowerCase() + field.type.slice(1);
     sqltype = sqltype.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
     sqltype = sqltype.replace(/(__)/g, (e) => { return '_'}) _%>
@@ -45,7 +45,7 @@ let temp = ''
         }})
                     <% break
                 case "manyToMany": _%>
-        <% let manyToManyTable = include('getManyToManyTableBetween',{typeOne: sqltypeName,typeTwo: field.type,manyToManyTables: manyToManyTables}).name %>
+        <% let manyToManyTable = include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables}).name %>
         // Field <%- field.name %> of type <%- field.type %> 
         sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \" <%- manyToManyTable %> \" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \" <%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {
@@ -125,7 +125,7 @@ let temp = ''
         <% } _%>
                         <% break
                     default: _%>
-                        <% console.log("Error in handling relationship") %>
+                        <% console.log("Error in handling relationship in update") %>
                         <% break
                 }%>
             <% } else { _%>

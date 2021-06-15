@@ -5,7 +5,6 @@
     sqltype = sqltype.replace(/(__)/g, (e) => { return '_'}) _%>
     <% if (field.type !== "ID") { _%>
         <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") { _%>
-
             <%  switch (s.trim()) { 
 
                 case "oneToMany": _%>
@@ -83,7 +82,7 @@
     <% } _%>
                     <% break
                 default: _%>
-                    <% console.log("Error in handling relationship") %>
+                    <% console.log("Error in handling relationship in create") %>
                     <% break %>
             <% }
         }

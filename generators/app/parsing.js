@@ -459,15 +459,15 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
             case "ID":
             case "Boolean":
             case "Int":
-                s += `(args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") ) + "," +`
+                s += `args.${field.name} + "," +`
                 break;
             case "String":
             case "Date":
             case "Time":
-                s += `"'" + utils.escapeQuote((args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") )) + "'" + "," +`
+                s += `utils.escapeQuote(args.${field.name}) + "," +`
                 break;
             case "DateTime":
-                s += `"'" + (args.${field.name} ? args.${field.name} : (${field.noNull} ? process.exit(1) : "null") ).toISOString() + "'" + "," +`
+                s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
                 break;
             default:
                 break;

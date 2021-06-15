@@ -46,6 +46,7 @@ const resultColumns = [
 const tables = [
     {
         "name" : "TableTest",
+        "sqlname" : "table_test", 
         "columns" : columns
     }
 ]
@@ -53,18 +54,20 @@ const tables = [
 const tables2 = [
     {
         "name" : "TableTest",
+        "sqlname" : "table_test",
         "columns" : columns.slice(0,3)
     }
 ]
 
 const deleteFields = [
-    { name: 'User', column: 'firstname' },
-    { name: 'User', column: 'lastname' },  
+    { name: 'User', sqlname:'user', column: 'firstname' },
+    { name: 'User', sqlname:'user', column: 'lastname' },  
 ]
 
 const updateFields = [
     {
         name: 'User',
+        sqlname: 'user',
         column_old: {
             name: 'username',
             arguments: [],
@@ -178,7 +181,7 @@ describe('partials', function() {
     });
     describe('partials/columns', function() {
         const filename = './generators/app/templates/database/partials/columns.ejs';
-        const awaited = '`'+resultColumns.join(',').replace(/\s+/g, '')+'`';
+        const awaited = resultColumns.join(',').replace(/\s+/g, '');
         it('should render Full list of columns', function() {
             return ejs.renderFile(filename, {"columns": columns}).then(result => {
                 awaited.should.equal(result.replace(/\s+/g, ''));
@@ -220,33 +223,33 @@ describe('partials', function() {
         });
         it('should render queries constraint', function() {
             return ejs.renderFile(filename, {"tables": tables}).should.eventually
-                .equalIgnoreSpaces("const queriesConstraint = [{tableName: \"TableTest\", text: `ALTER TABLE \"TableTest\" ADD FOREIGN KEY (\"Fk_User_id\") REFERENCES \"User\" (\"Pk_User_id\") DEFERRABLE INITIALLY DEFERRED`},]")
+                .equalIgnoreSpaces("const queriesConstraint = [{tableName: \"table_test\", text: `ALTER TABLE \"table_test\" ADD FOREIGN KEY (\"Fk_User_id\") REFERENCES \"User\" (\"Pk_User_id\") DEFERRABLE INITIALLY DEFERRED`},]")
         });
     })
     describe('partials/queriesAddFields', function() {
         const filename = './generators/app/templates/database/partials/queriesAddFields.ejs';
         it('should render add column', function() {
-            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","column" : columns[0]}]}).should.eventually
-                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"FieldTest\", text: `ALTER TABLE \"FieldTest\" ADD COLUMN Pk_Tweet_id Int`},]")
+            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","sqlname" : "field_test","column" : columns[0]}]}).should.eventually
+                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"field_test\", text: `ALTER TABLE \"field_test\" ADD COLUMN Pk_Tweet_id Int`},]")
         });
         it('should render add column with FK', function() {
-            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","column" : columns[3]}]}).should.eventually
-                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"FieldTest\", text: `ALTER TABLE \"FieldTest\" ADD COLUMN Fk_User_id Int`},"
-                    + "{tableName: \"FieldTest\", text: `ALTER TABLE \"FieldTest\" ADD FOREIGN KEY (\"Fk_User_id\") REFERENCES \"User\" (\"Pk_User_id\") DEFERRABLE INITIALLY DEFERRED`},]")
+            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","sqlname" : "field_test","column" : columns[3]}]}).should.eventually
+                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"field_test\", text: `ALTER TABLE \"field_test\" ADD COLUMN Fk_User_id Int`},"
+                    + "{tableName: \"field_test\", text: `ALTER TABLE \"field_test\" ADD FOREIGN KEY (\"Fk_User_id\") REFERENCES \"User\" (\"Pk_User_id\") DEFERRABLE INITIALLY DEFERRED`},]")
         });
         
         it('should render add not null column', function() {
-            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","column" : columns[2]}]}).should.eventually
-                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"FieldTest\", text: `ALTER TABLE \"FieldTest\" ADD COLUMN date timestamp NOT NULL DEFAULT TO_TIMESTAMP('1970-01-01 01:00:00','YYYY-MM-DD HH:MI:SS')`},"
-                    + "{tableName: \"FieldTest\", text: `ALTER TABLE \"FieldTest\" ALTER COLUMN date DROP DEFAULT`},]")
+            return ejs.renderFile(filename, {"fields": [{"name" : "FieldTest","sqlname" : "field_test","column" : columns[2]}]}).should.eventually
+                .equalIgnoreSpaces("const queriesAddFields = [{tableName: \"field_test\", text: `ALTER TABLE \"field_test\" ADD COLUMN date timestamp NOT NULL DEFAULT TO_TIMESTAMP('1970-01-01 01:00:00','YYYY-MM-DD HH:MI:SS')`},"
+                    + "{tableName: \"field_test\", text: `ALTER TABLE \"field_test\" ALTER COLUMN date DROP DEFAULT`},]")
         });
     })
     describe('partials/queriesDeleteFields', function() {
         const filename = './generators/app/templates/database/partials/queriesDeleteFields.ejs';
         it('should render delete fields', function() {
             return ejs.renderFile(filename, {"fields": deleteFields}).then(result => {
-                result.replace(/\s\s+/g, ' ').should.equal(("const queriesDeleteFields = [ {tableName : \"User\" , text: `ALTER TABLE \"User\" DROP COLUMN IF EXISTS firstname`}, "
-                + "{tableName : \"User\" , text: `ALTER TABLE \"User\" DROP COLUMN IF EXISTS lastname`}, ]").replace(/\s\s+/g, ' '))})
+                result.replace(/\s\s+/g, ' ').should.equal(("const queriesDeleteFields = [ {tableName : \"User\" , text: `ALTER TABLE \"user\" DROP COLUMN IF EXISTS firstname`}, "
+                + "{tableName : \"User\" , text: `ALTER TABLE \"user\" DROP COLUMN IF EXISTS lastname`}, ]").replace(/\s\s+/g, ' '))})
         });
     })
     describe('partials/defaultVal', function() {
@@ -271,37 +274,45 @@ describe('partials', function() {
         const filename = './generators/app/templates/database/partials/queriesUpdateFields.ejs';
         it('should render update fields', function() {
             return ejs.renderFile(filename, {"fields": updateFields}).then(result => {
-                result.replace(/\s\s+/g, ' ').should.equal("const queriesUpdateFields = [ {tableName: \"User\", text: `UPDATE \"User\" SET \"username\" = '' WHERE \"username\" IS NULL;`}, "
-                                                                                        +"{tableName: \"User\", text: `ALTER TABLE \"User\" ALTER COLUMN \"username\" SET NOT NULL ;`}, ]")})
+                result.replace(/\s\s+/g, ' ').should.equal("const queriesUpdateFields = [ {tableName: \"user\", text: `UPDATE \"user\" SET \"username\" = '' WHERE \"username\" IS NULL;`}, "
+                                                                                        +"{tableName: \"user\", text: `ALTER TABLE \"user\" ALTER COLUMN \"username\" SET NOT NULL ;`}, ]")})
         });
     })
     describe('partials/scalars', function() {
         const filename = './generators/app/templates/database/partials/scalars.ejs';
         it('should render scalar for ID ', function() {
             return ejs.renderFile(filename, {"field": fields[0],"scalars": scalars}).then(result => {
-                result.replace(/\s\s+/g, ' ').should.equal("if(args.id !== undefined){ temp += args.id ? \"\\\"id\\\" = \'\" + utils.escapeQuote(args.name) + \"\', \" : \"\\\" id\\\" = null, \" } ")})
+                result.replace(/\s\s+/g, ' ').should.equal("if(args.id !== undefined){ temp += args.id ? \"\\\"id\\\" = \'\" + utils.escapeQuote(args.id) + \"\', \" : \"\\\" id\\\" = null, \" } ")})
         });
         it('should render scalar for title ', function() {
             return ejs.renderFile(filename, {"field": fields[1],"scalars": scalars}).then(result => {
-                result.replace(/\s\s+/g, ' ').should.equal("if(args.title !== undefined){ temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.name) + \"\', \" : \"\\\" title\\\" = null, \" } ")})
+                result.replace(/\s\s+/g, ' ').should.equal("if(args.title !== undefined){ temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.title) + \"\', \" : \"\\\" title\\\" = null, \" } ")})
         });
     })
     describe('partials/getRelationBetween', function() {
         const filename = './generators/app/templates/database/partials/getRelationBetween.ejs';
         it('should render relation manyToMany ', function() {
             return ejs.renderFile(filename, {"typeOne": fields[0].type,"typeTwo": "Movie",relations: relations }).then(result => {
-                result.replace(/\s\s+/g, ' ').should.equal("manyToMany ")})
+                result.replace(/\s\s+/g, ' ').should.equal(" manyToMany ")})
         });
+    })
+    describe('partials/getManyToMany', function() {
+        const filename = './generators/app/templates/database/partials/getManyToManyTableBetween.ejs';
+        it('should render manyToMany table between', function() {
+            return ejs.renderFile(filename, {"typeOne": "Actor","typeTwo": "Movie","manyToManyTables":manyToManyTables}).then(result => {
+                result.replace(/\s\s+/g, ' ').should.equal(JSON.stringify(manyToManyTables[0])+' ')
+            })
+        })
     })
     describe('partials/updateMethodsField', function() {
         const filename = './generators/app/templates/database/partials/updateMethodsField.ejs';
         it('should render fields update methods ', function() {
-            return ejs.renderFile(filename, {"fields": fields, "relations":relations, "manyToManyTables":manyToManyTables, "scalarTypeNames":scalarTypeNames, "scalars":scalars, "typeName":"Movie"}).then(result => {
+            return ejs.renderFile(filename, {"fields": fields, "relations":relations, "manyToManyTables":manyToManyTables, "scalarTypeNames":scalarTypeNames, "scalars":scalars, "typeName":"Movie", "sqltypeName":"movie"}).then(result => {
                 result.replace(/\s\s+/g, ' ').should.equal("let temp = '' " 
                     + "if(args.title !== undefined){ "
-                    + "temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.name) + \"', \" : \"\\\" title\\\" = null, \" } "
+                    + "temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.title) + \"', \" : \"\\\" title\\\" = null, \" } "
                     + "// Field actors of type Actor "
-                    + "sqlParams.sql = \"SELECT * FROM \\\"Actor\\\" INNER JOIN \\\" Actor_Movie \\\" ON \\\"Pk_Actor_id\\\" = \\\"Actor_Movie\\\".\\\"Actor_id\\\" INNER JOIN \\\"Movie\\\" ON \\\"Pk_Movie_id\\\" = \\\" Actor_Movie\\\".\\\"Movie_id\\\" WHERE \\\"Pk_Movie_id\\\" = \" + args.id "
+                    + "sqlParams.sql = \"SELECT * FROM \\\"actor\\\" INNER JOIN \\\" Actor_Movie \\\" ON \\\"Pk_Actor_id\\\" = \\\"Actor_Movie\\\".\\\"Actor_id\\\" INNER JOIN \\\"Movie\\\" ON \\\"Pk_Movie_id\\\" = \\\" Actor_Movie\\\".\\\"Movie_id\\\" WHERE \\\"Pk_Movie_id\\\" = \" + args.id "
                     + "rdsDataService.executeStatement(sqlParams, (err, data) => { if (err) {console.log(err, err.stack)} else { let currentActorState = utils.constructOutputArray(data, \"Actor\") "
                     + "// Actor to add "
                     + "let addedElementsActor = utils.getAddedElements(currentActorState, args.actors) "

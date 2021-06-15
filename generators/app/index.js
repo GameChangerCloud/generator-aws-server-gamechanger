@@ -548,6 +548,7 @@ module.exports = class extends Generator {
 				relations: this.relations,
 				matching : matching,
 				tables: this.tables,
+				hasFieldType: parsing.hasFieldType,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
 				initQueriesInsert: parsing.getInitQueriesInsert(this.tables)
