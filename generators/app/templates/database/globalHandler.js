@@ -1,5 +1,5 @@
 /******* Start of generated part using tables */
-<% tables.forEach(table => { -%>
+<% tables.filter(table => !table.isJoinTable).forEach(table => { -%>
 	<%- include('./partials/requireByEntity', {entity: table.name}) %>
 <% }); %>
 /******* End of generated part using tables */
@@ -12,7 +12,7 @@ module.exports = {
 	handleGet: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
-			<% tables.forEach(table => { %>
+			<% tables.filter(table => !table.isJoinTable).forEach(table => { %>
 			case "<%= table.name %>Type":
 				if(args) {
 					return handler<%= table.name %>.getMethodsByArgs(args, directives)
@@ -30,7 +30,7 @@ module.exports = {
 	handleDelete: (id, type , directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
-			<% tables.forEach(table => { %>
+			<% tables.filter(table => !table.isJoinTable).forEach(table => { %>
 				case "<%= table.name %>Type":
 					return handler<%= table.name %>.deleteMethods(id, directives)
 			<% }); %>
@@ -43,7 +43,7 @@ module.exports = {
 	handleUpdate: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
-			<% tables.forEach(table => { %>
+			<% tables.filter(table => !table.isJoinTable).forEach(table => { %>
 				case "<%= table.name %>Type":
 					return handler<%= table.name %>.updateMethods(args, directives)
 			<% }); %>
@@ -56,7 +56,7 @@ module.exports = {
 	handleCreate: (args, type, directives) => {
 		switch (type) {
 			/******* Start of generated part using tables */
-			<% tables.forEach(table => { %>
+			<% tables.filter(table => !table.isJoinTable).forEach(table => { %>
 				case "<%= table.name %>Type":
 					return handler<%= table.name %>.createMethods(args, directives)
 			<% }); %>

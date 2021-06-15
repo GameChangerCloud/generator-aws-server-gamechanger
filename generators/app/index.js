@@ -6,8 +6,6 @@ const constants = require('./constants');
 
 const matching = require('./matching')
 
-
-
 const sdlSchema =
 	`type User {
   id: ID!
