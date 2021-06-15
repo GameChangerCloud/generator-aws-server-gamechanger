@@ -2,8 +2,8 @@ let temp = ''
 <% fields.map(field => {_%>
     <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
     <% let sqltype = field.type.charAt(0).toLowerCase() + field.type.slice(1);
-    sqltype = sqltype.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-    sqltype = sqltype.replace(/(__)/g, (e) => { return '_'}) _%>
+        .replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+        .replace(/(__)/g, '_') _%>
     <% if (field.type !== "ID") { _%>
         <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !scalarTypeNames.includes(field.type)) {_%>
             <% switch (s.trim()) {

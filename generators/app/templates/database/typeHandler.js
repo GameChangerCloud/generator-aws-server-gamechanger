@@ -80,8 +80,8 @@ module.exports = {
 			const value = args.parentId
 			let minifiedparentTypeName = args.parentTypeName.toString().replace("Type", "")
 			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1);
-			minifiedparentTypeName = minifiedparentTypeName.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-			minifiedparentTypeName = minifiedparentTypeName.replace(/(__)/g, (e) => { return '_'})
+				.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+				.replace(/(__)/g, '_')
 			
 			let res 
 			sqlParams.parameters.length = 0

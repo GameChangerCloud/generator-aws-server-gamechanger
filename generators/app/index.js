@@ -254,9 +254,7 @@ module.exports = class extends Generator {
 				}
 			})
 			let typeNameId = isOneToOneChild ? parent : currentTypeName
-			let sqltypeNameId = typeNameId.charAt(0).toLowerCase() + typeNameId.slice(1);
-			sqltypeNameId = sqltypeNameId.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-			sqltypeNameId = sqltypeNameId.replace(/(__)/g, (e) => { return '_'})
+			let sqltypeNameId = parsing.getSQLTableName(typeNameId)
 			if (graphqlType === "GraphQLInterfaceType") {
 
 				// Check if this.typesInterface is already initialised
@@ -692,9 +690,7 @@ module.exports = class extends Generator {
 					add.forEach(x => {
 						let table = parsing.findTable(this.tables, x.name)
 						let name = x.column.name
-						let sqlname = x.name.charAt(0).toLowerCase() + x.name.slice(1);
-						sqlname = sqlname.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-						sqlname = sqlname.replace(/(__)/g, (e) => { return '_'})
+						let sqlname = parsing.getSQLTableName(x.name)
 						let type = x.column.type
 						if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
 							&& type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
