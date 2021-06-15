@@ -79,7 +79,7 @@ module.exports = {
 		else if(args.parentId) {
 			const value = args.parentId
 			let minifiedparentTypeName = args.parentTypeName.toString().replace("Type", "")
-			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1);
+			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1)
 				.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
 				.replace(/(__)/g, '_')
 			
