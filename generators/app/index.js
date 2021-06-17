@@ -419,31 +419,38 @@ module.exports = class extends Generator {
 					// Adding events for lambdas
 					//Create
 					this.fs.copyTpl(
-						this.templatePath('testLambdas/eventMaker.json'),
+						this.templatePath('testLambdas/eventMaker.ejs'),
 						this.destinationPath('events/create'+ currentTypeName+ '.json'),
 						{
 							fields: fields,
 							typeName: currentTypeName,
-							relations : this.relations
+							relations : this.relations,
+							typeQuery : "create"
 						}
 					)
-					// //Delete
-					// this.fs.copyTpl(
-					// 	this.templatePath('testLambdas/eventMaker.js'),
-					// 	this.destinationPath('events/'),
-					// 	{
-					// 		appName: parsing.formatName(this.answers.name)
-					// 	}
-					// )
+					//Delete
+					this.fs.copyTpl(
+						this.templatePath('testLambdas/eventMaker.ejs'),
+						this.destinationPath('events/delete'+ currentTypeName+ '.json'),
+						{
+							fields: fields,
+							typeName: currentTypeName,
+							relations : this.relations,
+							typeQuery : "delete"
+						}
+					)
 
-					// //Update
-					// this.fs.copyTpl(
-					// 	this.templatePath('testLambdas/eventMaker.js'),
-					// 	this.destinationPath('events/'),
-					// 	{
-					// 		appName: parsing.formatName(this.answers.name)
-					// 	}
-					// )
+					//Update
+					this.fs.copyTpl(
+						this.templatePath('testLambdas/eventMaker.ejs'),
+						this.destinationPath('events/update'+ currentTypeName+ '.json'),
+						{
+							fields: fields,
+							typeName: currentTypeName,
+							relations : this.relations,
+							typeQuery : "update"
+						}
+					)
 					
 
 				}
@@ -676,6 +683,35 @@ module.exports = class extends Generator {
 			this.destinationPath('README.md'),
 			{
 				appName: parsing.formatName(this.answers.name)
+			}
+		)
+
+
+		this.fs.copyTpl(
+			this.templatePath('testLambdas/eventMaker.ejs'),
+			this.destinationPath('events/fillTable.json'),
+			{
+				fields: null,
+				typeName: "filltable",
+				typeQuery : "fillTable"
+			}
+		)
+		this.fs.copyTpl(
+			this.templatePath('testLambdas/eventMaker.ejs'),
+			this.destinationPath('events/initTable.json'),
+			{
+				fields: null,
+				typeName: "inittable",
+				typeQuery : "initTable"
+			}
+		)
+		this.fs.copyTpl(
+			this.templatePath('testLambdas/eventMaker.ejs'),
+			this.destinationPath('events/dropTables.json'),
+			{
+				fields: null,
+				typeName: "droptable",
+				typeQuery : "dropTables"
 			}
 		)
 
