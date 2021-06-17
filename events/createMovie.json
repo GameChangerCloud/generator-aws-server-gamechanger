@@ -1,0 +1,3 @@
+{
+    "query": "mutation {movieCreate(id : 1 , title : \"pirate des Caraibe\", actors : [1], studio : 1 ){id , title, actors{id, name}, studio{id, name}}}"
+}

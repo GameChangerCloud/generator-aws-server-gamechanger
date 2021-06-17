@@ -415,8 +415,36 @@ module.exports = class extends Generator {
 							dirNames : directiveNames
 						}
 					)
-					
+		
+					// Adding events for lambdas
+					//Create
+					this.fs.copyTpl(
+						this.templatePath('testLambdas/eventMaker.json'),
+						this.destinationPath('events/create'+ currentTypeName+ '.json'),
+						{
+							fields: fields,
+							typeName: currentTypeName,
+							relations : this.relations
+						}
+					)
+					// //Delete
+					// this.fs.copyTpl(
+					// 	this.templatePath('testLambdas/eventMaker.js'),
+					// 	this.destinationPath('events/'),
+					// 	{
+					// 		appName: parsing.formatName(this.answers.name)
+					// 	}
+					// )
 
+					// //Update
+					// this.fs.copyTpl(
+					// 	this.templatePath('testLambdas/eventMaker.js'),
+					// 	this.destinationPath('events/'),
+					// 	{
+					// 		appName: parsing.formatName(this.answers.name)
+					// 	}
+					// )
+					
 
 				}
 			}

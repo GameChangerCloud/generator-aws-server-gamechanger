@@ -1,0 +1,3 @@
+{
+    "query": "mutation {actorCreate(id : 1 , name : \"jhony deep\", movies : \"null\" ){id , name, movies{id}}}"
+}
