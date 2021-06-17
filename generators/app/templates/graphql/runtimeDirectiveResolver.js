@@ -44,6 +44,10 @@ const directiveResolver =(a, args,directives, resolvers) =>{
                     return args[a]
                 case "notifyWhere":
                     break
+                case "Perform":
+                    resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)
+                    return args[a]
+                    break
             }
         }
     }

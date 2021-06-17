@@ -88,6 +88,28 @@
         }
     },
 
+    hasInverse : {
+        name : "hasInverse",
+        type: "Perform",
+        resolve: function (field, value) {
+            console.log("inverse of" + value)
+        },
+        getType : function(){
+            return this.type
+        }
+    },
+
+    search: {
+        name : "search",
+        type: "Perform",
+        resolve: function (field, value) {
+            console.log("search")
+        },
+        getType : function(){
+            return this.type
+        }
+    }
+
 
 }%>
 

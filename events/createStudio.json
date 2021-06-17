@@ -1,0 +1,3 @@
+{
+    "query": "mutation {studioCreate(id : 1 , name : \"hollywood\" ){id , name}}"
+}
