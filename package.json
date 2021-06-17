@@ -1,6 +1,6 @@
 {
   "name": "generator-aws-server-gamechanger",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Simple generator of a serverless GraphQL API that can be deployed on AWS from a GraphQL schema",
   "main": "index.js",
   "files": [
