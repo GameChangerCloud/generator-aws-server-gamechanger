@@ -1,3 +1,0 @@
-{
-    "initTable": "mutation {personUpdate(id : 12 , firstName : \"MERLU\", lastName : \"aa\", notice : \"zzz\"){id , firstName, lastName, notice}}"
-    }
