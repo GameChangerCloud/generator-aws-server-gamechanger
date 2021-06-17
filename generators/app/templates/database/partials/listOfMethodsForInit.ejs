@@ -12,7 +12,7 @@
                         <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
                     }
                 }
-                <%- include('./getUpdateForModel', {currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations, hasFieldType: hasFieldType}) %>
+                <%- include('./getUpdateForModel', {currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) %>
         <% }
     } %>
 

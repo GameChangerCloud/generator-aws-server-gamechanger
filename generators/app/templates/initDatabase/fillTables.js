@@ -1,7 +1,6 @@
 const faker = require('faker');
 const model = require('./models');
 const rdsdata = require("rds-data");
-
 const directivesOnTypes = require('../directives/directivesOnTypes')
 
 
@@ -148,8 +147,7 @@ module.exports.fillTables = (numberItem) => {
 /*******
  * Start of generated part using listOfMethodsForInit
  */
-<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, hasFieldType: hasFieldType}) _%>
-//<ListofMethodsForInit>
+<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, hasFieldType: hasFieldType, getSQLTableName: utils.getSQLTableName}) _%>
 
 /*******
  * End of generated part using listOfMethodsForInit

@@ -96,8 +96,15 @@ const utils = {
 
 	escapeQuote(stringInput) {
 		let regex = /'/
-	    return stringInput === undefined || stringInput === "null" ? 'NULL' : "'" + stringInput.replace(regex, "''") + "'"
-	}
+	    return stringInput ? "'" + stringInput.replace(regex, "''") + "'" : 'NULL'
+	},
+
+	getSQLTableName(typeName) {
+		let minifiedType = typeName.charAt(0).toLowerCase() + typeName.slice(1) 
+			.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
+			.replace(/(__)/g, '_')
+		return minifiedType;
+	},
 
 }
 

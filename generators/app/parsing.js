@@ -1,7 +1,7 @@
 const matching = require('./matching')
 const pluralize = require('pluralize')
 const scalars = require('./constants')
-
+const utils = require('./templates/database/utils')
 
 // From the schema, fetch all the types object and return an array of it
 const getAllTypes = (schemaJSON) => {
@@ -25,7 +25,7 @@ const getAllTypesName = (schemaJSON) => {
 const getAllSQLTypesName = (schemaJSON) => {
     let typesName = []
     for (const typeName in schemaJSON) {
-        typesName.push(getSQLTableName(typeName))
+        typesName.push(utils.getSQLTableName(typeName))
     }
     return typesName
 }
@@ -315,7 +315,7 @@ const buildResolver = (field, hasArguments = false, currentTypeName, relationTyp
     else {
         if (currentTypeName !== "Query") {
             if (manyToManyTable != null) {
-                result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\treturn dbHandler.handleGet({parentId: obj.id, parentTypeName: info.parentType, relationType: \"" + relationType + "\", tableJunction: \"" + manyToManyTable.name + "\"}, '" + field.type + "Type')\n\t\t\t}"
+                result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\treturn dbHandler.handleGet({parentId: obj.id, parentTypeName: info.parentType, relationType: \"" + relationType + "\", tableJunction: \"" + manyToManyTable.sqlname + "\"}, '" + field.type + "Type')\n\t\t\t}"
             }
             else {
                 if (!relationType) {
@@ -643,7 +643,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
 
             // Then, we check relations between the current type table with all the types to add the correct foreigns key and references
             typesName.forEach((typeTable,index) => {
-                let sqltypeTable = getSQLTableName(typeTable);
+                let sqltypeTable = utils.getSQLTableName(typeTable);
                 if (!scalarTypeNames.includes(typeTable)) {
                     let fieldChild
                     let relationType = getRelationBetween(currentTypeName, typeTable, relations)
@@ -1332,8 +1332,8 @@ const getManyToManyTables = (relations, types, typesName) => {
         }
     })
     relations.manyToMany.forEach(element => {
-        let elt0 = getSQLTableName(element[0])
-        let elt1 = getSQLTableName(element[1])
+        let elt0 = utils.getSQLTableName(element[0])
+        let elt1 = utils.getSQLTableName(element[1])
         result.push(
             {
                 name: element[0] + "_" + element[1],
@@ -1341,14 +1341,14 @@ const getManyToManyTables = (relations, types, typesName) => {
                 isJoinTable: true,
                 columns: [
                     {
-                        field: element[0] + '_id',
+                        field: elt0 + '_id',
                         fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + element[0] + '_id") REFERENCES "' + elt0 + '"("Pk_' + element[0] + '_id") ON DELETE CASCADE'
+                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id") ON DELETE CASCADE'
                     },
                     {
-                        field: element[1] + '_id',
+                        field: elt1 + '_id',
                         fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + element[1] + '_id") REFERENCES "' + elt1 + '"("Pk_' + element[1] + '_id") ON DELETE CASCADE'
+                        constraint: 'FOREIGN KEY ("' + elt1 + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id") ON DELETE CASCADE'
                     },
                 ]
             }
@@ -1356,13 +1356,6 @@ const getManyToManyTables = (relations, types, typesName) => {
 
     })
     return result
-}
-
-const getSQLTableName = (typeName) => {
-    let minifiedType = typeName.charAt(0).toLowerCase() + typeName.slice(1) 
-        .replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-        .replace(/(__)/g, '_')
-    return minifiedType;
 }
 
 const getManyToManyTableBetween = (typeOne, typeTwo, manyToManyTables) => {
@@ -1650,5 +1643,4 @@ module.exports = {
     compareSchema: compareSchema,
     findTable: findTable,
     findField: findField,
-    getSQLTableName: getSQLTableName,
 }

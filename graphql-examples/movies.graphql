@@ -2,7 +2,7 @@ type Movie {
   id: ID!
   title: String
   actors: [Actor]
-  studio : Studio!
+  studio: Studio!
 }
 
 type Actor {

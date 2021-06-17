@@ -3,7 +3,7 @@ const pluralize = require('pluralize')
 const parsing = require('./parsing')
 const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger')
 const constants = require('./constants');
-
+const utils = require('./templates/database/utils')
 const matching = require('./matching')
 
 const sdlSchema =
@@ -254,7 +254,7 @@ module.exports = class extends Generator {
 				}
 			})
 			let typeNameId = isOneToOneChild ? parent : currentTypeName
-			let sqltypeNameId = parsing.getSQLTableName(typeNameId)
+			let sqltypeNameId = utils.getSQLTableName(typeNameId)
 			if (graphqlType === "GraphQLInterfaceType") {
 
 				// Check if this.typesInterface is already initialised
@@ -401,7 +401,8 @@ module.exports = class extends Generator {
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
-							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations)
+							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
+							getSQLTableName: utils.getSQLTableName,
 						}
 					)
 					
@@ -547,7 +548,8 @@ module.exports = class extends Generator {
 				hasFieldType: parsing.hasFieldType,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
-				initQueriesInsert: parsing.getInitQueriesInsert(this.tables)
+				initQueriesInsert: parsing.getInitQueriesInsert(this.tables),
+				utils: utils,
 			}
 		)
 
@@ -690,7 +692,7 @@ module.exports = class extends Generator {
 					add.forEach(x => {
 						let table = parsing.findTable(this.tables, x.name)
 						let name = x.column.name
-						let sqlname = parsing.getSQLTableName(x.name)
+						let sqlname = utils.getSQLTableName(x.name)
 						let type = x.column.type
 						if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
 							&& type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {

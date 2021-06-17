@@ -78,11 +78,7 @@ module.exports = {
 		// Field from a parent type (other than query)
 		else if(args.parentId) {
 			const value = args.parentId
-			let minifiedparentTypeName = args.parentTypeName.toString().replace("Type", "")
-			minifiedparentTypeName = minifiedparentTypeName.charAt(0).toLowerCase() + minifiedparentTypeName.slice(1)
-				.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
-				.replace(/(__)/g, '_')
-			
+			let minifiedparentTypeName = utils.getSQLTableName(args.parentTypeName.toString().replace("Type", ""))
 			let res 
 			sqlParams.parameters.length = 0
 			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
@@ -182,7 +178,7 @@ module.exports = {
 	async updateMethods(args, directives) {
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars}) _%>
+		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, getSQLTableName: getSQLTableName}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error
@@ -217,7 +213,7 @@ module.exports = {
 
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName}) _%>
 
 			
 		/******* End of generated part using createMethodsField */
