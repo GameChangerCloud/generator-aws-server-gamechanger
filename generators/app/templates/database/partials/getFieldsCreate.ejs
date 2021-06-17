@@ -13,7 +13,7 @@
             case "Date": _%>
                 <% break;
             case "Time": _%>
-                <%- ("'" + utils.escapeQuote(args.<%-field.name%>) + "'" + ",")
+                <%- (utils.escapeQuote(args.<%-field.name%>) + ",")
                 <% break;
             case "DateTime":
                 ("'" + args.<%-field.name%>.toISOString() + "'" + ",")
