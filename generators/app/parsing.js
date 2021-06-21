@@ -1,7 +1,12 @@
 const matching = require('./matching')
 const pluralize = require('pluralize')
-const scalars = require('./constants')
+const camelCase = require('camelcase');
+
+const scalars = require('./scalars/scalars')
+const manageScalars = require('./scalars/manageScalars')
+
 const utils = require('./templates/database/utils')
+
 
 // From the schema, fetch all the types object and return an array of it
 const getAllTypes = (schemaJSON) => {
@@ -450,6 +455,20 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
 
 
 const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
+    let sqlFields = []
+    // Deal with scalar first (removing any Array)
+    fields.filter(field => !field.isArray).forEach(field => {
+        let sqlField = manageScalars.getFieldCreate(field.type,field.name)
+        if (sqlField) sqlFields.push(sqlField);
+    })
+    // Deal with oneOnly relationship
+    relations.oneOnly.forEach(relation => {
+        fields.filter(field1 => field1.type == relation[0]).forEach(field2 => {
+            sqlFields.push(`args.${field2.name}`);
+        })
+    })
+    return sqlFields.join(` + "," + `);
+    /*
     let s = ""
     fields.map(field => {
         switch (field.type) {
@@ -472,10 +491,26 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
     })
     s = s.substring(0, s.length - 7)
     return s
+    */
 
 }
 
 const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relations) => {
+    let sqlNames = []
+    // Deal with scalar first (removing any Array)
+    fields.filter(field => !field.isArray).forEach(field => {
+        let sqlName = manageScalars.getFieldName(field.type,field.name)
+        if (sqlName) sqlNames.push(sqlName);
+    })
+    // Deal with oneOnly relationship
+    relations.oneOnly.forEach(relation => {
+        fields.filter(field1 => field1.type == relation[0]).forEach(field2 => {
+            sqlNames.push("\\\"Fk_" + utils.getSQLTableName(field2.type) + "_id\\\"");
+        })
+    })
+    return sqlNames.join(",");
+
+    /*
     let s = '('
     // let table = tables.find(t => t.name === currentTypeName)
     fields.forEach((c) => {
@@ -497,6 +532,7 @@ const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relat
     })
     s = s.substring(0, s.length - 1) + ')'
     return s
+    */
 }
 
 const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTables) => {
