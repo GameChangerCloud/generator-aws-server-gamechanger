@@ -25,7 +25,7 @@
                     // Get the junction table
                     <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).name) %>
     // Field <%- field.name %> of type <%- sqltype %> 
-    sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \" <%- manyToManyTable %> \" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \" <%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
+    sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
     rdsDataService.executeStatement(sqlParams, (err, data) => {
         if (err) {console.log(err, err.stack)}
         else {

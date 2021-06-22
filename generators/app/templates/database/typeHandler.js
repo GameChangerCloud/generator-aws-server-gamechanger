@@ -14,6 +14,17 @@ let sqlParams = {
 	includeResultMetadata: true,
 	parameters: []
 }
+let beginParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	database: process.env.DATABASE
+}
+
+let commitParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	transactionId: ""
+}
 
 const resolvers = require('../utils/<%= typeName.toLowerCase() %>DirectiveResolvers')
 
@@ -214,8 +225,6 @@ module.exports = {
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
 		/******* Start of generated part using createMethodsField */
 		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName}) _%>
-
-			
 		/******* End of generated part using createMethodsField */
 
 		return res
