@@ -429,8 +429,6 @@ const getEnumValues = (currentType) => {
     return result
 }
 
-
-
 /** TYPE HANDLER */
 
 const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent) => {
@@ -468,38 +466,13 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
         })
     })
     return sqlFields.join(` + "," + `);
-    /*
-    let s = ""
-    fields.map(field => {
-        switch (field.type) {
-            case "ID":
-            case "Boolean":
-            case "Int":
-                s += `args.${field.name} + "," +`
-                break;
-            case "String":
-            case "Date":
-            case "Time":
-                s += `utils.escapeQuote(args.${field.name}) + "," +`
-                break;
-            case "DateTime":
-                s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
-                break;
-            default:
-                break;
-        }
-    })
-    s = s.substring(0, s.length - 7)
-    return s
-    */
-
 }
 
 const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relations) => {
     let sqlNames = []
     // Deal with scalar first (removing any Array)
     fields.filter(field => !field.isArray).forEach(field => {
-        let sqlName = manageScalars.getFieldName(field.type,field.name)
+        let sqlName = manageScalars.getFieldName(field.type,field.name, currentTypeName)
         if (sqlName) sqlNames.push(sqlName);
     })
     // Deal with oneOnly relationship
@@ -509,30 +482,6 @@ const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relat
         })
     })
     return sqlNames.join(",");
-
-    /*
-    let s = '('
-    // let table = tables.find(t => t.name === currentTypeName)
-    fields.forEach((c) => {
-        switch (c.type) {
-            case "ID":
-                s += "\\\"Pk_" + currentSQLTypeName + "_id\\\","
-                break;
-            case "Boolean":
-            case "Int":
-            case "String":
-            case "Date":
-            case "Time":
-            case "DateTime":
-                s += "\\\"" + c.name + "\\\","
-                break;
-            default:
-                break;
-        }
-    })
-    s = s.substring(0, s.length - 1) + ')'
-    return s
-    */
 }
 
 const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTables) => {

@@ -18,16 +18,18 @@ const getFieldCreate = (type, name) => {
             s = `"'" + args.${name}.toISOString() + "'"`
             break
         default:
+            // Default for all defined scalars
+            if (scalars[type]) s = `args.${name}`
             break;
     }
     return s
 }
 
-const getFieldName = (type, name) => {
+const getFieldName = (scalar, name, type) => {
     let s =  null
-    switch (type) {
+    switch (scalar) {
         case "ID":
-            s += "\\\"Pk_" + utils.getSQLTableName(type) + "_id\\\""
+            s = "\\\"Pk_" + utils.getSQLTableName(type) + "_id\\\""
             break;
         case "Boolean":
         case "Int":
@@ -35,9 +37,10 @@ const getFieldName = (type, name) => {
         case "Date":
         case "Time":
         case "DateTime":
-            s += "\\\"" + name + "\\\""
+            s = "\\\"" + name + "\\\""
             break;
         default:
+            if (scalars[scalar]) s = "\\\"" + name + "\\\""
             break;
     }
     return s

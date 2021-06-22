@@ -1,8 +1,12 @@
+scalar URL
+scalar Date
 
 type Movie {
   id: ID!
-  title: String 
-  actors: [Actor] 
+  trailers: [URL]
+  launchDate: Date
+  title: String @search
+  actors: [Actor] @hasInverse(field: movies)
   studio: Studio!
 }
 
