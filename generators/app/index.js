@@ -400,7 +400,7 @@ module.exports = class extends Generator {
 							manyToManyTables: this.manyToManyTables,
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
-							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
+							fieldsCreate: parsing.getFieldsCreate(this.tables, currentTypeName, fields, this.relations, this.manyToManyTables),
 							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
 							getSQLTableName: utils.getSQLTableName,
 						}

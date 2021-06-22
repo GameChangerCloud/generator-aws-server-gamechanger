@@ -449,7 +449,7 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
 
 
 
-const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
+const getFieldsCreate = (tables ,currentTypeName, fields, relations, manyToManyTables) => {
     let s = ""
     fields.map(field => {
         switch (field.type) {
@@ -467,6 +467,20 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
                 s += `"'" + args.${field.name}.toISOString() + "'" + "," +`
                 break;
             default:
+                for( type in tables){
+                    //console.log(tables[type].name + field.type + field.name + currentTypeName)
+                    if(tables[type].name === currentTypeName ){
+                        tables[type].columns.forEach((c) =>{
+                            console.log("333" +c.field.slice(3,-3))
+                            if(c.field.slice(3,-3) === field.name){
+                               console.log("333" +c.field.slice(3,-3))
+                               s += `args.${field.name} + "," +`
+                            }
+                        })
+                        
+                        
+                    }
+                }
                 break;
         }
     })
@@ -478,23 +492,33 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
 const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relations) => {
     let s = '('
     // let table = tables.find(t => t.name === currentTypeName)
-    fields.forEach((c) => {
-        switch (c.type) {
-            case "ID":
-                s += "\\\"Pk_" + currentSQLTypeName + "_id\\\","
-                break;
-            case "Boolean":
-            case "Int":
-            case "String":
-            case "Date":
-            case "Time":
-            case "DateTime":
-                s += "\\\"" + c.name + "\\\","
-                break;
-            default:
-                break;
+    for( type in tables){
+        if(tables[type].name === currentTypeName){
+            tables[type].columns.forEach((c) =>{
+                console.log(c.field)
+                s += "\\\"" + c.field +"\\\","
+            })
         }
-    })
+    }
+
+    // tables.forEach((c) => {
+    //     //console.log(JSON.stringify(c))
+    //     switch (c.gqlType) {
+    //         case "ID":
+    //             s += "\\\"Pk_" + currentSQLTypeName + "_id\\\","
+    //             break;
+    //         case "Boolean":
+    //         case "Int":
+    //         case "String":
+    //         case "Date":
+    //         case "Time":
+    //         case "DateTime":
+    //             s += "\\\"" + c.field + "\\\","
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // })
     s = s.substring(0, s.length - 1) + ')'
     return s
 }
