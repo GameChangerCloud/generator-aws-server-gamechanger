@@ -217,14 +217,9 @@ module.exports = {
 		for(a in args){
 			args[a] = directiveResolver.directiveResolver(a, args, directives, resolvers)
 		}
-		
-		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (') using fieldsCreate */
-		sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") "
-		/******* End of generated part using fieldsCreate */
-
-		const res = await rdsDataService.executeStatement(sqlParams).promise()
+	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate}) _%>
 		/******* End of generated part using createMethodsField */
 
 		return res
