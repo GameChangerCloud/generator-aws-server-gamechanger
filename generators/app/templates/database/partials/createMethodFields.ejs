@@ -18,12 +18,9 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                 case "manyOnly":_%>
                     let addedElements<%- sqltype %> = utils.getAddedElements([], args.<%- field.name%>)
                         for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
-                            sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- sqltype %>[index]
-                            rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                if (err) console.log(err, err.stack);
-                                else console.log(data);   
-                            })
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- sqltype %>[index])
                         }
+                        utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
                     <%break
                 case "manyToMany": _%>
                     // Get the junction table
@@ -62,17 +59,9 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <% } else { _%>
     // Don't have the field
     // Remove te previous child
-    sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = null WHERE \"Pk_<%- sqltype %>_id\" = (SELECT \"Pk_<%- sqltype %>_id\" FROM \"<%- sqltype %>\" WHERE \"Fk_<%- sqltypeName %>_id\" = " + args.id + ")"
-    rdsDataService.executeStatement(sqlParams, (err, data) => {
-    if (err) {console.log(err, err.stack)}
-    else { 
-        sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%- field.name %>
-            rdsDataService.executeStatement(sqlParams, (err, data) => {
-                if (err) {console.log(err, err.stack)}
-                else {console.log(data)}
-            })
-        }
-    })
+    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = null WHERE \"Pk_<%- sqltype %>_id\" = (SELECT \"Pk_<%- sqltype %>_id\" FROM \"<%- sqltype %>\" WHERE \"Fk_<%- sqltypeName %>_id\" = " + args.id + ")" )
+    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%- field.name %> )
+    utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
     <% } _%>
                     <% break
                 default: _%>
