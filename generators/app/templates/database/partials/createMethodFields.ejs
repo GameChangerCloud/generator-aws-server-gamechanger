@@ -30,14 +30,15 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).name) %>
     
     // Field <%- field.name %> of type <%- sqltype %> 
-    sqlRequests.push("SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id)
-    let current<%- sqltype %>State , addedElements<%- sqltype %> = await rdsDataService.executeStatement(sqlParams, (err, data) => {
+    sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
+    let addedElements<%- sqltype %> = await rdsDataService.executeStatement(sqlParams, (err, data) => {
         if (err) {
             console.log(err, err.stack)
-            return null, null
+            return null
         }
         else {
-            return utils.constructOutputArray(data, "<%- sqltype %>"), utils.getAddedElements(current<%- sqltype %>State, args.<%- field.name %>) 
+            let current<%- sqltype %>State = utils.constructOutputArray(data, "<%- sqltype %>")
+            return utils.getAddedElements(current<%- sqltype %>State, args.<%- field.name %>) 
             
         }
     })

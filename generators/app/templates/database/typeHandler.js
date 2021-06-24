@@ -222,7 +222,7 @@ module.exports = {
 		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate}) _%>
 		/******* End of generated part using createMethodsField */
 
-		return res
+		//return res
 
 	},
 
