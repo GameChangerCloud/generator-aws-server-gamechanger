@@ -108,32 +108,30 @@ const utils = {
 	},
 
 	startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
-
-		try{
-			rdsDataService.beginTransaction(beginParams, function (err, data) {
-					for( let index = 0; index <sqlRequests.length ; index ++){
-						sqlParams.sql = sqlRequests[index]
-						rdsDataService.executeStatement(sqlParams, (err, data) => {
+		rdsDataService.beginTransaction(beginParams, function (err, data) {
+			if (err){
+				console.log(err, err.stack);
+				rdsdataservice.rollbackTransaction(commitParams, function(err, data) {
+					if (err) console.log(err, err.stack); // an error occurred
+					else     console.log(data);           // successful response
+					});
+			}
+			else{
+				for( let index = 0; index <sqlRequests.length ; index ++){
+					sqlParams.sql = sqlRequests[index]
+					rdsDataService.executeStatement(sqlParams, (err, data) => {
 						if (err) console.log(err, err.stack);
 						else console.log(data);
-					})	
-					   
-				
-					commitParams.transactionId = data.transactionId
-					rdsDataService.commitTransaction(commitParams, function (err, data) {
-						if (err) console.log(err, err.stack); // an error occurred
-						else console.log(data)
 					})
-				}
-			})
-		}
-		catch(err){
-			rdsdataservice.rollbackTransaction(commitParams, function(err, data) {
-				if (err) console.log(err, err.stack); // an error occurred
-				else     console.log(data);           // successful response
-			  });
-		}
-
+				}	
+				commitParams.transactionId = data.transactionId
+				rdsDataService.commitTransaction(commitParams, function (err, data) {
+					if (err) console.log(err, err.stack); // an error occurred
+					else console.log(data)
+				})
+			}
+		}) 	
+	
 	}
 
 

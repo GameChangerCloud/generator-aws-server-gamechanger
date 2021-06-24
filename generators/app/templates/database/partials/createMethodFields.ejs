@@ -12,6 +12,8 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                 case "oneToMany": _%>
                    <% break; 
                 case "oneOnly": _%>
+                utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+
                     <%break
                 case "manyToOne":%>
                    <% break 
@@ -68,6 +70,9 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <% console.log("Error in handling relationship in create") %>
                     <% break %>
             <% }
-        }
+        }else{%>
+            utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+
+        <%}
     }
 })%>
