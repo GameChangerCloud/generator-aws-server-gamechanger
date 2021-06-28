@@ -46,8 +46,28 @@ const getFieldName = (scalar, name, type) => {
     return s
 }
 
+const isScalar = (type) =>{
+    if (type in scalars || type === "String" || type === "ID" || type === "Int" || type === "Boolean" || type === "Float" ){
+        return true
+    }
+    else{
+        return false
+    }
+}
+
+const isBasicType = (type) =>{
+    if (type === "String" || type === "ID" || type === "Int" || type === "Boolean" || type === "Float" ){
+        return true
+    }
+    else{
+        return false
+    }
+}
+
 
 module.exports = {
     getFieldCreate: getFieldCreate,
-    getFieldName: getFieldName
+    getFieldName: getFieldName,
+    isScalar : isScalar,
+    isBasicType: isBasicType
 }

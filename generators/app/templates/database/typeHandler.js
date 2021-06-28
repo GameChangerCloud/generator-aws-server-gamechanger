@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk')
 const rdsDataService = new AWS.RDSDataService()
 const utils = require('../utils/index')
-
 /******* Start of generated part (except for 'const TABLE = ' ) using typeName */
 const TABLE = "<%-sqltypeName%>"
 /******* End of generated part using typeName */
@@ -219,7 +218,7 @@ module.exports = {
 		}
 	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: isScalar, isBasicType : isBasicType}) _%>
 		/******* End of generated part using createMethodsField */
 
 		//return res

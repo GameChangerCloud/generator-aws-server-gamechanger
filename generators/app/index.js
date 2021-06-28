@@ -5,6 +5,7 @@ const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger')
 const constants = require('./scalars/scalars');
 const utils = require('./templates/database/utils')
 const matching = require('./matching')
+const manageScalars = require('./scalars/manageScalars')
 
 const sdlSchema =
 	`type User {
@@ -403,6 +404,8 @@ module.exports = class extends Generator {
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
 							getSQLTableName: utils.getSQLTableName,
+							isScalar : manageScalars.isScalar,
+							isBasicType : manageScalars.isBasicType
 						}
 					)
 					

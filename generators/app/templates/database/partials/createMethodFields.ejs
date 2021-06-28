@@ -1,19 +1,15 @@
 sqlRequests = []
 sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") ")
-
-
+<% let containsRelations = true %>
 <% fields.map(field => { _%>
     <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
     <% let sqltype = getSQLTableName(field.type) _%>
-    <% if (field.type !== "ID") { _%>
-        <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type != "Boolean") { _%>
-            <%  switch (s.trim()) { 
-
+        <% if (!isScalar(field.type)) { 
+            containsRelations = false _%>
+            <%  switch (s.trim()) {  
                 case "oneToMany": _%>
                    <% break; 
                 case "oneOnly": _%>
-                utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
-
                     <%break
                 case "manyToOne":%>
                    <% break 
@@ -30,22 +26,22 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
     
     // Field <%- field.name %> of type <%- sqltype %> 
     sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
-    let addedElements<%- sqltype %> = await rdsDataService.executeStatement(sqlParams, (err, data) => {
+    const res  = await rdsDataService.executeStatement(sqlParams, (err, data) => {
         if (err) {
             console.log(err, err.stack)
             return null
         }
         else {
             let current<%- sqltype %>State = utils.constructOutputArray(data, "<%- sqltype %>")
-            return utils.getAddedElements(current<%- sqltype %>State, args.<%- field.name %>) 
-            
+            let addedElements<%- sqltype %> = utils.getAddedElements(current<%- sqltype %>State, args.<%- field.name %>) 
+            for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
+                sqlRequests.push("INSERT INTO \"<%- manyToManyTable %>\" (\"<%- sqltypeName %>_id\", \"<%- sqltype %>_id\") VALUES ("+ args.id +", "+ addedElements<%- sqltype%>[index]+")" )
+            }
+            utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
         }
     })
     
-    for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
-        sqlRequests.push("INSERT INTO \"<%- manyToManyTable %>\" (\"<%- sqltypeName %>_id\", \"<%- sqltype %>_id\") VALUES ("+ args.id +", "+ addedElements<%- sqltype%>[index]+")" )
-    }
-    utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+    
                     <%break
                 case "oneToOneParent": _%>
                     // A child cannot change its parent in unidirectional
@@ -70,9 +66,9 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <% console.log("Error in handling relationship in create") %>
                     <% break %>
             <% }
-        }else{%>
-            utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
-
-        <%}
-    }
+        }
 })%>
+    <% if( containsRelations){_%>
+        shees
+        utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+    <%}%>
