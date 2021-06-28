@@ -1,18 +1,38 @@
-
 type Movie {
   id: ID!
   title: String 
-  actors: [Actor] 
+  actors: [Actor]
   studio: Studio!
+  oscars: [Oscar]
+  sequel: Movie
+  abstract: Abstract
 }
 
 type Actor {
   id: ID!
   name: String
   movies: [Movie]
+  children: [Actor]
+}
+
+type Oscar {
+  id: ID
+  category: String
 }
 
 type Studio {
+  id: ID!
+  name: String!
+  location: [City]!
+}
+
+type Abstract {
+	id: ID!
+  text: String!
+  movie: Movie
+}
+
+type City {
   id: ID!
   name: String!
 }

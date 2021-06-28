@@ -1079,6 +1079,13 @@ const filter = (lst) => {
     return uniqBy(lst, JSON.stringify)
 }
 
+/**
+ *  Compute relationships oneToMany, manyToMany, etc..
+ * @param {*} types contains all types with associated attributes read from easygraphql-parser
+ * @param {*} typenames names assocoated with each type
+ * @param {*} scalarTypeNames scalar type name if type is one of them
+ * @returns 
+ */
 const getRelations = (types, typenames, scalarTypeNames) => {
     let manyToOne = []
     let manyToMany = []
