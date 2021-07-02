@@ -5,6 +5,7 @@ const getFieldCreate = (type, name) => {
     let s =  null
     switch (type) {
         case "ID":
+            
         case "Boolean":
         case "Int":
             s = `args.${name}`

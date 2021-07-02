@@ -465,7 +465,7 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
             sqlFields.push(`args.${field2.name}`);
         })
     })
-    return sqlFields.join(` + "," + `);
+    return sqlFields.filter(field => !field.includes("args.id")).join(` + "," + `);
 }
 
 const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relations) => {
@@ -481,7 +481,7 @@ const getFieldsName = (tables,fields, currentTypeName, currentSQLTypeName, relat
             sqlNames.push("\\\"Fk_" + utils.getSQLTableName(field2.type) + "_id\\\"");
         })
     })
-    return sqlNames.join(",");
+    return sqlNames.filter(field => !field.includes("\"Pk_")).join(",");
 }
 
 const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTables) => {
