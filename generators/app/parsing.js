@@ -1040,7 +1040,13 @@ const getExternalFields = (fields) => {
     return lst;
 
 }
-
+/**
+ * 
+ * @param {*} fields Fields of the targeted object
+ * @param {*} currentType Type being inspected
+ * @returns 2 if relationship is [Type], 1 if relationship is Type, 0 if no relationship
+ * @description Doesn't work if there is several time the same type referenced in the fileds !
+ */
 const getManyOrOne = (fields, currentType) => {
     for (let index = 0; index < fields.length; index++) {
         if (fields[index].type == currentType) {
@@ -1052,7 +1058,14 @@ const getManyOrOne = (fields, currentType) => {
     }
     return 0;
 }
-
+/**
+ * 
+ * @param {*} element : Target type for the relation
+ * @param {*} types : Types defined in the schema
+ * @param {*} typenames : Typenames defined in the schema
+ * @param {*} currentType : Current Type being processed
+ * @returns : 2 if relationship is [Type], 1 if relationship is Type, 0 if no relationship
+ */
 const getRelationOf = (element, types, typenames, currentType) => {
     for (let index = 0; index < types.length; index++) {
         if (typenames[index] == element) {
