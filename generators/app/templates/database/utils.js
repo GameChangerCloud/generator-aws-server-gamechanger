@@ -109,6 +109,7 @@ const utils = {
 
 	startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
 		rdsDataService.beginTransaction(beginParams, function (err, data) {
+			commitParams.transactionId = data.transactionId
 			if (err){
 				console.log(err, err.stack);
 				rdsdataservice.rollbackTransaction(commitParams, function(err, data) {
@@ -124,7 +125,6 @@ const utils = {
 						else console.log(data);
 					})
 				}	
-				commitParams.transactionId = data.transactionId
 				rdsDataService.commitTransaction(commitParams, function (err, data) {
 					if (err) console.log(err, err.stack); // an error occurred
 					else console.log(data)
