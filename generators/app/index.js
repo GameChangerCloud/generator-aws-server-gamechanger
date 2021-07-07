@@ -586,7 +586,6 @@ module.exports = class extends Generator {
 				hasFieldType: parsing.hasFieldType,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
 				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
-				initQueriesInsert: parsing.getInitQueriesInsert(this.tables),
 				utils: utils,
 			}
 		)
@@ -786,9 +785,9 @@ module.exports = class extends Generator {
 					})
 				}
 			})
-			console.log("ADD FIELDS - ", this.add_fields)
-			console.log("UPDATE FIELDS - ", this.update_fields)
-			console.log("DELETE FIELDS - ", this.delete_fields)
+			// console.log("ADD FIELDS - ", this.add_fields)
+			// console.log("UPDATE FIELDS - ", this.update_fields)
+			// console.log("DELETE FIELDS - ", this.delete_fields)
 			this.fs.copyTpl(
 				this.templatePath('upgradeDatabase/upgradeDatabase.js'),
 				this.destinationPath('upgradeDatabase/upgradeDatabase.js'),

@@ -1,11 +1,40 @@
 const faker = require('faker');
 const model = require('./models');
-const rdsdata = require("rds-data");
+
+const AWS = require('aws-sdk')
+const rdsDataService = new AWS.RDSDataService()
+const utils = require('../database/utils/index')
+
+
 const directivesOnTypes = require('../directives/directivesOnTypes')
+const directiveResolver = require('../database/utils/runtimeDirectiveResolver');
 
 
 
-const directiveResolver = require('../database/utils/runtimeDirectiveResolver')
+let beginParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	database: process.env.DATABASE
+}
+
+let commitParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	transactionId: ""
+}
+
+let sqlParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	sql: "",
+	database: process.env.DATABASE,
+	includeResultMetadata: true,
+	parameters: []
+}
+
+
+
+
 
 function formatDate(date) {
     var d = new Date(date),
@@ -115,31 +144,6 @@ function update(modelToUpdate, field, value, result) {
     return Object.assign(result, data);
 }
 
-const beginTransactionParams = {
-    secretArn: process.env.SECRETARN,
-    resourceArn: process.env.RESOURCEARN,
-    database: process.env.DATABASE,
-}
-
-async function transac(queriesInsert){
-    const db = new rdsdata.RDSDatabase(beginTransactionParams).getInstance();
-    let hasFailed = false
-    await db.transaction().then(async (transactionId) => {
-        for(let i = 0; i < queriesInsert.length; i++){
-            if(!hasFailed){
-              console.log(queriesInsert[i])
-              await db.query(queriesInsert[i], "name", transactionId).then(r => console.log(r)).catch(err => {console.log(err); hasFailed = true})
-            }
-        }
-        if(!hasFailed){
-          await db.commit(transactionId).then(r => {console.log("commit"); return "Items added"});
-        }
-        else {
-          console.log("Transaction rolled back")
-          return "Error, items not added"
-        }
-    });
-}
 
 module.exports.fillTables = (numberItem) => {
 
@@ -174,11 +178,13 @@ const queriesInsert = []
  /*******
  * Start of generated part using initQueriesInsert
  */
-<%-initQueriesInsert%>
+<%- include('../database/partials/getInitQueriesInsert.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, hasFieldType: hasFieldType, getSQLTableName: utils.getSQLTableName}) _%>
  /*******
- * Start of generated part using initQueriesInsert
+ * End of generated part using initQueriesInsert
  */
-    transac(queriesInsert).then(r => console.log("Done: " +r));
+    utils.startSqlTransaction(queriesInsert, beginParams, commitParams, sqlParams, rdsDataService)
+
+    
 
 
 
