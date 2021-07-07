@@ -534,8 +534,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
         if (currentTypeName !== "Query" && currentTypeName !== "Mutation" && !scalarTypeNames.includes(currentTypeName)) {
             currentType.fields.forEach(field => {
                 let fieldType = field.type
-                let fieldIsArray = field.isArray
-                
+                let fieldIsArray = field.isArray  
                 if (!typesName.includes(fieldType)) {
                     if (fieldType === "ID") {
                         tableTemp.push({ field: "Pk_" + currentSQLTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
@@ -728,51 +727,7 @@ const getInitEachFieldsModelsJS = (types, typename) => {
     return s;
 }
 
-const getInitQueriesInsert = (tables) => {
-    let s = ''
-    tables.forEach(table => {
-        s += table.name.toLowerCase() + 'Tab.forEach(item => {\n'
-        s += '\tlet temp = `INSERT INTO "' + table.sqlname + '"('
-        for (let index = 0; index < table.columns.length; index++) {
-            s += '"' + table.columns[index].field + '"'
-            if (index < table.columns.length - 1) {
-                s += ', '
-            }
-        }
-        s += ') '
-        s += 'VALUES ('
-        for (let index = 0; index < table.columns.length; index++) {
-            let correctField = ''
-            if (table.columns[index].fieldType === 'Int') {
-                if (table.columns[index].field.includes("Fk")) {
-                    // Triming the Fk_ / Pk_ and _id prefix and suffix
-                    correctField = table.columns[index].field.slice(3, (table.columns[index].field.length - 3))
-                    s += '`+item.' + correctField.toLowerCase() + '+`'
-                }
-                else if (table.columns[index].field.includes("Pk")) {
-                    s += '`+item.id+`'
-                }
-                else {
-                    s += '`+item.' + table.columns[index].field.toLowerCase() + '+`'
-                }
-            }
-            else {
-                s += '\'`+item.' + table.columns[index].field.toLowerCase() + '+`\''
-            }
 
-            if (index < table.columns.length - 1) {
-                s += ', '
-            }
-        }
-        s += ')`\n'
-        s += '\tqueriesInsert.push(temp)\n'
-        s += '})\n'
-    })
-
-
-    return s
-
-}
 
 
 
@@ -1100,6 +1055,7 @@ const filter = (lst) => {
  * @returns 
  */
 const getRelations = (types, typenames, scalarTypeNames) => {
+    //console.log(JSON.stringify(types,null, 3), "\n",typenames, "\n", scalarTypeNames)
     let manyToOne = []
     let manyToMany = []
     let oneToOne = []
@@ -1116,16 +1072,19 @@ const getRelations = (types, typenames, scalarTypeNames) => {
         if (typenames[index] != "Query" && typenames[index] != "Mutation") {
             let fields = getFields(types[index])
             let lst = getExternalFields(fields)
-
             for (let i = 0; i < lst.length; i++) {
                 // Check if it's not a scalar type
                 if (!scalarTypeNames.includes(lst[i].type)) {
                     let out = getRelationOf(lst[i].type, types, typenames, typenames[index])
                     let inn = getRelationOf(typenames[index], types, typenames, lst[i].type)
                     if (out == 2 && inn == 2) {
+                        //console.log(lst[i].type, "ggggggggg", typenames[index])
+
                         // Checking if self join (type related to itself)
                         if (lst[i].type === typenames[index]) {
                             selfJoinMany.push([lst[i].type, typenames[index]])
+                            console.log(lst[i].type, "ggggggggg", typenames[index])
+
                         }
                         else {
                             manyToMany.push([lst[i].type, typenames[index]])
@@ -1308,25 +1267,30 @@ const getRelationBetween = (typeOne, typeTwo, relations) => {
 
 const getManyToManyTables = (relations, types, typesName) => {
     let result = []
+    console.log(JSON.stringify(relations,null , 3))
     relations.selfJoinMany.forEach(element => {
         // Self join many
+        let elt0 = utils.getSQLTableName(element[0])
+        let elt1 = utils.getSQLTableName(element[1])
         for (let index = 0; index < typesName.length; index++) {
             if (typesName[index] === element[0]) {
                 types[index].fields.forEach(field => {
                     if (field.type === typesName[index]) {
                         result.push(
                             {
-                                name: element[0] + "_" + field.name,
+                                name: element[0] + "_" + element[1],
+                                sqlname:  elt0 + "_" + elt1   + "_" + field.name,
+                                isJoinTable: true,
                                 columns: [
                                     {
-                                        field: element[0].toLowerCase() + '_id',
+                                        field: elt0 + '_id',
                                         fieldType: 'INTEGER',
-                                        constraint: 'FOREIGN KEY ("' + element[0].toLowerCase() + '_id") REFERENCES "' + element[0] + '"("Pk_' + element[0] + '_id")'
+                                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id")'
                                     },
                                     {
                                         field: field.name + '_id',
                                         fieldType: 'INTEGER',
-                                        constraint: 'FOREIGN KEY ("' + field.name + '_id") REFERENCES "' + element[0] + '"("Pk_' + element[0] + '_id")'
+                                        constraint: 'FOREIGN KEY ("' + field.name + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id")'
                                     },
                                 ]
                             }
@@ -1339,25 +1303,33 @@ const getManyToManyTables = (relations, types, typesName) => {
     relations.manyToMany.forEach(element => {
         let elt0 = utils.getSQLTableName(element[0])
         let elt1 = utils.getSQLTableName(element[1])
-        result.push(
-            {
-                name: element[0] + "_" + element[1],
-                sqlname:  elt0 + "_" + elt1,
-                isJoinTable: true,
-                columns: [
-                    {
-                        field: elt0 + '_id',
-                        fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id") ON DELETE CASCADE'
-                    },
-                    {
-                        field: elt1 + '_id',
-                        fieldType: 'INTEGER',
-                        constraint: 'FOREIGN KEY ("' + elt1 + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id") ON DELETE CASCADE'
-                    },
-                ]
+        for (let index = 0; index < typesName.length; index++) {
+            if (typesName[index] === element[0]) {
+                types[index].fields.forEach(field => {
+                    if (field.type === typesName[index]) {
+                        result.push(
+                            {
+                                name: element[0] + "_" + element[1],
+                                sqlname:  elt0 + "_" + elt1 + "_" + field.name,
+                                isJoinTable: true,
+                                columns: [
+                                    {
+                                        field: elt0 + '_id',
+                                        fieldType: 'INTEGER',
+                                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id") ON DELETE CASCADE'
+                                    },
+                                    {
+                                        field: elt1 + '_id',
+                                        fieldType: 'INTEGER',
+                                        constraint: 'FOREIGN KEY ("' + elt1 + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id") ON DELETE CASCADE'
+                                    },
+                                ]
+                            }
+                        )
+                    }
+                })
             }
-        )
+        }
 
     })
     return result
@@ -1462,9 +1434,9 @@ const findDifferencesBetweenEntities = (name_entity, old_entity, new_entity) => 
 
         }
     }
-    console.log("NEW FIELDS : ", add_fields)
-    console.log("UPDATED FIELDS : ", update_fields)
-    console.log("DELETED FIELDS : ", delete_fields)
+    // console.log("NEW FIELDS : ", add_fields)
+    // console.log("UPDATED FIELDS : ", update_fields)
+    // console.log("DELETED FIELDS : ", delete_fields)
     return [add_fields, update_fields, delete_fields]
 }
 
@@ -1491,9 +1463,9 @@ const compareSchema = (old_schema, new_schema) => {
             }
         }
     }
-    console.log("Add entities : ", add_entities)
-    console.log("Drop entities : ", drop_entities)
-    console.log("Update entities : ", update_entities)
+    // console.log("Add entities : ", add_entities)
+    // console.log("Drop entities : ", drop_entities)
+    // console.log("Update entities : ", update_entities)
     let updates = [[], [], []]
     update_entities.forEach(x => {
         console.log("----- UPDATE ", x, " -----")
@@ -1625,7 +1597,6 @@ module.exports = {
     getAllTables: getAllTables,
     getInitEachModelsJS: getInitEachModelsJS,
     getInitEachFieldsModelsJS: getInitEachFieldsModelsJS,
-    getInitQueriesInsert: getInitQueriesInsert,
     getCreationOfModels: getCreationOfModels,
     getListOfModelsExport: getListOfModelsExport,
     getRelations: getRelations,

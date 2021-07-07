@@ -27,10 +27,10 @@
                         function init<%=nameTable%>(){
                             for(let i = 0; i < 5; i++){
                                 let _<%- relation[0].toLowerCase()%>Position, _<%-field.name %>Position
-                                do { _<%-relation[0].toLowerCase()%>Position = pickOne(<%-relation[0].toLowerCase()%>Tab)
+                                do { _<%-relation[0].toLowerCase()%>Position = Math.floor((Math.random() * 5))
                                      _<%- field.name%>Position = pickOne(<%- relation[0].toLowerCase()%>Tab)
                                 } while(_<%-relation[0].toLowerCase()%>Position === _<%-field.name%>Position)
-                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : <%-relation[0].toLowerCase()%>Tab[_<%relation[0].toLowerCase()%>Position].id, <%-field.name.toLowerCase()%>_id : <%-relation[1].toLowerCase()%>Tab[_<%-field.name.toLowerCase()%>Position].id});
+                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5)), <%-field.name.toLowerCase()%>_id : Math.floor((Math.random() * 5))});
                                     
                             }
                         }
@@ -45,7 +45,7 @@
         function init<%-nameTable%>(){
             for(let i = 0; i < 5; i++){
                 
-                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : <%-relation[0].toLowerCase()%>Tab[pickOne(<%- relation[0].toLowerCase()%>Tab)].id, <%-relation[1].toLowerCase()%>_id : <%-relation[1].toLowerCase()%>Tab[pickOne(<%-relation[1].toLowerCase()%>Tab)].id})
+                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5)), <%-relation[1].toLowerCase()%>_id : Math.floor((Math.random() * 5))})
             }
         }
     <%}) _%> 
