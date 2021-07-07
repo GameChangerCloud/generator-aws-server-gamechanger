@@ -1072,59 +1072,56 @@ const getRelations = (types, typenames, scalarTypeNames) => {
         if (typenames[index] != "Query" && typenames[index] != "Mutation") {
             let fields = getFields(types[index])
             let lst = getExternalFields(fields)
+            console.log("sheesh" , JSON.stringify(lst,null, 3))
             for (let i = 0; i < lst.length; i++) {
                 // Check if it's not a scalar type
                 if (!scalarTypeNames.includes(lst[i].type)) {
                     let out = getRelationOf(lst[i].type, types, typenames, typenames[index])
                     let inn = getRelationOf(typenames[index], types, typenames, lst[i].type)
                     if (out == 2 && inn == 2) {
-                        //console.log(lst[i].type, "ggggggggg", typenames[index])
-
                         // Checking if self join (type related to itself)
                         if (lst[i].type === typenames[index]) {
-                            selfJoinMany.push([lst[i].type, typenames[index]])
-                            console.log(lst[i].type, "ggggggggg", typenames[index])
-
+                            selfJoinMany.push([lst[i].type, typenames[index], lst[i].name])
                         }
                         else {
-                            manyToMany.push([lst[i].type, typenames[index]])
+                            manyToMany.push([lst[i].type, typenames[index], lst[i].name])
                         }
                     }
                     else if (out == 2 && inn == 1) {
-                        oneToMany.push([lst[i].type, typenames[index]])
+                        oneToMany.push([lst[i].type, typenames[index], lst[i].name])
                     }
                     else if (out == 1 && inn == 2) {
-                        manyToOne.push([lst[i].type, typenames[index]])
+                        manyToOne.push([lst[i].type, typenames[index], lst[i].name])
                     }
                     else if (out == 1 && inn == 1) {
 
                         // Checking if self join (type related to itself)
                         if (lst[i].type === typenames[index]) {
                             if (!isSelfJoinOne(lst[i].type, selfJoinOne)) {
-                                selfJoinOne.push([lst[i].type, typenames[index]])
+                                selfJoinOne.push([lst[i].type, typenames[index], lst[i].name])
                             }
                         }
                         else {
                             if (!isOneToOne(lst[i].type, typenames[index], oneToOne).answers) {
-                                oneToOne.push([lst[i].type, typenames[index]])
+                                oneToOne.push([lst[i].type, typenames[index], lst[i].name])
                             }
                         }
                     }
 
                     // One only
                     else if (out == 0 && inn == 1) {
-                        oneOnly.push([lst[i].type, typenames[index]])
+                        oneOnly.push([lst[i].type, typenames[index], lst[i].name])
                     }
                     else if (out == 1 && inn == 0) {
-                        oneOnly.push([lst[i].type, typenames[index]])
+                        oneOnly.push([lst[i].type, typenames[index], lst[i].name])
                     }
 
                     // ManyOnly
                     else if (out == 0 && inn == 2) {
-                        manyOnly.push([lst[i].type, typenames[index]])
+                        manyOnly.push([lst[i].type, typenames[index], lst[i].name])
                     }
                     else if (out == 2 && inn == 0) {
-                        manyOnly.push([lst[i].type, typenames[index]])
+                        manyOnly.push([lst[i].type, typenames[index], lst[i].name])
                     }
                     types[index].fields = types[index].fields.filter((e)=> e !== lst[i])
                 }
@@ -1303,35 +1300,32 @@ const getManyToManyTables = (relations, types, typesName) => {
     relations.manyToMany.forEach(element => {
         let elt0 = utils.getSQLTableName(element[0])
         let elt1 = utils.getSQLTableName(element[1])
-        for (let index = 0; index < typesName.length; index++) {
-            if (typesName[index] === element[0]) {
-                types[index].fields.forEach(field => {
-                    if (field.type === typesName[index]) {
-                        result.push(
-                            {
-                                name: element[0] + "_" + element[1],
-                                sqlname:  elt0 + "_" + elt1 + "_" + field.name,
-                                isJoinTable: true,
-                                columns: [
-                                    {
-                                        field: elt0 + '_id',
-                                        fieldType: 'INTEGER',
-                                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id") ON DELETE CASCADE'
-                                    },
-                                    {
-                                        field: elt1 + '_id',
-                                        fieldType: 'INTEGER',
-                                        constraint: 'FOREIGN KEY ("' + elt1 + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id") ON DELETE CASCADE'
-                                    },
-                                ]
-                            }
-                        )
-                    }
-                })
+        
+        result.push(
+            {
+                name: element[0] + "_" + element[1],
+                sqlname:  elt0 + "_" + elt1 + "_" + element[2],
+                isJoinTable: true,
+                columns: [
+                    {
+                        field: elt0 + '_id',
+                        fieldType: 'INTEGER',
+                        constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id") ON DELETE CASCADE'
+                    },
+                    {
+                        field: elt1 + '_id',
+                        fieldType: 'INTEGER',
+                        constraint: 'FOREIGN KEY ("' + elt1 + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id") ON DELETE CASCADE'
+                    },
+                ]
             }
-        }
+        )
+                    
+                    
 
     })
+    
+    
     return result
 }
 
