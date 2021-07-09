@@ -145,8 +145,11 @@ function update(modelToUpdate, field, value, result) {
 }
 
 
-module.exports.fillTables = (numberItem) => {
+module.exports.fillTables = async (numberItem) => {
 
+const queriesInsert = []
+const restoreConstraints = new Set()
+const removeConstraints = new Set()
 
 /*******
  * Start of generated part using listOfMethodsForInit
@@ -172,8 +175,7 @@ module.exports.fillTables = (numberItem) => {
 /*******
  * End of generated part using initEachFieldsModelsJS
  */
-
-const queriesInsert = []
+ queriesInsert.push(...removeConstraints)
 
  /*******
  * Start of generated part using initQueriesInsert
@@ -182,9 +184,14 @@ const queriesInsert = []
  /*******
  * End of generated part using initQueriesInsert
  */
-    utils.startSqlTransaction(queriesInsert, beginParams, commitParams, sqlParams, rdsDataService)
+queriesInsert.push(...restoreConstraints)
 
-    
+for (let index = 0; index < queriesInsert.length ; index ++){
+    console.log(queriesInsert[index])
+    sqlParams.sql = queriesInsert[index]
+    const res = await rdsDataService.executeStatement(sqlParams).promise()
+    console.log(JSON.stringify(res.records))
+}   
 
 
 

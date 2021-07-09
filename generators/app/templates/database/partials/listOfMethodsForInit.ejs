@@ -12,7 +12,7 @@
                         <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
                     }
                 }
-                <%- include('./getUpdateForModel', {currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) %>
+                <%- include('./getUpdateForModel', {tables: tables, currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) %>
         <% }
     } %>
 
@@ -30,7 +30,7 @@
                                 do { _<%-relation[0].toLowerCase()%>Position = Math.floor((Math.random() * 5))
                                      _<%- field.name%>Position = pickOne(<%- relation[0].toLowerCase()%>Tab)
                                 } while(_<%-relation[0].toLowerCase()%>Position === _<%-field.name%>Position)
-                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5)), <%-field.name.toLowerCase()%>_id : Math.floor((Math.random() * 5))});
+                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5) +1), <%-field.name.toLowerCase()%>_id : Math.floor((Math.random() * 5) +1)});
                                     
                             }
                         }
@@ -45,7 +45,7 @@
         function init<%-nameTable%>(){
             for(let i = 0; i < 5; i++){
                 
-                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5)), <%-relation[1].toLowerCase()%>_id : Math.floor((Math.random() * 5))})
+                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-relation[1].toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
             }
         }
     <%}) _%> 
