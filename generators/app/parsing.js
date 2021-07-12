@@ -7,35 +7,26 @@ const manageScalars = require('./scalars/manageScalars')
 
 const utils = require('./templates/database/utils')
 
-
-// From the schema, fetch all the types object and return an array of it
+/**
+ * From the schema, fetch all the types object and return an array of it
+ * @param {*} schemaJSON 
+ * @returns 
+ */
 const getAllTypes = (schemaJSON) => {
     let types = []
     for (const type in schemaJSON) {
         types.push(schemaJSON[type])
+        schemaJSON[type]["typeName"] = type
+        schemaJSON[type]["sqlTypeName"] = utils.getSQLTableName(type)
     }
     return types
 }
 
-// From the schema, fetch all the types name and return an array of it
-const getAllTypesName = (schemaJSON) => {
-    let typesName = []
-    for (const typeName in schemaJSON) {
-        typesName.push(typeName)
-    }
-    return typesName
-}
-
-// From the schema, fetch all the types name, transform it for SQL and return an array of it
-const getAllSQLTypesName = (schemaJSON) => {
-    let typesName = []
-    for (const typeName in schemaJSON) {
-        typesName.push(utils.getSQLTableName(typeName))
-    }
-    return typesName
-}
-
-// From a type object, get the fields and return an array of it
+/**
+ * From a type object, get the fields and return an array of it
+ * @param {*} type 
+ * @returns 
+ */
 const getFields = (type) => {
     let fields = []
     for (let index = 0; index < type["fields"].length; index++) {
@@ -57,7 +48,6 @@ const getFieldsDirectiveNames = (fields, typeObject) =>{
         if(fields[index].directives.length > 0){
             for( let j = 0 ; j < fields[index].directives.length ; j++){
                 directiveNames.push(fields[index].directives[j].name)
-                //console.log("*********" + JSON.stringify(fields[index].directives[j]))
             }
         }
         //console.log("*********" + JSON.stringify(fields[index].directives))
@@ -65,10 +55,18 @@ const getFieldsDirectiveNames = (fields, typeObject) =>{
     return directiveNames
 }
 
-
 /** GRAPHQL files parsing */
-
-// From the fields object, transform the syntax to get the right one to print on final type.js file. Return a string
+/**
+ * From the fields object, transform the syntax to get the right one to print on final type.js file. Return a string
+ * @param {*} currentTypeName 
+ * @param {*} fields 
+ * @param {*} graphqlType 
+ * @param {*} relations 
+ * @param {*} manyToManyTables 
+ * @param {*} typesName 
+ * @param {*} defaultScalarsType 
+ * @returns 
+ */
 const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyToManyTables, typesName, defaultScalarsType) => {
     let result = ""
     for (let index = 0; index < fields.length; index++) {
@@ -520,12 +518,13 @@ const getDeleteMethodsMany = (currentTypeName, fields, relations, manyToManyTabl
 
 // Tables
 // Get all the tables, with columns, based on the types we have
-const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName) => {
+const getAllTables = (types, relations, scalarTypeNames) => {
     let allTables = []
+    let typesNameArray = types.map(type => type.typeName)
     for (let index = 0; index < types.length; index++) {
 
-        let currentTypeName = typesName[index]
-        let currentSQLTypeName = sqlTypesName[index]
+        let currentTypeName = types[index].typeName
+        let currentSQLTypeName = types[index].sqlTypeName
         let currentType = types[index]
         // Will hold the currentType table infos
         let tableTemp = []
@@ -535,7 +534,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
             currentType.fields.forEach(field => {
                 let fieldType = field.type
                 let fieldIsArray = field.isArray  
-                if (!typesName.includes(fieldType)) {
+                if (!typesNameArray.includes(fieldType)) {
                     if (fieldType === "ID") {
                         tableTemp.push({ field: "Pk_" + currentSQLTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
                     }
@@ -626,25 +625,24 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
             })
 
             // Then, we check relations between the current type table with all the types to add the correct foreigns key and references
-            typesName.forEach((typeTable,index) => {
-                let sqltypeTable = utils.getSQLTableName(typeTable);
-                if (!scalarTypeNames.includes(typeTable)) {
+            types.forEach((type) => {
+                if (!scalarTypeNames.includes(type.typeName)) {
                     let fieldChild
-                    let relationType = getRelationBetween(currentTypeName, typeTable, relations)
+                    let relationType = getRelationBetween(currentTypeName, type.typeName, relations)
                     switch (relationType) {
                         case "oneOnly":
                             // Only if the current type DOES HAVE the field type
-                            if (hasFieldType(currentType, typeTable).answers) {
-                                fieldChild = (hasFieldType(currentType, typeTable).fieldInfo)
-                                tableTemp.push({ field: "Fk_" + sqltypeTable + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: false, constraint: "FOREIGN KEY (\"Fk_" + sqltypeTable + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                            if (hasFieldType(currentType, type.typeName).answers) {
+                                fieldChild = (hasFieldType(currentType, type.typeName).fieldInfo)
+                                tableTemp.push({ field: "Fk_" + type.sqlTypeName + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: false, constraint: "FOREIGN KEY (\"Fk_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")" })
                             }
                             break
 
                         case "manyOnly":
                             // Only if the current type DOES NOT have the field type
-                            if (!hasFieldType(currentType, typeTable).answers) {
+                            if (!hasFieldType(currentType, type.sqlTypeName).answers) {
                                 // We create a column reference that can hold id of element from the fieldType, but without constraint since it's just informative
-                                tableTemp.push({ field: "Fk_" + sqltypeTable + "_id", fieldType: "Int", noNull: false, unique: false, constraint: "FOREIGN KEY (\"Fk_" + sqltypeTable + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                                tableTemp.push({ field: "Fk_" + type.sqlTypeName + "_id", fieldType: "Int", noNull: false, unique: false, constraint: "FOREIGN KEY (\"Fk_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")" })
                             }
                             break
 
@@ -653,8 +651,8 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
                             break
 
                         case "manyToOne":
-                            fieldChild = (hasFieldType(currentType, typeTable).fieldInfo)
-                            tableTemp.push({ field: "Fk_" + sqltypeTable + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: false, constraint: "FOREIGN KEY (\"Fk_" + sqltypeTable + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                            fieldChild = (hasFieldType(currentType, type.typeName).fieldInfo)
+                            tableTemp.push({ field: "Fk_" + type.sqlTypeName + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: false, constraint: "FOREIGN KEY (\"Fk_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + sqlttype.sqlTypeNameypeTable + "_id\")" })
                             break
 
                         case "manyToMany":
@@ -662,9 +660,9 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
                             break
 
                         case "oneToOneParent":
-                            fieldChild = (hasFieldType(currentType, typeTable).fieldInfo)
+                            fieldChild = (hasFieldType(currentType, type.typeName).fieldInfo)
                             if (fieldChild.noNull) {
-                                tableTemp.push({ field: "Fk_" + sqltypeTable + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: true, constraint: "FOREIGN KEY (\"Fk_" + sqltypeTable + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                                tableTemp.push({ field: "Fk_" + type.sqlTypeName + "_id", fieldType: "Int", noNull: fieldChild.noNull, unique: true, constraint: "FOREIGN KEY (\"Fk_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")" })
                             }
                             else {
                                 // Nothing, it's unidirectionnal and the constraint is on the child
@@ -672,8 +670,8 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
                             break
 
                         case "oneToOneChild":
-                            fieldChild = (hasFieldType(currentType, typeTable).fieldInfo)
-                            tableTemp.push({ field: "Fk_" + sqltypeTable + "_id", fieldType: "Int", noNull: true, unique: true, constraint: "FOREIGN KEY (\"Fk_" + sqltypeTable + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                            fieldChild = (hasFieldType(currentType, type.typeName).fieldInfo)
+                            tableTemp.push({ field: "Fk_" + type.sqlTypeName + "_id", fieldType: "Int", noNull: true, unique: true, constraint: "FOREIGN KEY (\"Fk_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")" })
 
                         case "selfJoinOne":
                             // Check field with the same type
@@ -682,7 +680,7 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
                                 // If it's the field, we add the key
                                 if (field.type === currentTypeName) {
                                     // Adding a foreign key with the graphql field name
-                                    tableTemp.push({ field: field.name + "_id", fieldType: "Int", noNull: field.noNull, unique: true, constraint: "FOREIGN KEY (\"" + field.name + "_id\") REFERENCES \"" + sqlTypesName[index] + "\" (\"Pk_" + sqltypeTable + "_id\")" })
+                                    tableTemp.push({ field: field.name + "_id", fieldType: "Int", noNull: field.noNull, unique: true, constraint: "FOREIGN KEY (\"" + field.name + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")" })
                                 }
                             })
                         default:
@@ -697,8 +695,6 @@ const getAllTables = (types, typesName, relations, scalarTypeNames, sqlTypesName
     return allTables
 }
 
-
-
 const getInitEachModelsJS = (tables) => {
     let s = '';
     tables.forEach(table => {
@@ -707,8 +703,16 @@ const getInitEachModelsJS = (tables) => {
     return s;
 }
 
-const getInitEachModelsFields = (types, typename) => {
+const getInitEachModelsFields = (types) => {
     let s = '';
+    types.forEach(type => {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation") {
+            let nameList = type.typeName.toLowerCase()
+            s += 'for(let i = 0; i < ' + nameList + 'Tab.length; i++){\n\t' +
+                nameList + 'Tab[i] = update' + type.typeName + '(' + nameList + 'Tab[i]);\n}';
+        }
+    })
+    /*
     for (let index = 0; index < types.length; index++) {
         if (typename[index] !== "Query" && typename[index] !== "Mutation") {
             let nameList = typename[index].toLowerCase()
@@ -716,20 +720,16 @@ const getInitEachModelsFields = (types, typename) => {
                 nameList + 'Tab[i] = update' + typename[index] + '(' + nameList + 'Tab[i]);\n}';
         }
     }
-
+    */
     return s;
 }
 
-const getInitEachFieldsModelsJS = (types, typename) => {
+const getInitEachFieldsModelsJS = (types) => {
     let s = '';
-    s += getInitEachModelsFields(types, typename);
+    s += getInitEachModelsFields(types);
     s += '\n\n'
     return s;
 }
-
-
-
-
 
 const formatTime = (date) => {
     var d = new Date(date),
@@ -759,36 +759,28 @@ const formatDate = (date) => {
     return [year, month, day].join('-');
 }
 
-
-
-
 // Models
 
 const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fields, relations, scalarTypeNames) => {
-    let result = ""
-    for (let index = 0; index < fields.length; index++) {
+    let explicit = []
+    fields.forEach(field => {
+                // Parameters explicit 
+                switch (field.type) {
+                    case "String":
+                    case "ID":
+                    case "Boolean":
+                    case "Int":
+                        explicit.push(field.name.toLowerCase())
+                        break
+                    default:
+                        if (scalarTypeNames.includes(field.type)) {
+                            explicit.push(field.name.toLowerCase())
+                        }
+                        break
+                }
+    })
+    let result = explicit.join(',')
 
-        // Parameters explicit 
-        switch (fields[index].type) {
-            case "String":
-            case "ID":
-            case "Boolean":
-            case "Int":
-                if (index > 0) {
-                    result += ", "
-                }
-                result += fields[index].name.toLowerCase()
-                break;
-            default:
-                if (scalarTypeNames.includes(fields[index].type)) {
-                    if (index > 0) {
-                        result += ", "
-                    }
-                    result += fields[index].name.toLowerCase()
-                    break
-                }
-        }
-    }
     // Parameters implicit
     // Then, we check relations between the current type table with all the types
     for (let index = 0; index < typesName.length; index++) {
@@ -956,28 +948,31 @@ const getBodyOfConstructor = (typesName, sqltypesName, currentType, currentTypeN
     return result
 }
 
-const getCreationOfModels = (types, typesName, sqltypesName, relations, scalarTypeNames) => {
+const getCreationOfModels = (types, relations, scalarTypeNames) => {
     let s = '';
-    for (let index = 0; index < types.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "ScalarTypeDefinition") {
-            let fields = getFields(types[index])
-            s += 'class ' + typesName[index] + ' {\n\tconstructor(' + getParameters(typesName, sqltypesName, types[index], typesName[index], fields, relations, scalarTypeNames) + '){\n';
-            s += getBodyOfConstructor(typesName, sqltypesName, types[index], typesName[index], fields, relations);
+    let typesName = types.map(type => type.typeName)
+    let sqlTypesName = types.map(type => type.sqlTypeName)
+
+    types.forEach(type => {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition") {
+            let fields = getFields(type)
+            s += 'class ' + type.typeName + ' {\n\tconstructor(' + getParameters(typesName, sqlTypesName, type, type.typeName, fields, relations, scalarTypeNames) + '){\n';
+            s += getBodyOfConstructor(typesName, sqlTypesName, type, type.typeName, fields, relations);
             s += '\t}\n}\n\n'
         }
-    }
+    })
     return s;
 }
 
-const getListOfModelsExport = (typename, types) => {
-    let s = '';
-    for (let index = 0; index < typename.length; index++) {
-        if (typename[index] !== "Query" && typename[index] !== "Mutation" && types[index].type !== "ScalarTypeDefinition") {
-            s += typename[index] + ' : ' + typename[index] + ',\n\t'
+const getListOfModelsExport = (types) => {
+    let s = [];
+    types.forEach(type => {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition") {
+            s.push( type.typeName + ' : ' + type.typeName)
         }
-    }
-    s.substring(0, s.length - 3);
-    return s;
+    })
+
+    return s.join(',\n\t');
 }
 
 /** RELATIONS HANDLER */
@@ -1054,7 +1049,7 @@ const filter = (lst) => {
  * @param {*} scalarTypeNames scalar type name if type is one of them
  * @returns 
  */
-const getRelations = (types, typenames, scalarTypeNames) => {
+const getRelations = (types, scalarTypeNames) => {
     //console.log(JSON.stringify(types,null, 3), "\n",typenames, "\n", scalarTypeNames)
     let manyToOne = []
     let manyToMany = []
@@ -1062,6 +1057,7 @@ const getRelations = (types, typenames, scalarTypeNames) => {
     let oneToMany = []
     let selfJoinOne = []
     let selfJoinMany = []
+    let typenames = types.map(type => type.typeName)
 
     // Only one "constraint" on one side
     let oneOnly = [];
@@ -1262,17 +1258,18 @@ const getRelationBetween = (typeOne, typeTwo, relations) => {
         return "No relation"
 }
 
-const getManyToManyTables = (relations, types, typesName) => {
+const getManyToManyTables = (relations, types) => {
     let result = []
+    let typesNameArray = types.map(type => type.typeName)
     console.log(JSON.stringify(relations,null , 3))
     relations.selfJoinMany.forEach(element => {
         // Self join many
         let elt0 = utils.getSQLTableName(element[0])
         let elt1 = utils.getSQLTableName(element[1])
-        for (let index = 0; index < typesName.length; index++) {
-            if (typesName[index] === element[0]) {
+        for (let index = 0; index < typesNameArray.length; index++) {
+            if (typesNameArray[index] === element[0]) {
                 types[index].fields.forEach(field => {
-                    if (field.type === typesName[index]) {
+                    if (field.type === typesNameArray[index]) {
                         result.push(
                             {
                                 name: element[0] + "_" + element[1],
@@ -1491,7 +1488,15 @@ const formatName = (name) => {
     return name.replace(/[^a-z]/gi, '');
 }
 
-const addIdTypes = (typesName, types) => {
+const addIdTypes = (types) => {
+    types.forEach(type => {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
+            if (!type.fields.find(field => field.name === "id")) {
+                type.fields.push({"name":"id","arguments":[], "directives":[], "isDeprecated":false,"noNull":true,"isArray":false,"noNullArrayValues":false,"type":"ID"})
+            }
+        }
+    })
+    /*
     for (let index = 0; index < types.length; index++) {
         if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && types[index].type !== "ScalarTypeDefinition" && types[index].type !== "EnumTypeDefinition") {
             if (!types[index].fields.find(field => field.name === "id")) {
@@ -1499,10 +1504,13 @@ const addIdTypes = (typesName, types) => {
             }
         }
     }
+    */
     return types
 }
 
-const isSchemaValid = (typesName, types) => {
+const isSchemaValid = (types) => {
+    let typesName = types.map(type => type.typeName)
+
     if (!typesHaveId(typesName, types))
         return { response: false, reason: "Missing required id field of type ID in one or multiple Entity" }
     if (!fieldTypeExists(typesName, types))
@@ -1575,8 +1583,6 @@ const findField = (fields, columnName) => {
 
 module.exports = {
     getAllTypes: getAllTypes,
-    getAllTypesName: getAllTypesName,
-    getAllSQLTypesName: getAllSQLTypesName,
     getFields: getFields,
     getFieldsDirectiveNames : getFieldsDirectiveNames,
     getFieldsParsed: getFieldsParsed,

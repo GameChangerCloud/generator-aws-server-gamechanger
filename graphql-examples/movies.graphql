@@ -1,18 +1,18 @@
 type Movie {
-  id: ID!
+  id: ID
   title: String 
   actors: [Actor]
   studio: Studio!
   oscars: [Oscar]
   sequel: Movie
-  abstract: Abstract
+  abstract: Abstract!
 }
 
 type Actor {
-  id: ID!
+  id: ID
   name: String
   movies: [Movie]
-  children: [Actor]
+  likes: [Movie]
 }
 
 type Oscar {
@@ -21,18 +21,18 @@ type Oscar {
 }
 
 type Studio {
-  id: ID!
+  id: ID
   name: String!
-  location: [City]!
+  location: [City!]!
 }
 
 type Abstract {
-	id: ID!
+	id: ID
   text: String!
-  movie: Movie
+  movie: Movie!
 }
 
 type City {
-  id: ID!
+  id: ID
   name: String!
 }

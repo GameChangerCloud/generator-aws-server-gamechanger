@@ -1,8 +1,5 @@
 <%-creationOfModels%>
 
 module.exports = {
-
-
     <%-listOfModelsExport%>
-
     }
