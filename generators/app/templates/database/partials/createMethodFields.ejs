@@ -22,7 +22,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <%break
                 case "manyToMany": _%>
                     // Get the junction table
-                    <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).name) %>
+                    <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).sqlname) %>
     
     // Field <%- field.name %> of type <%- sqltype %>
     for( element in args.<%-field.name%>){

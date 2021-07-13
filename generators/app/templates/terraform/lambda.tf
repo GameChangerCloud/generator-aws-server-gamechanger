@@ -22,6 +22,20 @@ resource "aws_lambda_function" "lambda" {
       DATABASE = aws_rds_cluster.postgresql.database_name
     }
   }
+  provisioner "local-exec" {
+    command = <<EOT
+                export arn=${aws_rds_cluster.postgresql.arn}
+                export secretArn=${aws_secretsmanager_secret.example.arn}
+                rm -f final.yaml ../temp.yaml  
+                ( echo "cat <<EOF > ../template.yaml";
+                  cat ../template.yaml;
+                ) >../temp.yaml
+                . ../temp.yaml
+              EOT
+    interpreter = ["bash", "-c"]
+  }
+  
+
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
