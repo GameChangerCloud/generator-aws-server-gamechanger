@@ -1,17 +1,38 @@
 type Movie {
-  id: ID!
-  title: String @search
-  actors: [Actor] @hasInverse(field: movies)
+  id: ID
+  title: String 
+  actors: [Actor]
   studio: Studio!
+  oscars: [Oscar]
+  sequel: Movie
+  abstract: Abstract!
 }
 
 type Actor {
-  id: ID!
+  id: ID
   name: String
   movies: [Movie]
+  likes: [Movie]
+}
+
+type Oscar {
+  id: ID
+  category: String
 }
 
 type Studio {
-  id: ID!
+  id: ID
+  name: String!
+  location: [City!]!
+}
+
+type Abstract {
+	id: ID
+  text: String!
+  movie: Movie!
+}
+
+type City {
+  id: ID
   name: String!
 }

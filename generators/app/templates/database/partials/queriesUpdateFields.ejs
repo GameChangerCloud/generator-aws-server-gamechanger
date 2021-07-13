@@ -1,8 +1,8 @@
 const queriesUpdateFields = [
 <% fields.forEach(x => { 
-    console.log("NAME : ", x.name)
-    console.log("OLD : ", x.column_old)
-    console.log("NEW : ", x.column_new) 
+//     console.log("NAME : ", x.name)
+//     console.log("OLD : ", x.column_old)
+//     console.log("NEW : ", x.column_new) 
     if (x.column_old.type != x.column_new.type) { 
         if (x.column_old.type == "String" && x.column_new.type == "Int") { _%>
 <%- include('./alter',{name: x.sqlname, field: x.column_old.name, drop: "DEFAULT", alterCase : "AlterColumn"}) %>

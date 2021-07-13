@@ -50,33 +50,18 @@ const {
 } = require('../defaultScalarsMap')
 
 const dbHandler = require('../../database/handler')
-const { types } = require('pg')
-
-
+//const { types } = require('pg')
 const directivesOnTypes = require('../../directives/directivesOnTypes')
-
-
-
-
-
-
-
 
 module.exports = new GraphQLObjectType({
   name: 'MutationType',
   description: '',
   fields: () => ({
-
-    <%- include('../database/partials/getMutationFields.ejs', { typesName: typesName, types: types, defaultScalars: defaultScalars }) _%>
+    <%- include('../database/partials/getMutationFields.ejs', { types: types, defaultScalars: defaultScalars }) _%>
   
-
-
 		<%- otherMutation %>
 	}),
-
-
-
 })
 
-  <% typesName.forEach(typeName => {%><%if (typeName !== "Query" && typeName !== "Mutation" && !defaultScalars.includes(typeName)) {%>const <%- typeName %>Type = require('./<%-typeName.toLowerCase()%>')
+  <% types.forEach(type => {%><%if (type.typeName !== "Query" && type.typeName !== "Mutation" && !defaultScalars.includes(type.typeName)) {%>const <%- type.typeName %>Type = require('./<%-type.typeName.toLowerCase()%>')
     <%}%><%}) %>

@@ -15,9 +15,5 @@ Resources:
       Environment : #Variables d'environement necessaires aux lambdas
         Variables :
           DATABASE: "<%= appName%>_db"
-          RESOURCEARN: "< aws_ressource_arn >"
-          SECRETARN: "< aws_secret_arn >"
-          
-          
-
-                  
+          RESOURCEARN: "${arn}"
+          SECRETARN: "${secretArn}"

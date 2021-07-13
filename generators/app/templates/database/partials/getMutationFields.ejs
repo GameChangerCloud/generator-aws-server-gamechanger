@@ -1,22 +1,22 @@
-    <%for (let index = 0; index < typesName.length; index++) {
-        if (typesName[index] !== "Query" && typesName[index] !== "Mutation" && !defaultScalars.includes(typesName[index])) {_%>
-            <%- typesName[index].toLowerCase() %>Delete: { 
-			    type: <%- typesName[index] %>Type,
+    <%for (let index = 0; index < types.length; index++) {
+        if (types[index].typeName !== "Query" && types[index].typeName !== "Mutation" && !defaultScalars.includes(types[index].typeName)) {_%>
+            <%- types[index].typeName.toLowerCase() %>Delete: { 
+			    type: <%- types[index].typeName %>Type,
 			    args: {
 				    id: { type: new GraphQLNonNull(GraphQLID) },
 			    },
 			    resolve: (obj, args, context, info) => {
-				    const recordToDelete = dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+				    const recordToDelete = dbHandler.handleGet(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
                         // Query to delete
-                        return dbHandler.handleDelete(args.id, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(() => {
+                        return dbHandler.handleDelete(args.id, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(() => {
                             return record
                         })
 				    })
 				    return recordToDelete
 			    }
 		    },
-            <%- typesName[index].toLowerCase() %>Update: { 
-			    type: <%- typesName[index] %>Type,
+            <%- types[index].typeName.toLowerCase() %>Update: { 
+			    type: <%- types[index].typeName %>Type,
 			    args: {
                     id: { type: new GraphQLNonNull(GraphQLID) },
             <% for (let j = 0; j < types[index].fields.length; j++) { 
@@ -54,16 +54,16 @@
             } _%>
             },
 			    resolve: (obj, args, context, info) => {
-                    const recordUpdated = dbHandler.handleUpdate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index]%>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                    const recordUpdated = dbHandler.handleUpdate(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        return dbHandler.handleGet(args, '<%- types[index].typeName%>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
                             return record
                         })
                     })
                     return recordUpdated
 			    }
 		    },
-	        <%- typesName[index].toLowerCase()%>Create: {
-                type: <%- typesName[index] %>Type ,
+	        <%- types[index].typeName.toLowerCase()%>Create: {
+                type: <%- types[index].typeName %>Type ,
                 args: {
                     id: { type: new GraphQLNonNull(GraphQLID) },
             <% for (let j = 0; j < types[index].fields.length; j++) {
@@ -103,8 +103,8 @@
             },
                 resolve: (obj, args, context, info) => {
                     
-                    const recordCreated = dbHandler.handleCreate(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
-                        return dbHandler.handleGet(args, '<%- typesName[index] %>Type', directivesOnTypes.<%- typesName[index].toLowerCase()%>Directives).then(record => {
+                    const recordCreated = dbHandler.handleCreate(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        return dbHandler.handleGet(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
                             return record
                         })
                     })

@@ -1,0 +1,43 @@
+<%_tables.forEach(table => {_%>
+    <%-table.name.toLowerCase()%>Tab.forEach(item =>{
+        let temp = `INSERT INTO "<%-table.sqlname%>"(
+    <%_for (let index = 0; index < table.columns.length; index++) {_%>
+        <%_if (!table.columns[index].field.includes("Pk_")){_%>
+            "<%-table.columns[index].field%>"
+        <%}_%>
+        <%_if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {_%>
+            , 
+        <%}
+    }_%>
+    ) 
+    VALUES (
+    <%_for (let index = 0; index < table.columns.length; index++) {
+        let correctField = ''
+        if (table.columns[index].fieldType === 'Int') {
+            if(!table.columns[index].field.includes("Pk_")){
+                if (table.columns[index].field.includes("Fk")) {
+                    // Triming the Fk_ / Pk_ and _id prefix and suffix
+                    correctField = table.columns[index].field.slice(3, (table.columns[index].field.length - 3))_%>
+                    `+item.<%-correctField.toLowerCase()%>+`
+                <%_}
+                else if (table.columns[index].field.includes("Pk")) {_%>
+                    `+item.id+`
+                <%_}
+                else {_%>
+                    '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
+                <%}
+            }
+        }
+        else {_%>
+            '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
+        <%}%>
+
+        <%if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {%>
+            , 
+        <%}
+    }%>
+    )`
+    queriesInsert.push(temp)
+    })
+<%})%>
+

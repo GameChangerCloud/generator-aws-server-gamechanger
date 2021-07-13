@@ -1,3 +1,4 @@
+
 const utils = {
 
 	constructOutputArray(data, table = null) {
@@ -104,6 +105,40 @@ const utils = {
 			.replace(/([A-Z])/g, (e) => { return '_' + e.toLowerCase()})
 			.replace(/(__)/g, '_')
 		return minifiedType;
+	},
+
+	startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
+		rdsDataService.beginTransaction(beginParams).promise().then(async (data, err) => {
+			if (err) {
+				console.log(err, err.stack); // an error occurred
+			} else {
+				let ok = false
+				sqlParams.transactionId = data.transactionId
+				commitParams.transactionId = data.transactionId
+				
+				try {
+					for (let index = 0; index < sqlRequests.length; index++) {
+						sqlParams.sql = sqlRequests[index]
+						console.log(sqlRequests[index])
+						res = await rdsDataService.executeStatement(sqlParams).promise()
+					}
+					
+					ok = true
+				}
+				catch (error) {
+					console.log("Damned : error "+error)
+					await rdsDataService.rollbackTransaction(sqlParams).promise()
+				}
+				
+				if (ok) { 
+					rdsDataService.commitTransaction(commitParams).promise() 
+				} else {
+					rdsDataService.rollbackTransaction(commitParams).promise()
+				}
+				console.log("Ending transaction")
+			}           
+		  });
+	
 	},
 
 }

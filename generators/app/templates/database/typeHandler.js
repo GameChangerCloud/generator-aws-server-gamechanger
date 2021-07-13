@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk')
 const rdsDataService = new AWS.RDSDataService()
 const utils = require('../utils/index')
-
 /******* Start of generated part (except for 'const TABLE = ' ) using typeName */
 const TABLE = "<%-sqltypeName%>"
 /******* End of generated part using typeName */
@@ -13,6 +12,17 @@ let sqlParams = {
 	database: process.env.DATABASE,
 	includeResultMetadata: true,
 	parameters: []
+}
+let beginParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	database: process.env.DATABASE
+}
+
+let commitParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	transactionId: ""
 }
 
 const resolvers = require('../utils/<%= typeName.toLowerCase() %>DirectiveResolvers')
@@ -206,19 +216,12 @@ module.exports = {
 		for(a in args){
 			args[a] = directiveResolver.directiveResolver(a, args, directives, resolvers)
 		}
-		
-		/******* Start of generated part (except 'sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" VALUES (') using fieldsCreate */
-		sqlParams.sql = "INSERT INTO \"<%-sqltypeName%>\" <%-fieldsName%> VALUES (" + <%-fieldsCreate%> + ") "
-		/******* End of generated part using fieldsCreate */
-
-		const res = await rdsDataService.executeStatement(sqlParams).promise()
+	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName}) _%>
-
-			
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: isScalar, isBasicType : isBasicType}) _%>
 		/******* End of generated part using createMethodsField */
 
-		return res
+		//return res
 
 	},
 

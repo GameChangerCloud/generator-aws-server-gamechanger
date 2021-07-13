@@ -2,9 +2,10 @@ const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
 const parsing = require('./parsing')
 const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger')
-const constants = require('./constants');
+const constants = require('./scalars/scalars');
 const utils = require('./templates/database/utils')
 const matching = require('./matching')
+const manageScalars = require('./scalars/manageScalars')
 
 const sdlSchema =
 	`type User {
@@ -117,14 +118,10 @@ module.exports = class extends Generator {
 
 				// Get all the types
 				this.types = parsing.getAllTypes(this.schemaJSON)
-				// Get all the types Name
-				this.typesName = parsing.getAllTypesName(this.schemaJSON)
-				// Get all the SQL types Name
-				this.sqlTypesName = parsing.getAllSQLTypesName(this.schemaJSON)
 
-				this.types = parsing.addIdTypes(this.typesName, this.types)
+				this.types = parsing.addIdTypes(this.types)
 				// Check if the schema is valid 
-				let isValidSchema = parsing.isSchemaValid(this.typesName, this.types)
+				let isValidSchema = parsing.isSchemaValid(this.types)
 				if (!isValidSchema.response) {
 					throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason)
 				}
@@ -165,7 +162,7 @@ module.exports = class extends Generator {
 		// Handle the scalars
 		this.scalarTypeNames = this.types.map((type, index) => {
 			if (type.type === "ScalarTypeDefinition")
-				return this.typesName[index]
+				return this.types[index].typeName
 		})
 
 		this.defaultScalars = []
@@ -177,13 +174,13 @@ module.exports = class extends Generator {
 
 		// Get all the relations between entities
 		const tmpTypes = JSON.parse(JSON.stringify(this.types));
-		this.relations = parsing.getRelations(tmpTypes, this.typesName, this.scalarTypeNames)
+		this.relations = parsing.getRelations(tmpTypes, this.scalarTypeNames)
 
 		// Get all the name of manyToMany relation table
-		this.manyToManyTables = parsing.getManyToManyTables(this.relations, this.types, this.typesName)
+		this.manyToManyTables = parsing.getManyToManyTables(this.relations, this.types)
 
 		// Will hold all the informations on the tables 
-		this.tables = parsing.getAllTables(this.types, this.typesName, this.relations, this.scalarTypeNames, this.sqlTypesName)
+		this.tables = parsing.getAllTables(this.types, this.relations, this.scalarTypeNames)
 
 		// Adding the junction table if some exeits
 		this.manyToManyTables.forEach(table => {
@@ -198,11 +195,12 @@ module.exports = class extends Generator {
 			}
 		)
 
+		let typesNameArray = this.types.map(type => type.typeName)
 		for (let index = 0; index < this.types.length; index++) {
 
 
-			let currentTypeName = this.typesName[index]
-			let currentSQLTypeName = this.sqlTypesName[index]
+			let currentTypeName = this.types[index].typeName
+			let currentSQLTypeName = this.types[index].sqlTypeName
 			let currentType = this.types[index]
 			let isQuery = currentTypeName === "Query" ? true : false
 
@@ -216,7 +214,7 @@ module.exports = class extends Generator {
 			let directiveNames = parsing.getFieldsDirectiveNames(fields , this.types[index])
 
 			// Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
-			let fieldsParsed = parsing.getFieldsParsed(currentTypeName, fields, currentType.type, this.relations, this.manyToManyTables, this.typesName, this.defaultScalars)
+			let fieldsParsed = parsing.getFieldsParsed(currentTypeName, fields, currentType.type, this.relations, this.manyToManyTables, typesNameArray, this.defaultScalars)
 
 			// Get the const require 
 			let requireTypes = parsing.getRequire(fields, currentType, this.defaultScalars)
@@ -235,7 +233,6 @@ module.exports = class extends Generator {
 					this.destinationPath('directives/directivesOnTypes.js'),
 					{
 						defaultScalars: this.defaultScalars,
-						typesName: this.typesName,
 						types: this.types,
 						fields : fields,
 						//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
@@ -328,7 +325,7 @@ module.exports = class extends Generator {
 						this.templatePath('graphql/query.js'),
 						this.destinationPath('graphql/types/query.js'),
 						{
-							typesName: this.typesName,
+							typesName: typesNameArray,
 							scalarTypeNames: this.scalarTypeNames,
 							pluralize: pluralize,
 							otherQuery: fieldsParsed
@@ -342,7 +339,6 @@ module.exports = class extends Generator {
 						this.destinationPath('graphql/types/mutation.js'),
 						{
 							defaultScalars: this.defaultScalars,
-							typesName: this.typesName,
 							types: this.types,
 							fields : fields,
 							otherMutation: fieldsParsed
@@ -403,6 +399,8 @@ module.exports = class extends Generator {
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
 							getSQLTableName: utils.getSQLTableName,
+							isScalar : manageScalars.isScalar,
+							isBasicType : manageScalars.isBasicType
 						}
 					)
 					
@@ -467,7 +465,6 @@ module.exports = class extends Generator {
 				this.destinationPath('graphql/types/mutation.js'),
 				{
 					defaultScalars: this.defaultScalars,
-					typesName: this.typesName,
 					types: this.types,
 					otherMutation: ""
 				}
@@ -479,7 +476,7 @@ module.exports = class extends Generator {
 				this.templatePath('graphql/query.js'),
 				this.destinationPath('graphql/types/query.js'),
 				{
-					typesName: this.typesName,
+					typesName: typesNameArray,
 					scalarTypeNames: this.scalarTypeNames,
 					pluralize: pluralize,
 					otherQuery: ""
@@ -556,8 +553,8 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/models.js'),
 			this.destinationPath('initDatabase/models.js'),
 			{
-				creationOfModels: parsing.getCreationOfModels(this.types, this.typesName, this.sqlTypesName, this.relations, this.scalarTypeNames),
-				listOfModelsExport: parsing.getListOfModelsExport(this.typesName, this.types)
+				creationOfModels: parsing.getCreationOfModels(this.types, this.relations, this.scalarTypeNames),
+				listOfModelsExport: parsing.getListOfModelsExport(this.types)
 			}
 		)
 
@@ -576,14 +573,13 @@ module.exports = class extends Generator {
 			this.destinationPath('initDatabase/fillTables.js'),
 			{
 				types: this.types, 
-				typesName: this.typesName, 
+				typesName: typesNameArray, 
 				relations: this.relations,
 				matching : matching,
 				tables: this.tables,
 				hasFieldType: parsing.hasFieldType,
 				initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
-				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types, this.typesName),
-				initQueriesInsert: parsing.getInitQueriesInsert(this.tables),
+				initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types),
 				utils: utils,
 			}
 		)
@@ -783,9 +779,9 @@ module.exports = class extends Generator {
 					})
 				}
 			})
-			console.log("ADD FIELDS - ", this.add_fields)
-			console.log("UPDATE FIELDS - ", this.update_fields)
-			console.log("DELETE FIELDS - ", this.delete_fields)
+			// console.log("ADD FIELDS - ", this.add_fields)
+			// console.log("UPDATE FIELDS - ", this.update_fields)
+			// console.log("DELETE FIELDS - ", this.delete_fields)
 			this.fs.copyTpl(
 				this.templatePath('upgradeDatabase/upgradeDatabase.js'),
 				this.destinationPath('upgradeDatabase/upgradeDatabase.js'),

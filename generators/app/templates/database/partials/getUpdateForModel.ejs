@@ -63,7 +63,7 @@
                             _position = pickOne(<%- currentTypeName.toLowerCase() %>Tab);
                             <%- s %> = <%- currentTypeName.toLowerCase() %>Tab[_position];
                         } while(<%- currentTypeName.toLowerCase() %>.id === <%- s %>.id)
-                            <%-currentTypeName.toLowerCase() %> = update(<%- currentTypeName.toLowerCase()%> , '<%- field.name.toLowerCase() %>_id', <%- s %>.id , new model.<%- currentTypeName %>);
+                            <%-currentTypeName.toLowerCase() %> = update(<%- currentTypeName.toLowerCase()%> , '<%- field.name.toLowerCase() %>_id', Math.floor((Math.random() * 5)) , new model.<%- currentTypeName %>);
                         }
                     <%}
                 })%>
@@ -72,6 +72,12 @@
                 // Only if the current type DOES have the field type
                 <%if (hasFieldType(currentType, typesName[index]).answers) {%>
                     <%- include('./positionUpdate',{currentTypeName : currentTypeName, name : typesName[index], sqlname : sqlname, nameBis : s}) %>
+                    <% let fieldTable = tables.filter(tab => tab.sqlname === currentTypeName.toLowerCase())
+                       let fieldName = fieldTable[0].columns.filter(col => col.field.includes("Fk")) %>
+                    
+                    removeConstraints.add("ALTER TABLE \"<%-currentTypeName.toLowerCase()%>\" DROP CONSTRAINT \"<%-currentTypeName.toLowerCase()%>_<%-fieldName[0].field%>_fkey\"")
+                    restoreConstraints.add("ALTER TABLE \"<%-currentTypeName.toLowerCase()%>\" ADD FOREIGN KEY (\"<%-fieldName[0].field%>\") REFERENCES \"<%-sqlname%>\" (\"Pk_<%-sqlname%>_id\") DEFERRABLE INITIALLY DEFERRED")
+
                 <%}%>
                 <%break
         }
