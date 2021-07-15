@@ -43,7 +43,7 @@ let temp = ''
         }})
                     <% break
                 case "manyToMany": _%>
-        <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).name) %>
+        <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).sqlname) %>
         // Field <%- field.name %> of type <%- field.type %> 
         sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {

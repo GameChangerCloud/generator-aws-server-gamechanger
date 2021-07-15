@@ -531,98 +531,9 @@ const getAllTables = (types, relations, scalarTypeNames) => {
 
         // Fill up the infos on scalar field (int, string, etc.)
         if (currentTypeName !== "Query" && currentTypeName !== "Mutation" && !scalarTypeNames.includes(currentTypeName)) {
-            currentType.fields.forEach(field => {
-                let fieldType = field.type
-                let fieldIsArray = field.isArray  
-                if (!typesNameArray.includes(fieldType)) {
-                    if (fieldType === "ID") {
-                        tableTemp.push({ field: "Pk_" + currentSQLTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
-                    }
-                    else if (fieldType === "String") {
-                        tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                    }
-                    else {
-                        tableTemp.push({ field: field.name, fieldType: fieldType, noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                    }
-                }
-
-                else if (scalarTypeNames.includes(fieldType)) {
-                    switch (fieldType) {
-                        case scalars.Date:
-                            tableTemp.push({ field: field.name, fieldType: "date", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.Time:
-                            tableTemp.push({ field: field.name, fieldType: "time", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.DateTime:
-                            tableTemp.push({ field: field.name, fieldType: "timestamp", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.NonPositiveInt:
-                        case scalars.PositiveInt:
-                        case scalars.NonNegativeInt:
-                        case scalars.NegativeInt:
-                        case scalars.UnsignedInt:
-                            tableTemp.push({ field: field.name, fieldType: "int", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.NonPositiveFloat:
-                        case scalars.PositiveFloat:
-                        case scalars.NonNegativeFloat:
-                        case scalars.NegativeFloat:
-                        case scalars.UnsignedFloat:
-                            tableTemp.push({ field: field.name, fieldType: "float8", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.BigInt:
-                        case scalars.Long:
-                        case scalars.Port:
-                            tableTemp.push({ field: field.name, fieldType: "int8", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-
-                        case scalars.GUID:
-                            tableTemp.push({ field: field.name, fieldType: "uuid", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.IPv4:
-                        case scalars.IPv6:
-                            tableTemp.push({ field: field.name, fieldType: "inet", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.MAC:
-                            tableTemp.push({ field: field.name, fieldType: "macaddr", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.USCurrency:
-                        case scalars.Currency:
-                            tableTemp.push({ field: field.name, fieldType: "money", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.JSON:
-                        case scalars.JSONObject:
-                            tableTemp.push({ field: field.name, fieldType: "json", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.Byte:
-                            tableTemp.push({ field: field.name, fieldType: "bytea", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.Linestring:
-                        case scalars.Point:
-                        case scalars.Polygon:
-                            tableTemp.push({ field: field.name, fieldType: "geometry", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                            break
-                        case scalars.UtcOffset:
-                        case scalars.EmailAddress:
-                        case scalars.URL:
-                        case scalars.PhoneNumber:
-                        case scalars.PostalCode:
-                        case scalars.HexColorCode:
-                        case scalars.HSL:
-                        case scalars.HSLA:
-                        case scalars.RGB:
-                        case scalars.RGBA:
-                        case scalars.ISBN:
-                        default:
-                            // By default, scalar type other than the ones that have specific column type in postgres, it's up to the final user to modify the final field type in the table
-                            tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
-                    }
-                }
-                else {
-                    // Do nothing, handled after
-                }
-            })
+            
+            //get scalar field infos
+            tableTemp.push(...manageScalars.getScalarFieldInfo(currentType, typesNameArray, currentSQLTypeName))
 
             // Then, we check relations between the current type table with all the types to add the correct foreigns key and references
             types.forEach((type) => {
@@ -731,33 +642,7 @@ const getInitEachFieldsModelsJS = (types) => {
     return s;
 }
 
-const formatTime = (date) => {
-    var d = new Date(date),
-        hours = '' + (d.getHours() + 1),
-        minutes = '' + d.getMinutes(),
-        seconds = '' + d.getSeconds();
-    if (hours.length < 2)
-        hours = '0' + hours
-    if (minutes.length < 2)
-        minutes = '0' + minutes
-    if (seconds.length < 2)
-        seconds = '0' + seconds
-    return [hours, minutes, seconds].join(':');
-}
 
-const formatDate = (date) => {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2)
-        month = '0' + month;
-    if (day.length < 2)
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-}
 
 // Models
 
