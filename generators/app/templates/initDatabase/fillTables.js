@@ -32,48 +32,16 @@ let sqlParams = {
 	parameters: []
 }
 
-
-
-
-
-function formatDate(date) {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2)
-        month = '0' + month;
-    if (day.length < 2)
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-}
-
-function formatTime(date) {
-    var d = new Date(date),
-        hours = '' + (d.getHours() + 1),
-        minutes = '' + d.getMinutes(),
-        seconds = '' + d.getSeconds();
-    if(hours.length < 2)
-        hours = '0' + hours
-    if(minutes.length < 2)
-        minutes = '0' + minutes
-    if(seconds.length < 2)
-        seconds = '0' + seconds
-    return [hours, minutes, seconds].join(':');
-}
-
 function getRandomDateTime(){
     return new Date(+(new Date()) - Math.floor(Math.random()*10000000000));
 }
 
 function getRandomDate(){
-    return formatDate(getRandomDateTime())
+    return utils.formatDate(getRandomDateTime())
 }
 
 function getRandomTime(){
-    return formatTime(getRandomDateTime())
+    return utils.formatTime(getRandomDateTime())
 }
 
 function generateRandomListID(){
@@ -192,9 +160,5 @@ for (let index = 0; index < queriesInsert.length ; index ++){
     const res = await rdsDataService.executeStatement(sqlParams).promise()
     console.log(JSON.stringify(res.records))
 }   
-
-
-
-
 
 }

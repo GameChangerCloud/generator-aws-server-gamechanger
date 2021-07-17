@@ -7,22 +7,6 @@ const utils = require('./templates/database/utils')
 const matching = require('./matching')
 const manageScalars = require('./scalars/manageScalars')
 
-const sdlSchema =
-	`type User {
-  id: ID!
-  username: String!
-  email: String!
-}
-
-type Post {
-  id: ID!
-}
-
-
-type Blog {
-  id: ID!
-}
-`;
 module.exports = class extends Generator {
 	// The name `constructor` is important here
 	constructor(args, opts) {
@@ -135,7 +119,6 @@ module.exports = class extends Generator {
 			}
 		}
 		else {
-			// this.schema = sdlSchema
 			throw new Error("Required schema not found in argument")
 		}
 
