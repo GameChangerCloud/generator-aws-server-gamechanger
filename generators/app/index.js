@@ -156,7 +156,7 @@ module.exports = class extends Generator {
 		}
 
 		// Get all the relations between entities
-		const tmpTypes = JSON.parse(JSON.stringify(this.types));
+		const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
 		this.relations = parsing.getRelations(tmpTypes, this.scalarTypeNames)
 
 		// Get all the name of manyToMany relation table
@@ -180,27 +180,20 @@ module.exports = class extends Generator {
 
 		let typesNameArray = this.types.map(type => type.typeName)
 		for (let index = 0; index < this.types.length; index++) {
-
-
-			let currentTypeName = this.types[index].typeName
-			let currentSQLTypeName = this.types[index].sqlTypeName
 			let currentType = this.types[index]
-			let isQuery = currentTypeName === "Query" ? true : false
+			let isQuery = currentType.typeName === "Query" ? true : false
 
-			this.log("TYPE : " + currentTypeName)
-
-			// Fetch all the fields for one type
-			let fields = parsing.getFields(currentType)
+			this.log("Processing TYPE : " + currentType.typeName)
 
 			// Get all the fields directives names
 
-			let directiveNames = parsing.getFieldsDirectiveNames(fields , this.types[index])
+			let directiveNames = parsing.getFieldsDirectiveNames(this.types[index])
 
 			// Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
-			let fieldsParsed = parsing.getFieldsParsed(currentTypeName, fields, currentType.type, this.relations, this.manyToManyTables, typesNameArray, this.defaultScalars)
+			let fieldsParsed = parsing.getFieldsParsed(currentType, this.relations, this.manyToManyTables, typesNameArray, this.defaultScalars)
 
 			// Get the const require 
-			let requireTypes = parsing.getRequire(fields, currentType, this.defaultScalars)
+			let requireTypes = parsing.getRequire(currentType, this.defaultScalars)
 
 			// Get the graphqlType 
 			let graphqlType = parsing.getGraphqlType(currentType)
@@ -217,23 +210,20 @@ module.exports = class extends Generator {
 					{
 						defaultScalars: this.defaultScalars,
 						types: this.types,
-						fields : fields,
+						fields : currentType.fields,
 						//mutationFields: parsing.getMutationFields(this.typesName, this.types, this.defaultScalars),
 						otherMutation: fieldsParsed
 					}
 				)
 			}
 
-
-
-
-			fields.forEach((field,index) => {
-				if (parsing.getRelationBetween(currentTypeName, field.type, this.relations) === "oneToOneChild") {
+			currentType.fields.forEach((field) => {
+				if (parsing.getRelationBetween(currentType.typeName, field.type, this.relations) === "oneToOneChild") {
 					isOneToOneChild = true
 					parent = field.type
 				}
 			})
-			let typeNameId = isOneToOneChild ? parent : currentTypeName
+			let typeNameId = isOneToOneChild ? parent : currentType.typeName
 			let sqltypeNameId = utils.getSQLTableName(typeNameId)
 			if (graphqlType === "GraphQLInterfaceType") {
 
@@ -241,19 +231,19 @@ module.exports = class extends Generator {
 				if (!this.typesInterface) {
 					this.typesInterface = []
 				}
-				this.typesInterface.push(currentTypeName + "Type")
+				this.typesInterface.push(currentType.typeName + "Type")
 
 
-				let resolveType = parsing.getResolveType(currentType, currentTypeName)
+				let resolveType = parsing.getResolveType(currentType, currentType.typeName)
 				// Adding the types graphql files
 				this.fs.copyTpl(
 					this.templatePath('graphql/type.js'),
-					this.destinationPath('graphql/types/' + currentTypeName.toLowerCase() + '.js'),
+					this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					{
 						graphqlType: graphqlType, //EnumType, ObjectType, InterfaceType
 						interfaces: null, // An interface doesn't implement other interface
 						typeRequire: requireTypes,
-						typeName: currentTypeName,
+						typeName: currentType.typeName,
 						typeFields: fieldsParsed,
 						resolveType: resolveType
 					}
@@ -263,9 +253,9 @@ module.exports = class extends Generator {
 			else if (graphqlType === "GraphQLEnumType") {
 				this.fs.copyTpl(
 					this.templatePath('graphql/typeEnum.js'),
-					this.destinationPath('graphql/types/' + currentTypeName.toLowerCase() + '.js'),
+					this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					{
-						enumName: currentTypeName,
+						enumName: currentType.typeName,
 						enumValues: parsing.getEnumValues(currentType),
 
 					}
@@ -274,10 +264,10 @@ module.exports = class extends Generator {
 
 			else if (graphqlType === "GraphQLScalarType") {
 
-				if (!this.defaultScalars.includes(currentTypeName)) {
+				if (!this.defaultScalars.includes(currentType.typeName)) {
 					this.fs.copyTpl(
 						this.templatePath('graphql/typeScalar.js'),
-						this.destinationPath('graphql/types/' + currentTypeName.toLowerCase() + '.js'),
+						this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					)
 				}
 			}
@@ -289,7 +279,7 @@ module.exports = class extends Generator {
 					if (!this.typesInterface) {
 						this.typesInterface = []
 					}
-					this.typesInterface.push(currentTypeName + "Type")
+					this.typesInterface.push(currentType.typeName + "Type")
 
 					if (!this.interfaces) {
 						this.interfaces = []
@@ -302,7 +292,7 @@ module.exports = class extends Generator {
 
 				// Adding the types graphql files
 
-				if (currentTypeName === "Query") {
+				if (currentType.typeName === "Query") {
 
 					this.fs.copyTpl(
 						this.templatePath('graphql/query.js'),
@@ -316,14 +306,14 @@ module.exports = class extends Generator {
 					)
 				}
 
-				else if (currentTypeName === "Mutation") {
+				else if (currentType.typeName === "Mutation") {
 					this.fs.copyTpl(
 						this.templatePath('graphql/mutation.js'),
 						this.destinationPath('graphql/types/mutation.js'),
 						{
 							defaultScalars: this.defaultScalars,
 							types: this.types,
-							fields : fields,
+							fields : currentType.fields,
 							otherMutation: fieldsParsed
 						}
 					)
@@ -332,12 +322,12 @@ module.exports = class extends Generator {
 				else {
 					this.fs.copyTpl(
 						this.templatePath('graphql/type.js'),
-						this.destinationPath('graphql/types/' + currentTypeName.toLowerCase() + '.js'),
+						this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 						{
 							graphqlType: graphqlType,
 							interfaces: this.interfaces ? this.interfaces : null,
 							typeRequire: requireTypes,
-							typeName: currentTypeName,
+							typeName: currentType.typeName,
 							typeFields: fieldsParsed,
 							resolveType: false
 						}
@@ -347,40 +337,40 @@ module.exports = class extends Generator {
 				this.interfaces = null
 
 				// No need for a queryType handler
-				if (!isQuery && currentTypeName !== "Mutation") {
-					let queryManyToMany = "SELECT * FROM \"" + currentSQLTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentSQLTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentSQLTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
-					let queryOneToMany = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"Pk_" + sqltypeNameId + "_id\" = (SELECT \"Fk_" + sqltypeNameId + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
-					let queryManyToOne = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + currentSQLTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
+				if (!isQuery && currentType.typeName !== "Mutation") {
+					let queryManyToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentType.sqlTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentType.sqlTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
+					let queryOneToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"Pk_" + sqltypeNameId + "_id\" = (SELECT \"Fk_" + sqltypeNameId + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
+					let queryManyToOne = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + currentType.sqlTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
 					// One To One queries
 					// Parent
-					let queryOneToOneParent = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + currentSQLTypeName + "\".\"Pk_" + sqltypeNameId + "_id\" = $1"
+					let queryOneToOneParent = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + currentType.sqlTypeName + "\".\"Pk_" + sqltypeNameId + "_id\" = $1"
 					// Child
-					let queryOneToOneChild = "SELECT * FROM \"" + currentSQLTypeName + "\" WHERE \"" + sqltypeNameId + "\".\"Fk_'+parentTypeName+'_id\" = $1"
+					let queryOneToOneChild = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + sqltypeNameId + "\".\"Fk_'+parentTypeName+'_id\" = $1"
 
 					// Adding the handlerType.js file
 					this.fs.copyTpl(
 						this.templatePath('database/typeHandler.js'),
-						this.destinationPath('database/handlers/handler' + currentTypeName + '.js'),
+						this.destinationPath('database/handlers/handler' + currentType.typeName + '.js'),
 						{
-							typeName: currentTypeName,
-							sqltypeName: currentSQLTypeName,
+							typeName: currentType.typeName,
+							sqltypeName: currentType.sqlTypeName,
 							sqltypeNameId: sqltypeNameId,
-							typeFieldsParsed: parsing.getFieldsParsedHandler(currentTypeName, fields, isOneToOneChild, parent),
+							typeFieldsParsed: parsing.getFieldsParsedHandler(currentType.typeName, currentType.fields, isOneToOneChild, parent),
 							queryManyToMany: queryManyToMany,
 							queryOneToMany: queryOneToMany,
 							queryOneToOneParent: queryOneToOneParent,
 							queryOneToOneChild: queryOneToOneChild,
 							queryManyToOne: queryManyToOne,
-							querySelfJoinOne: parsing.isSelfJoinOne(currentTypeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentTypeName, fields) : false,
-							querySelfJoinMany: parsing.isSelfJoinMany(currentTypeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentTypeName, fields) : false,
-							fields: fields,
+							querySelfJoinOne: parsing.isSelfJoinOne(currentType.typeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentType.typeName, currentType.fields) : false,
+							querySelfJoinMany: parsing.isSelfJoinMany(currentType.typeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentType.typeName, currentType.fields) : false,
+							fields: currentType.fields,
 							directiveNames : directiveNames,
 							relations: this.relations,
 							manyToManyTables: this.manyToManyTables,
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
-							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
-							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
+							fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, this.relations, this.manyToManyTables),
+							fieldsName: parsing.getFieldsName(this.tables,currentType.fields, currentType.typeName, currentType.sqlTypeName, this.relations),
 							utils: utils,
 							manageScalars : manageScalars
 						}
@@ -390,7 +380,7 @@ module.exports = class extends Generator {
 					//Adding DirectiveResolvers
 					this.fs.copyTpl(
 						this.templatePath('graphql/directives/directiveResolvers.js'),
-						this.destinationPath('database/utils/' + currentTypeName.toLocaleLowerCase() + 'DirectiveResolvers.js'),
+						this.destinationPath('database/utils/' + currentType.typeName.toLocaleLowerCase() + 'DirectiveResolvers.js'),
 						{
 							dirNames : directiveNames
 						}
@@ -400,10 +390,10 @@ module.exports = class extends Generator {
 					//Create
 					this.fs.copyTpl(
 						this.templatePath('testLambdas/eventMaker.ejs'),
-						this.destinationPath('events/create'+ currentTypeName+ '.json'),
+						this.destinationPath('events/create'+ currentType.typeName+ '.json'),
 						{
-							fields: fields,
-							typeName: currentTypeName,
+							fields: currentType.fields,
+							typeName: currentType.typeName,
 							relations : this.relations,
 							typeQuery : "create"
 						}
@@ -411,10 +401,10 @@ module.exports = class extends Generator {
 					//Delete
 					this.fs.copyTpl(
 						this.templatePath('testLambdas/eventMaker.ejs'),
-						this.destinationPath('events/delete'+ currentTypeName+ '.json'),
+						this.destinationPath('events/delete'+ currentType.typeName+ '.json'),
 						{
-							fields: fields,
-							typeName: currentTypeName,
+							fields: currentType.fields,
+							typeName: currentType.typeName,
 							relations : this.relations,
 							typeQuery : "delete"
 						}
@@ -423,10 +413,10 @@ module.exports = class extends Generator {
 					//Update
 					this.fs.copyTpl(
 						this.templatePath('testLambdas/eventMaker.ejs'),
-						this.destinationPath('events/update'+ currentTypeName+ '.json'),
+						this.destinationPath('events/update'+ currentType.typeName+ '.json'),
 						{
-							fields: fields,
-							typeName: currentTypeName,
+							fields: currentType.fields,
+							typeName: currentType.typeName,
 							relations : this.relations,
 							typeQuery : "update"
 						}

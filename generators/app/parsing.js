@@ -22,36 +22,22 @@ const getAllTypes = (schemaJSON) => {
     return types
 }
 
-/**
- * From a type object, get the fields and return an array of it
- * @param {*} type 
- * @returns 
- */
-const getFields = (type) => {
-    let fields = []
-    for (let index = 0; index < type["fields"].length; index++) {
-        fields.push(type["fields"][index])
-    }
-    return fields
-}
-
 // Get all directive names from the fields of a type object
-const getFieldsDirectiveNames = (fields, typeObject) => {
+const getFieldsDirectiveNames = (type) => {
     let directiveNames = []
-    if (typeObject.directives.length > 0) {
-        for (let index = 0; index < typeObject.directives.length; index++) {
-            directiveNames.push(typeObject.directives[index].name)
-        }
+    if (type.directives.length > 0) {
+        type.directives.forEach(directive => {
+            directiveNames.push(directive.name)
+        })
     }
 
-    for (let index = 0; index < fields.length; index++) {
-        if (fields[index].directives.length > 0) {
-            for (let j = 0; j < fields[index].directives.length; j++) {
-                directiveNames.push(fields[index].directives[j].name)
-            }
+    type.fields.forEach(field => {
+        if (field.directives.length > 0) {
+            field.directives.forEach(directive => {
+                directiveNames.push(directive.name)
+            })
         }
-        // console.log("*********" + JSON.stringify(fields[index].directives))
-    }
+    })
     return directiveNames
 }
 
@@ -60,17 +46,17 @@ const getFieldsDirectiveNames = (fields, typeObject) => {
  * From the fields object, transform the syntax to get the right one to print on final type.js file. Return a string
  * @param {*} currentTypeName 
  * @param {*} fields 
- * @param {*} graphqlType 
+ * @param {*} type 
  * @param {*} relations 
  * @param {*} manyToManyTables 
  * @param {*} typesName 
  * @param {*} defaultScalarsType 
  * @returns 
  */
-const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyToManyTables, typesName, defaultScalarsType) => {
+const getFieldsParsed = (type, relations, manyToManyTables, typesName, defaultScalarsType) => {
     let result = ""
-    for (let index = 0; index < fields.length; index++) {
-        let field = fields[index]
+    for (let index = 0; index < type.fields.length; index++) {
+        let field = type.fields[index]
         let hasArguments = field.arguments[0] ? true : false
         if (index > 0) 
             result += "\t\t"
@@ -78,7 +64,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
         switch (field.type) {
 
             case "ID":
-                if (currentTypeName === "Mutation" || currentTypeName === "Query") {
+                if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLID", true)
                     result += "\n"
                     result += buildArgs(field.arguments, hasArguments)
@@ -90,7 +76,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                 break
 
             case "String":
-                if (currentTypeName === "Mutation" || currentTypeName === "Query") {
+                if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLString", true)
                     result += "\n"
                     result += buildArgs(field.arguments, hasArguments)
@@ -102,7 +88,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                 break
 
             case "Int":
-                if (currentTypeName === "Mutation" || currentTypeName === "Query") {
+                if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLInt", true)
                     result += "\n"
                     result += buildArgs(field.arguments, hasArguments)
@@ -114,7 +100,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                 break
 
             case "Boolean":
-                if (currentTypeName === "Mutation" || currentTypeName === "Query") {
+                if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLBoolean", true)
                     result += "\n"
                     result += buildArgs(field.arguments, hasArguments)
@@ -127,7 +113,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
 
                 // Not classic scalar type
             default:
-                if (currentTypeName === "Query") { // If query, we do not accept reserved field query (e.g <entity> or <entities>)
+                if (type.typeName === "Query") { // If query, we do not accept reserved field query (e.g <entity> or <entities>)
                     if (isValidFieldQuery(field.name, typesName)) {
                         if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type)) 
                             result += buildTypeField(field, field.type, true)
@@ -138,7 +124,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                         result += "\n\t\t},\n"
                     }
-                } else if (currentTypeName === "Mutation") {
+                } else if (type.typeName === "Mutation") {
                     if (isValidFieldMutation(field.name, typesName)) {
                         if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type)) 
                             result += buildTypeField(field, field.type, true)
@@ -156,7 +142,7 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                         result += buildResolver(field)
                         result += "\n\t\t},\n"
                     } else { // If it's an interface, different based resolver
-                        if (graphqlType === "InterfaceTypeDefinition") {
+                        if (type === "InterfaceTypeDefinition") {
                             result += buildResolverInterface()
                         } else {
                             result += buildTypeField(field, field.type + "Type", true)
@@ -164,13 +150,13 @@ const getFieldsParsed = (currentTypeName, fields, graphqlType, relations, manyTo
                             result += buildArgs(field.arguments, hasArguments)
 
                             // get the relation
-                            let relationsBetween = getRelationBetween(field.type, currentTypeName, relations)
+                            let relationsBetween = getRelationBetween(field.type, type.typeName, relations)
                             if (relationsBetween === "manyToMany") {
-                                let manyToManyTable = getManyToManyTableBetween(currentTypeName, field.type, manyToManyTables)
+                                let manyToManyTable = getManyToManyTableBetween(type.typeName, field.type, manyToManyTables)
 
-                                result += buildResolver(field, hasArguments, currentTypeName, relationsBetween, manyToManyTable)
+                                result += buildResolver(field, hasArguments, type.typeName, relationsBetween, manyToManyTable)
                             } else {
-                                result += buildResolver(field, hasArguments, currentTypeName, relationsBetween, null)
+                                result += buildResolver(field, hasArguments, type.typeName, relationsBetween, null)
                             }
 
                         } result += "\n\t\t},\n"
@@ -320,36 +306,34 @@ const buildResolverInterface = () => {
 }
 
 // Get all the types required, except the current one, to import in file
-const getRequireTypes = (fields, currentType, defaultScalars) => {
+const getRequireTypes = (currentType, defaultScalars) => {
     let result = []
-    for (let index = 0; index < fields.length; index++) {
-        let type = fields[index].type
+    currentType.fields.forEach(field => {
+        let type = field.type
         if (type !== currentType) {
             if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean") { // If it's a predefined scalars no need to include it
                 if (!defaultScalars.includes(type)) { // Check if it's not already included (multiple type call in Query)
                     if (! result.includes(type)) 
                         result.push(type)
-                    
                 }
             }
         }
         // Checking internal argument (for the query mainly if there's enum in place)
-        fields[index].arguments.forEach(argument => {
+        field.arguments.forEach(argument => {
             if (argument.type !== currentType) {
                 if (argument.type !== "String" && argument.type !== "ID" && argument.type !== "Int" && argument.type != "Boolean") { // Check if it's not already included (multiple type call in Query)
                     if (! result.includes(argument.type)) 
                         result.push(argument.type)
-                    
                 }
             }
         })
-    }
+    })
     return result
 }
 
 // Build the require const type string
-const getRequire = (fields, currentType, defaultScalars) => {
-    const requiredTypes = getRequireTypes(fields, currentType, defaultScalars)
+const getRequire = (type, defaultScalars) => {
+    const requiredTypes = getRequireTypes(type, defaultScalars)
     let result = ""
     for (let index = 0; index < requiredTypes.length; index++) {
         if (!defaultScalars.includes(requiredTypes[index])) {
@@ -584,7 +568,7 @@ const getAllTables = (types, relations, scalarTypeNames) => {
 
                         case "selfJoinOne":
                             // Check field with the same type
-                            const fields = getFields(currentType)
+                            const fields = currentType.fields
                             fields.forEach(field => { // If it's the field, we add the key
                                 if (field.type === currentTypeName) { // Adding a foreign key with the graphql field name
                                     tableTemp.push({
@@ -636,9 +620,9 @@ const getInitEachFieldsModelsJS = (types) => {
 
 // Models
 
-const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fields, relations, scalarTypeNames) => {
+const getParameters = (typesName, sqltypesName, currentType, relations, scalarTypeNames) => {
     let explicit = []
-    fields.forEach(field => { // Parameters explicit
+    currentType.fields.forEach(field => { // Parameters explicit
         switch (field.type) {
             case "String":
             case "ID":
@@ -657,7 +641,7 @@ const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fi
     // Parameters implicit
     // Then, we check relations between the current type table with all the types
     for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+        let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
         switch (relationType) {
             case "manyOnly":
                 // Only if the current type DOES NOT have the field type
@@ -681,10 +665,10 @@ const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fi
 
             case "manyToMany":
                 // if self join many
-                if (currentTypeName === typesName[index]) {
-                    const fieldsCurrentType = getFields(currentType)
+                if (currentType.typeName === typesName[index]) {
+                    const fieldsCurrentType = currentType.fields
                     fieldsCurrentType.forEach(field => { // If it's the field, we add the key
-                        if (field.type === currentTypeName) {
+                        if (field.type === currentType.typeName) {
                             result += ", "
                             result += field.name.toLowerCase()
                         }
@@ -709,9 +693,9 @@ const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fi
 
             case "selfJoinOne":
                 // Check field with the same type
-                const fieldsCurrentType = getFields(currentType)
+                const fieldsCurrentType = currentType.fields
                 fieldsCurrentType.forEach(field => { // If it's the field, we add the key
-                    if (field.type === currentTypeName) {
+                    if (field.type === currentType.typeName) {
                         result += ", "
                         result += field.name.toLowerCase() + "_id"
                     }
@@ -724,31 +708,33 @@ const getParameters = (typesName, sqltypesName, currentType, currentTypeName, fi
     return result
 }
 
-const getBodyOfConstructor = (typesName, sqltypesName, currentType, currentTypeName, fields, relations) => {
+const getBodyOfConstructor = (typesName, sqltypesName, currentType, relations) => {
     let result = ""
     let defaultScalars = []
     for (const value in scalars) {
         defaultScalars.push(scalars[value])
     }
-    for (let index = 0; index < fields.length; index++) {
-        switch (fields[index].type) {
+
+    currentType.fields.forEach(field => {
+        switch (field.type) {
             case "String":
             case "ID":
             case "Boolean":
-            case "Int": result += "\t\t\tthis." + fields[index].name.toLowerCase() + " = " + fields[index].name.toLowerCase() + ";\n"
+            case "Int": result += "\t\t\tthis." + field.name.toLowerCase() + " = " + field.name.toLowerCase() + ";\n"
                 break;
 
             default:
-                if (defaultScalars.includes(fields[index].type)) {
-                    result += "\t\t\tthis." + fields[index].name.toLowerCase() + " = " + fields[index].name.toLowerCase() + ";\n"
+                if (defaultScalars.includes(field.type)) {
+                    result += "\t\t\tthis." + field.name.toLowerCase() + " = " + field.name.toLowerCase() + ";\n"
                 }
                 break;
         }
-    }
+    })
+
     // Parameters implicit
     // Then, we check relations between the current type table with all the types
     for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
+        let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
         switch (relationType) {
             case "manyOnly":
                 // Only if the current type DOES NOT have the field type
@@ -769,10 +755,10 @@ const getBodyOfConstructor = (typesName, sqltypesName, currentType, currentTypeN
 
             case "manyToMany":
                 // if self join many
-                if (currentTypeName === typesName[index]) {
-                    const fields = getFields(currentType)
+                if (currentType.typeName === typesName[index]) {
+                    const fields = currentType.fields
                     fields.forEach(field => { // If it's the field, we add the key
-                        if (field.type === currentTypeName) {
+                        if (field.type === currentType.typeName) {
                             result += "\t\t\tthis." + field.name.toLowerCase() + " = " + field.name.toLowerCase() + ";\n"
                         }
                     })
@@ -795,9 +781,9 @@ const getBodyOfConstructor = (typesName, sqltypesName, currentType, currentTypeN
 
             case "selfJoinOne":
                 // Check field with the same type
-                const fields = getFields(currentType)
+                const fields = currentType.fields
                 fields.forEach(field => { // If it's the field, we add the key
-                    if (field.type === currentTypeName) {
+                    if (field.type === currentType.typeName) {
                         result += "\t\t\tthis." + field.name.toLowerCase() + "_id = " + field.name.toLowerCase() + "_id;\n"
                     }
                 })
@@ -817,9 +803,8 @@ const getCreationOfModels = (types, relations, scalarTypeNames) => {
 
     types.forEach(type => {
         if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition") {
-            let fields = getFields(type)
-            s += 'class ' + type.typeName + ' {\n\tconstructor(' + getParameters(typesName, sqlTypesName, type, type.typeName, fields, relations, scalarTypeNames) + '){\n';
-            s += getBodyOfConstructor(typesName, sqlTypesName, type, type.typeName, fields, relations);
+            s += 'class ' + type.typeName + ' {\n\tconstructor(' + getParameters(typesName, sqlTypesName, type, relations, scalarTypeNames) + '){\n';
+            s += getBodyOfConstructor(typesName, sqlTypesName, type, relations);
             s += '\t}\n}\n\n'
         }
     })
@@ -878,7 +863,7 @@ const getManyOrOne = (fields, currentType) => {
 const getRelationOf = (element, types, typenames, currentType) => {
     for (let index = 0; index < types.length; index++) {
         if (typenames[index] == element) {
-            let fields = getFields(types[index]);
+            let fields = types[index].fields
             return getManyOrOne(fields, currentType)
         }
     }
@@ -924,7 +909,7 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
     let relations = []
     types.forEach(type => {
         if (type.typeName != "Query" && type.typeName != "Mutation" && type.typeName != "Subscription") {
-            let fields = getFields(type)
+            let fields = type.fields
             let rfields = getExternalFields(fields)
 
             rfields.forEach(rfield => { // Check if it's not a scalar type
@@ -1194,7 +1179,6 @@ const getQuerySelfJoinMany = (currentTypeName, fields) => {
     return result
 }
 
-
 /** SCHEMA UPDATE */
 
 const compareFieldsForUpdate = (entity, field_check) => {
@@ -1376,7 +1360,7 @@ const typesHaveId = (typesName, types) => {
 // Check if the types of field are correct (default scalar, personalized scalar of other existing entities)
 const fieldTypeExists = (typesName, types) => {
     for (let i = 0; i < types.length; i++) {
-        let fields = getFields(types[i])
+        let fields = types[i].fields
         for (let j = 0; j < fields.length; j++) {
             if (fields[j].type !== "ID" && fields[j].type !== "String" && fields[j].type !== "Int" && fields[j].type !== "Boolean" && fields[j].type !== "Float") { // Default scalar
                 if (!typesName.includes(fields[j].type)) { // User scalars or Entities
@@ -1428,7 +1412,6 @@ const findField = (fields, columnName) => {
 
 module.exports = {
     getAllTypes: getAllTypes,
-    getFields: getFields,
     getFieldsDirectiveNames: getFieldsDirectiveNames,
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,

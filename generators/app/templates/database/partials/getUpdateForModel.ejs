@@ -53,7 +53,7 @@
 
             case "selfJoinOne": _%>
                 <%// Check field with the same type%> 
-                <%const fields = getFields(currentType)
+                <%const fields = currentType.fields
                 fields.forEach(field => {
                     if (field.type === currentTypeName) { _%>
                         if(<%- currentTypeName.toLowerCase()%>.<%- field.name %>_id == null) {
