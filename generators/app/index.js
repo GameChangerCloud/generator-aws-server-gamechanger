@@ -381,9 +381,8 @@ module.exports = class extends Generator {
 							scalars: constants,
 							fieldsCreate: parsing.getFieldsCreate(currentTypeName, fields, this.relations, this.manyToManyTables),
 							fieldsName: parsing.getFieldsName(this.tables,fields, currentTypeName, currentSQLTypeName, this.relations),
-							getSQLTableName: utils.getSQLTableName,
-							isScalar : manageScalars.isScalar,
-							isBasicType : manageScalars.isBasicType
+							utils: utils,
+							manageScalars : manageScalars
 						}
 					)
 					
@@ -505,7 +504,16 @@ module.exports = class extends Generator {
 			this.destinationPath('database/utils/index.js'),
 		)
 
-	
+		//Adding files for managing Scalars
+		this.fs.copyTpl(
+			this.templatePath('../scalars/scalars.js'),
+			this.destinationPath('database/utils/scalars.js'),
+		)
+		this.fs.copyTpl(
+			this.templatePath('../scalars/manageScalars.js'),
+			this.destinationPath('database/utils/manageScalars.js'),
+		)
+		
 		//Adding RuntimeDirectiveResolver
 		this.fs.copyTpl(
 			this.templatePath('graphql/runtimeDirectiveResolver.js'),

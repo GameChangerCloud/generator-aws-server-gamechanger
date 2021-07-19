@@ -141,6 +141,34 @@ const utils = {
 	
 	},
 
+	formatTime(date){
+		var d = new Date(date),
+			hours = '' + (d.getHours() + 1),
+			minutes = '' + d.getMinutes(),
+			seconds = '' + d.getSeconds();
+		if (hours.length < 2)
+			hours = '0' + hours
+		if (minutes.length < 2)
+			minutes = '0' + minutes
+		if (seconds.length < 2)
+			seconds = '0' + seconds
+		return [hours, minutes, seconds].join(':');
+	},
+	
+	formatDate(date){
+		var d = new Date(date),
+			month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear();
+	
+		if (month.length < 2)
+			month = '0' + month;
+		if (day.length < 2)
+			day = '0' + day;
+	
+		return [year, month, day].join('-');
+	}
+
 }
 
 module.exports = utils

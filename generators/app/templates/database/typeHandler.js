@@ -188,7 +188,7 @@ module.exports = {
 	async updateMethods(args, directives) {
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, getSQLTableName: getSQLTableName}) _%>
+		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, getSQLTableName: utils.getSQLTableName}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error
@@ -218,7 +218,7 @@ module.exports = {
 		}
 	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: isScalar, isBasicType : isBasicType}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: utils.getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: manageScalars.isScalar, isBasicType : manageScalars.isBasicType}) _%>
 		/******* End of generated part using createMethodsField */
 
 		//return res
