@@ -5,9 +5,7 @@
         <%_if (!table.columns[index].field.includes("Pk_")){_%>
             "<%-table.columns[index].field%>"
         <%}_%>
-        <%_if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {_%>
-            , 
-        <%}
+        <%_if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {_%>,<%}
     }_%>
     ) 
     VALUES (
@@ -18,23 +16,14 @@
                 if (table.columns[index].field.includes("Fk")) {
                     // Triming the Fk_ / Pk_ and _id prefix and suffix
                     correctField = table.columns[index].field.slice(3, (table.columns[index].field.length - 3))_%>
-                    `+item.<%-correctField.toLowerCase()%>+`
-                <%_}
-                else if (table.columns[index].field.includes("Pk")) {_%>
-                    `+item.id+`
-                <%_}
-                else {_%>
-                    '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
-                <%}
+                    `+item.<%-correctField.toLowerCase()%>+`<%_}
+                else if (table.columns[index].field.includes("Pk")) {_%>                    `+item.id+`<%_}
+                else {_%>                    '`+item.<%-table.columns[index].field.toLowerCase()%>+`'<%}
             }
         }
-        else {_%>
-            '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
-        <%}%>
+        else {_%>            '`+item.<%-table.columns[index].field.toLowerCase()%>+`'<%}%>
 
-        <%if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {%>
-            , 
-        <%}
+        <%_if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {_%>,<%}
     }%>
     )`
     queriesInsert.push(temp)
