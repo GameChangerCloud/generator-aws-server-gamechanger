@@ -196,6 +196,10 @@ module.exports = class extends Generator {
 		)
 
 		let typesNameArray = this.types.map(type => type.typeName)
+
+
+		let schemaDirectives = parsing.getschemaDirectivesNames()
+		
 		for (let index = 0; index < this.types.length; index++) {
 
 
@@ -409,6 +413,7 @@ module.exports = class extends Generator {
 						this.templatePath('graphql/directives/directiveResolvers.js'),
 						this.destinationPath('database/utils/' + currentTypeName.toLocaleLowerCase() + 'DirectiveResolvers.js'),
 						{
+							schemaDirectives : schemaDirectives,
 							dirNames : directiveNames
 						}
 					)

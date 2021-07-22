@@ -6,6 +6,7 @@ const scalars = require('./scalars/scalars')
 const manageScalars = require('./scalars/manageScalars')
 
 const utils = require('./templates/database/utils')
+const schemaDirectives = require('./templates/graphql/directives/schemaDirectives')
 
 /**
  * From the schema, fetch all the types object and return an array of it
@@ -53,6 +54,15 @@ const getFieldsDirectiveNames = (fields, typeObject) =>{
         //console.log("*********" + JSON.stringify(fields[index].directives))
     }
     return directiveNames
+}
+//
+const getschemaDirectivesNames = () =>{
+    names = []
+    for( elem in schemaDirectives.directives ){
+        names.push(elem)
+    }
+    console.log(names)
+    return names
 }
 
 /** GRAPHQL files parsing */
@@ -953,7 +963,7 @@ const getRelations = (types, scalarTypeNames) => {
         if (typenames[index] != "Query" && typenames[index] != "Mutation") {
             let fields = getFields(types[index])
             let lst = getExternalFields(fields)
-            console.log("sheesh" , JSON.stringify(lst,null, 3))
+            //console.log("sheesh" , JSON.stringify(lst,null, 3))
             for (let i = 0; i < lst.length; i++) {
                 // Check if it's not a scalar type
                 if (!scalarTypeNames.includes(lst[i].type)) {
@@ -1470,6 +1480,7 @@ module.exports = {
     getAllTypes: getAllTypes,
     getFields: getFields,
     getFieldsDirectiveNames : getFieldsDirectiveNames,
+    getschemaDirectivesNames : getschemaDirectivesNames,
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,
     buildResolverInterface: buildResolverInterface,
