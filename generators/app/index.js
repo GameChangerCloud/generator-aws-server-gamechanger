@@ -143,10 +143,7 @@ module.exports = class extends Generator {
 		this.interfaces = null
 
 		// Handle the scalars
-		this.scalarTypeNames = this.types.map((type, index) => {
-			if (type.type === "ScalarTypeDefinition")
-				return this.types[index].typeName
-		})
+		this.scalarTypeNames = this.types.filter(type => type.type === "ScalarTypeDefinition")
 
 		this.defaultScalars = []
 		for (const scalarName in constants) {
@@ -156,17 +153,17 @@ module.exports = class extends Generator {
 		}
 
 		// Get all the relations between entities
-		const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-		this.relations = parsing.getRelations(tmpTypes, this.scalarTypeNames)
+		//const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
+		this.types = parsing.getRelations(this.types, this.scalarTypeNames)
 
-		// Get all the name of manyToMany relation table
-		this.manyToManyTables = parsing.getManyToManyTables(this.relations, this.types)
+		// Get all the name of join relation table
+		this.joinTables = parsing.getJoinTables(this.types, this.scalarTypeNames)
 
 		// Will hold all the informations on the tables 
-		this.tables = parsing.getAllTables(this.types, this.relations, this.scalarTypeNames)
+		this.tables = parsing.getAllTables(this.types, this.scalarTypeNames)
 
 		// Adding the junction table if some exeits
-		this.manyToManyTables.forEach(table => {
+		this.joinTables.forEach(table => {
 			this.tables.push(table)
 		})
 
@@ -190,7 +187,7 @@ module.exports = class extends Generator {
 			let directiveNames = parsing.getFieldsDirectiveNames(this.types[index])
 
 			// Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
-			let fieldsParsed = parsing.getFieldsParsed(currentType, this.relations, this.manyToManyTables, typesNameArray, this.defaultScalars)
+			let fieldsParsed = parsing.getFieldsParsed(currentType, this.relations, this.joinTables, typesNameArray, this.defaultScalars)
 
 			// Get the const require 
 			let requireTypes = parsing.getRequire(currentType, this.defaultScalars)
@@ -366,10 +363,10 @@ module.exports = class extends Generator {
 							fields: currentType.fields,
 							directiveNames : directiveNames,
 							relations: this.relations,
-							manyToManyTables: this.manyToManyTables,
+							manyToManyTables: this.joinTables,
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
-							fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, this.relations, this.manyToManyTables),
+							fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, this.relations, this.joinTables),
 							fieldsName: parsing.getFieldsName(this.tables,currentType.fields, currentType.typeName, currentType.sqlTypeName, this.relations),
 							utils: utils,
 							manageScalars : manageScalars

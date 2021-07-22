@@ -65,14 +65,14 @@ const isBasicType = (type) =>{
     }
 }
 
-const getScalarFieldInfo =(currentType, typesNameArray, currentSQLTypeName)=>{
+const getScalarFieldInfo = (currentType, typesNameArray) => {
     tableTemp = []
     currentType.fields.forEach(field => {
         let fieldType = field.type
         let fieldIsArray = field.isArray  
         if (!typesNameArray.includes(fieldType)) {
             if (fieldType === "ID") {
-                tableTemp.push({ field: "Pk_" + currentSQLTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
+                tableTemp.push({ field: "Pk_" + currentType.sqlTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
             }
             else if (fieldType === "String") {
                 tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })

@@ -1,7 +1,8 @@
 type Movie {
   id: ID
   title: String 
-  actors: [Actor]
+  poster: String
+  actors: [Actor] @hasInverse(field: movies)
   studio: Studio!
   oscars: [Oscar]
   sequel: Movie
@@ -11,7 +12,7 @@ type Movie {
 type Actor {
   id: ID
   name: String
-  movies: [Movie]
+  movies: [Movie] @hasInverse(field: actors)
   likes: [Movie]
 }
 
