@@ -70,12 +70,16 @@ const getScalarFieldInfo = (currentType, typesNameArray) => {
     currentType.fields.forEach(field => {
         let fieldType = field.type
         let fieldIsArray = field.isArray  
-        if (!typesNameArray.includes(fieldType)) {
+        if (!typesNameArray.includes(fieldType) && fieldType !== "delegated_field") {
             if (fieldType === "ID") {
-                tableTemp.push({ field: "Pk_" + currentType.sqlTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
+                tableTemp.push({ field: "Pk_" + currentType.sqlTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "SERIAL PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
             }
             else if (fieldType === "String") {
                 tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+            }
+            else if (fieldType === "foreign_key") {
+                let fkInfo = field.foreign_key
+                tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: null, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
             }
             else {
                 tableTemp.push({ field: field.name, fieldType: fieldType, noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
@@ -156,6 +160,11 @@ const getScalarFieldInfo = (currentType, typesNameArray) => {
             }
         }
         else {
+            if (field.foreign_key !== null && field.type !== "delegated_field") {
+                
+                let fkInfo = field.foreign_key
+                tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: null, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
+            }
             // Do nothing, handled after
         }
     })

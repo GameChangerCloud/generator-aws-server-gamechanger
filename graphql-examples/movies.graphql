@@ -14,6 +14,8 @@ type Actor {
   name: String
   movies: [Movie] @hasInverse(field: actors)
   likes: [Movie]
+  hates : [Movie]
+  children : [Actor]
 }
 
 type Oscar {

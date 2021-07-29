@@ -486,7 +486,7 @@ const getAllTables = (types, scalarTypeNames) => {
         // Fill up the infos on scalar field (int, string, etc.)
         if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.typeName !== "Subscription"  && !scalarTypeNames.includes(type.typeName)) {
             //get scalar field infos
-            tableTemp.push(...manageScalars.getScalarFieldInfo(type, typesNameArray))
+            tableTemp.push(...manageScalars.getScalarFieldInfo(type, typesNameArray)) 
             /*
             let rfields = getRelationalFields(type.fields, scalarTypeNames)
             rfields.forEach(rfield => {
@@ -813,7 +813,7 @@ const getListOfModelsExport = (types) => {
 /** RELATIONS HANDLER */
 
 const getRelationalFields = (fields, scalarTypeNames) => {
-    const lst = fields.filter(field => field.type != "String" && field.type != "ID" && field.type != "Int" && fields.type != "Boolean" && !scalarTypeNames.includes(field.type))
+    const lst = fields.filter(field => field.type != "String" && field.type != "ID" && field.type != "Int" && fields.type != "Boolean" && !scalarTypeNames.includes(field.type) && field.type != "foreign_key")
 
     return lst;
 
@@ -899,7 +899,10 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 // No addition needed for ManyToMany --> only through join table
 
                             } else {
+                                // standard manyToMany tables but we try to not duplicate tables from each side of relation
                                 rfield["relationType"] = relationships.manyToMany
+                                manyToMany.push({"type": type, "relationship": rfield})
+
                                 // todo : to be clarified
                             }
                         }
@@ -909,47 +912,53 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         if (targetType.length != 1) {
                             console.error('Reference to type '+rfield.type+' found 0 or several times')
-                        } else { 
-                            targetType[0].fields.push({
+                        } else {   
+                            rfield["name"] = type.typeName
+                            rfield["type"] = "foreign_key"
+                            rfield["relation"] = true                                                                  
+                            rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
-                            })
+                            }
+                            targetType[0].fields.push(rfield)
                         }
+                        
+
                     } else if (out == 1 && inn == 2) {
                         rfield["relationType"] = relationships.manyToOne
                         // a Fk field has to be added to the current object
-                        type.fields.push({
+                    rfield["foreign_key"] = {
                             "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
                             "type": "Int",
                             "noNull": true,
                             "isArray": false,
                             "foreignKey": true
-                        })
+                        }
                     } else if (out == 1 && inn == 1) { 
                         // Checking if self join (type related to itself)
                         if (rfield.type === type.typeName) {
                             rfield["relationType"] = relationships.selfJoinOne
-                            type.fields.push({
+                            rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
-                            })
+                            }
 
                         } else {
                             rfield["relationType"] = relationships.oneToOne
                             // Both object has to integrate a Fk to Pk but each side is processed in each type
-                            type.fields.push({
+                            rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
-                            })
+                            }
                         }
                     }
                     // One only 
@@ -957,14 +966,14 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         rfield["relationType"] = relationships.oneOnly
                         // Fk to target Pk id has to be added in the current type
                         let targetSQLTypeName = utils.getSQLTableName(rfield.type)
-                        type.fields.push({
+                        rfield["foreign_key"] = {
                             "name": "Fk_"+rfield.name+"_"+targetSQLTypeName+"_id",
                             "type": "Int",
                             "noNull": rfield.noNull, 
                             "isArray": false,
                             "foreignKey": true,
                             "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+targetSQLTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + targetSQLTypeName + "_id\")"
-                        })
+                        }
                     } 
                     // ManyOnly 
                     else if ((out == 0 && inn == 2) || (out == 2 && inn == 0)) {
@@ -974,13 +983,23 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         if (targetType.length != 1) {
                             console.error('Reference to type '+rfield.type+' found 0 or several times')
                         } else { 
-                            targetType[0].fields.push({
+                            rfield["type"] = "delegated_field"
+                            rfield["relation"] = true
+                            rfield["foreign_key"] ={
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
-                            })
+                            }
+                            let delegatedField = {
+                                ...rfield
+                            };
+                            delegatedField["type"] = "foreign_key"
+                            targetType[0].fields.push(delegatedField)
+                            
+                            
+
                         }
                     } 
                     // Remove the relationship from the field : WHY ?
@@ -993,9 +1012,13 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
     for (let index1 = 0; index1< manyToMany.length; index1++) { 
         // find a reciproq relationship 
         for (let index2 = index1+1; index2<manyToMany.length; index2++) {
-            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName) {
+            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index1].relationship.directives.length>0  && manyToMany[index1].relationship.directives.filter(directive => directive.name == 'hasInverse').length >0) {
                 manyToMany[index2].relationship.activeSide = false // Todo should be reported in the type object
             }
+            else{
+                manyToMany[index2].relationship.activeSide = true
+            }
+
         }
     }
 
@@ -1133,9 +1156,9 @@ const getJoinTables = (types, scalarTypeNames) => {
             let rfields = getRelationalFields(type.fields, scalarTypeNames)
             rfields.filter(field => field.relationType == relationships.selfJoinMany).forEach(rfield => { 
                 let elt0 = utils.getSQLTableName(type.typeName)
-                let elt1 = utils.getSQLTableName(rfield.typeName)
+                let elt1 = utils.getSQLTableName(rfield.type.toLowerCase())
                 result.push({
-                    name: type.typeName + "_" + rfield.typeName+ "_" + rfield.name,
+                    name: type.typeName + "_" + rfield.type.toLowerCase()+ "_" + rfield.name,
                     sqlname: elt0 + "_" + elt1 + "_" + rfield.name.toLowerCase(),
                     isJoinTable: true,
                     columns: [
@@ -1144,18 +1167,18 @@ const getJoinTables = (types, scalarTypeNames) => {
                             fieldType: 'INTEGER',
                             constraint: 'FOREIGN KEY ("' + elt0 + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id")'
                         }, {
-                            field: field.name + '_id',
+                            field: rfield.name + '_id',
                             fieldType: 'INTEGER',
                             constraint: 'FOREIGN KEY ("' + rfield.name.toLowerCase() + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id")'
                         },
                     ]
                 })
             })
-            rfields.filter(field => field.relationType == relationships.manyToMany && field.activeSide == true).forEach(rfield => { 
+            rfields.filter(field => field.relationType == relationships.manyToMany && field.activeSide == true ).forEach(rfield => { 
                 let elt0 = utils.getSQLTableName(type.typeName)
-                let elt1 = utils.getSQLTableName(rfield.type)
+                let elt1 = utils.getSQLTableName(rfield.type.toLowerCase())
                 result.push({
-                    name: type.typeName + "_" + rfield.type+ "_" + rfield.name,
+                    name: type.typeName + "_" + rfield.type.toLowerCase() + "_" + rfield.name,
                     sqlname: elt0 + "_" + elt1 + "_" + rfield.name.toLowerCase(),
                     isJoinTable: true,
                     columns: [
@@ -1362,6 +1385,23 @@ const addIdTypes = (types) => {
     return types
 }
 
+const addMissingInfos = (types) => {
+    types.forEach(type => {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
+            type.fields.forEach(field =>{
+
+                field["foreign_key"] = null
+                field["relation"] = false
+
+                
+            })
+        }
+    })
+
+    return types
+}
+
+
 const isSchemaValid = (types) => {
     let typesName = types.map(type => type.typeName)
 
@@ -1473,5 +1513,6 @@ module.exports = {
     getFieldsName: getFieldsName,
     compareSchema: compareSchema,
     findTable: findTable,
-    findField: findField
+    findField: findField,
+    addMissingInfos : addMissingInfos
 }
