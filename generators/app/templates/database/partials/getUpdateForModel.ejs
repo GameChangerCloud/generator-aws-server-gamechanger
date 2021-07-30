@@ -20,7 +20,13 @@
     <%for (let index = 0; index < typesName.length; index++) {
         let sqlname = getSQLTableName(typesName[index])
         //let relationType = getRelationBetween(currentTypeName, typesName[index], relations)
-        let relationType = include('./getRelationBetween',{typeOne: currentTypeName, typeTwo: typesName[index], relations: relations})
+        currentType.fields.forEach(element => {
+            if(element.type === currentType.typeName ){
+                
+                relationType = element.relationType
+            }
+        });
+        //let relationType = include('./getRelationBetween',{typeOne: currentTypeName, typeTwo: typesName[index], relations: relations})
         let s = currentTypeName.toLowerCase().substring(0, 5) + typesName[index] + 'Bis';
         switch (relationType) {
 

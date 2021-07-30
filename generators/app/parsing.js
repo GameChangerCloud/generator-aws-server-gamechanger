@@ -152,7 +152,7 @@ const getFieldsParsed = (type, relations, manyToManyTables, typesName, defaultSc
                             result += buildArgs(field.arguments, hasArguments)
 
                             // get the relation
-                            let relationsBetween = getRelationBetween(field.type, type.typeName, relations)
+                            let relationsBetween = field.relationType//getRelationBetween(field.type, type.typeName, relations)
                             if (relationsBetween === "manyToMany") {
                                 let manyToManyTable = getManyToManyTableBetween(type.typeName, field.type, manyToManyTables)
 
@@ -416,13 +416,12 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
         
     })
     // Deal with oneOnly relationship
-    relations.oneOnly.forEach(relation => {
-        fields.filter(field1 => field1.type == relation[0]).forEach(field2 => {
-            sqlFields.push(`args.${
-                field2.name
-            }`);
-        })
+    fields.filter(field1 => field1.relationType == relations.oneOnly).forEach(field2 => {
+        sqlFields.push(`args.${
+            field2.name
+        }`);
     })
+    
     return sqlFields.filter(field => !field.includes("args.id")).join(` + "," + `);
 }
 
@@ -436,11 +435,11 @@ const getFieldsName = (tables, fields, currentTypeName, currentSQLTypeName, rela
         
     })
     // Deal with oneOnly relationship
-    relations.oneOnly.forEach(relation => {
-        fields.filter(field1 => field1.type == relation[0]).forEach(field2 => {
-            sqlNames.push("\\\"Fk_" + utils.getSQLTableName(field2.type) + "_id\\\"");
-        })
+
+    fields.filter(field1 => field1.relationType == relations.oneOnly).forEach(field2 => {
+        sqlNames.push("\\\"" + utils.getSQLTableName(field2.foreign_key.name) + "\\\"");
     })
+
     return sqlNames.filter(field => !field.includes("\"Pk_")).join(",");
 }
 
@@ -629,7 +628,15 @@ const getParameters = (typesName, sqltypesName, currentType, relations, scalarTy
     // Parameters implicit
     // Then, we check relations between the current type table with all the types
     for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
+        let relationType = ""
+        currentType.fields.forEach(element => {
+            if(element.type === currentType.typeName ){
+                
+                relationType = element.relationType
+            }
+        });
+
+        //let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
         switch (relationType) {
             case "manyOnly":
                 // Only if the current type DOES NOT have the field type
@@ -722,7 +729,13 @@ const getBodyOfConstructor = (typesName, sqltypesName, currentType, relations) =
     // Parameters implicit
     // Then, we check relations between the current type table with all the types
     for (let index = 0; index < typesName.length; index++) {
-        let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
+        currentType.fields.forEach(element => {
+            if(element.type === currentType.typeName ){
+                
+                relationType = element.relationType
+            }
+        });
+        // let relationType = getRelationBetween(currentType.typeName, typesName[index], relations)
         switch (relationType) {
             case "manyOnly":
                 // Only if the current type DOES NOT have the field type
@@ -884,6 +897,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
         if (type.typeName != "Query" && type.typeName != "Mutation" && type.typeName != "Subscription") {
             let rfields = getRelationalFields(type.fields, scalarTypeNames)
             rfields.forEach(rfield => { // Check if it's not a scalar type
+                // we skip fields that were been added by other types ( ex: ManyOnly relation)
+                if( !rfield["delegated_field"]["state"]){
                     let out = getRelationOf(rfield.type, types, typenames, type.typeName)
                     let inn = getRelationOf(type.typeName, types, typenames, rfield.type)
                     if (out == 2 && inn == 2) { // Checking if self join (type related to itself)
@@ -895,6 +910,13 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             if (rfield.directives.length>0 && rfield.directives.filter(directive => directive.name == 'hasInverse').length >0) {
                                 rfield["relationType"] = relationships.manyToMany
                                 rfield["activeSide"] = true
+                                rfield["joinTable"]["state"] = true 
+                                rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                                rfield["joinTable"]["contains"].push({
+                                    "fieldName" : rfield.name,
+                                    "type" : rfield.type
+                                })
+                                //TO continue 
                                 manyToMany.push({"type": type, "relationship": rfield})
                                 // No addition needed for ManyToMany --> only through join table
 
@@ -912,18 +934,43 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         if (targetType.length != 1) {
                             console.error('Reference to type '+rfield.type+' found 0 or several times')
-                        } else {   
-                            rfield["name"] = type.typeName
-                            rfield["type"] = "foreign_key"
-                            rfield["relation"] = true                                                                  
-                            rfield["foreign_key"] = {
+                        } else {
+                            // set relation status to each side of relation
+                            rfield["relation"] = true
+
+                            // tracks the fk that were added to the targetType
+                            rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
+                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                            rfield["delegated_field"]["side"] = "origin"
+                            
+
+
+                            // copy all info from field to fk to be added in targetType
+                            let delegatedField = JSON.parse(JSON.stringify(rfield))
+                            // delegated field is a foreign Key
+                            delegatedField["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
                             }
-                            targetType[0].fields.push(rfield)
+                            delegatedField["delegated_field"]["state"] = true
+                            delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                            delegatedField["type"] = "Int"
+
+                            // tracks the type who added the Fk
+                            delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
+                            delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
+                            delegatedField["delegated_field"]["side"] = "target"
+                          
+
+                            
+                            // the field wont appear in model
+                            rfield["in_model"] = false
+                        
+                            targetType[0].fields.push(delegatedField)
+                              
                         }
                         
 
@@ -982,28 +1029,45 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         if (targetType.length != 1) {
                             console.error('Reference to type '+rfield.type+' found 0 or several times')
-                        } else { 
-                            rfield["type"] = "delegated_field"
+                        } else {
+                            // set relation status to each side of relation
                             rfield["relation"] = true
-                            rfield["foreign_key"] ={
+
+                            // tracks the fk that were added to the targetType
+                            rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
+                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                            rfield["delegated_field"]["side"] = "origin"
+
+
+                            // copy all info from field to fk to be added in targetType
+                            let delegatedField = JSON.parse(JSON.stringify(rfield))
+                            // delegated field is a foreign Key
+                            delegatedField["foreign_key"] ={
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true
                             }
-                            let delegatedField = {
-                                ...rfield
-                            };
-                            delegatedField["type"] = "foreign_key"
+                            delegatedField["delegated_field"]["state"] = true
+                            delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                            delegatedField["type"] = "Int"
+
+                            
+                            
+                            // tracks the type who added the Fk
+                            delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
+                            delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
+                            delegatedField["delegated_field"]["side"] = "target"
+                            
+                        
                             targetType[0].fields.push(delegatedField)
                             
-                            
-
                         }
                     } 
                     // Remove the relationship from the field : WHY ?
                     //type.fields = type.fields.filter((e) => e !== rfield)
+                }
             })
         }
     })
@@ -1114,33 +1178,33 @@ const isSelfJoinMany = (type, selfJoinMany) => {
     return answers
 }
 
-const getRelationBetween = (typeOne, typeTwo, relations) => {
-    if (typeOne !== "Query" && typeTwo !== "Query") {
-        if (isManyToMany(typeOne, typeTwo, relations.manyToMany)) 
-            return "manyToMany"
-         else if (isOneToMany(typeOne, typeTwo, relations.oneToMany)) 
-            return "oneToMany"
-         else if (isManyToOne(typeOne, typeTwo, relations.manyToOne)) 
-            return "manyToOne"
-         else if (isOneToOne(typeOne, typeTwo, relations.oneToOne).answers) {
-            if (typeOne === isOneToOne(typeOne, typeTwo, relations.oneToOne).parent) 
-                return "oneToOneParent"
-             else 
-                return "oneToOneChild"
+// const getRelationBetween = (typeOne, typeTwo, relations) => {
+//     if (typeOne !== "Query" && typeTwo !== "Query") {
+//         if (isManyToMany(typeOne, typeTwo, relations.manyToMany)) 
+//             return "manyToMany"
+//          else if (isOneToMany(typeOne, typeTwo, relations.oneToMany)) 
+//             return "oneToMany"
+//          else if (isManyToOne(typeOne, typeTwo, relations.manyToOne)) 
+//             return "manyToOne"
+//          else if (isOneToOne(typeOne, typeTwo, relations.oneToOne).answers) {
+//             if (typeOne === isOneToOne(typeOne, typeTwo, relations.oneToOne).parent) 
+//                 return "oneToOneParent"
+//              else 
+//                 return "oneToOneChild"
             
-        } else if (isOneOnly(typeOne, typeTwo, relations.oneOnly)) 
-            return "oneOnly"
-         else if (isManyOnly(typeOne, typeTwo, relations.manyOnly)) 
-            return "manyOnly"
-         else if (isSelfJoinOne(typeOne, relations.selfJoinOne)) 
-            return "selfJoinOne"
-         else {
-            return "selfJoinMany"
-        }
-    } else 
-        return "No relation"
+//         } else if (isOneOnly(typeOne, typeTwo, relations.oneOnly)) 
+//             return "oneOnly"
+//          else if (isManyOnly(typeOne, typeTwo, relations.manyOnly)) 
+//             return "manyOnly"
+//          else if (isSelfJoinOne(typeOne, relations.selfJoinOne)) 
+//             return "selfJoinOne"
+//          else {
+//             return "selfJoinMany"
+//         }
+//     } else 
+//         return "No relation"
     
-}
+// }
 /**
  * Build the list of join tables to add to the schema on top of standard object
  * 
@@ -1385,15 +1449,44 @@ const addIdTypes = (types) => {
     return types
 }
 
+
+/**
+ * Set up types fields to handle tracking of foreign key that might have been added by other types 
+ * 
+ * @param {*} types list of types  
+ * @returns nothing
+ */
+
 const addMissingInfos = (types) => {
     types.forEach(type => {
         if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
             type.fields.forEach(field =>{
-
+                // foreign key of the field
                 field["foreign_key"] = null
+                // if the field is a relation
                 field["relation"] = false
+                // if the field is added or is adding to another field
+                field["delegated_field"] = {
+                    "state" : false,
+                    "side" : null, 
+                    "associatedWith": {
+                        "type": null,
+                        "fieldName" : null
+                    }
+                }
+                // if the field will appear in final model (tables) ex for oneToMany relation the field may dissapear
+                field["in_model"] = true
 
-                
+                // contains info if the field will be in a joinTable in final model, the name of the table
+                // the name of the fields associated in the table 
+
+                field["joinTable"] = {
+                    "state" : false,
+                    "name" : null,
+                    "contains" : []
+                        
+                    
+                }
             })
         }
     })
@@ -1500,7 +1593,7 @@ module.exports = {
  //   isManyOnly: isManyOnly,
     isSelfJoinOne: isSelfJoinOne,
     isSelfJoinMany: isSelfJoinMany,
-    getRelationBetween: getRelationBetween,
+    // getRelationBetween: getRelationBetween,
     getJoinTables: getJoinTables,
  //   getManyToManyTableBetween: getManyToManyTableBetween,
     getQuerySelfJoinOne: getQuerySelfJoinOne,

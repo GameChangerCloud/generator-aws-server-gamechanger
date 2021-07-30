@@ -27,12 +27,13 @@
             case "ID": 
                 let oneToOne = false
                 let parent
-                typesName.forEach(type => {
-                    if (include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).answers) {
-                        oneToOne = true
-                        parent = include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).parent
-                    }
-                }) _%>
+                // typesName.forEach(type => {
+                //     if (include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).answers) {
+                //         oneToOne = true
+                //         parent = include('./relation/isOneToOne',{typeOne: type, typeTwo: currentTypeName, oneToOne: relations.oneToOne}).parent
+                //     }
+                // }) 
+                _%>
                 pad(faker.random.number(), 3)
                 <%break;
             case "Boolean": _%>

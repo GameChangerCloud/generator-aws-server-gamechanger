@@ -1,6 +1,6 @@
 let temp = ''
 <% fields.map(field => {_%>
-    <% const s = include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
+    <% const s = field.relationType //include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
     <% let sqltype = getSQLTableName(field.type) _%>
     <% if (field.type !== "ID") { _%>
         <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !scalarTypeNames.includes(field.type)) {_%>
@@ -43,7 +43,7 @@ let temp = ''
         }})
                     <% break
                 case "manyToMany": _%>
-        <% let manyToManyTable = getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).sqlname) %>
+        <% let manyToManyTable = manyToManyTables.filter(table => table.sqlname.includes(field.name) && table.sqlname.includes(field.type) && table.sqlname.includes(typeName)).sqlname //getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).sqlname) %>
         // Field <%- field.name %> of type <%- field.type %> 
         sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {

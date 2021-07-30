@@ -7,6 +7,9 @@ const utils = require('./templates/database/utils')
 const matching = require('./matching')
 const manageScalars = require('./scalars/manageScalars')
 
+const relationships = require('./templates/database/relationships')
+
+
 module.exports = class extends Generator {
 	// The name `constructor` is important here
 	constructor(args, opts) {
@@ -217,7 +220,7 @@ module.exports = class extends Generator {
 			}
 
 			currentType.fields.forEach((field) => {
-				if (parsing.getRelationBetween(currentType.typeName, field.type, this.relations) === "oneToOneChild") {
+				if (field.relation === "oneToOneChild") {
 					isOneToOneChild = true
 					parent = field.type
 				}
@@ -360,16 +363,16 @@ module.exports = class extends Generator {
 							queryOneToOneParent: queryOneToOneParent,
 							queryOneToOneChild: queryOneToOneChild,
 							queryManyToOne: queryManyToOne,
-							querySelfJoinOne: parsing.isSelfJoinOne(currentType.typeName, this.relations.selfJoinOne) ? parsing.getQuerySelfJoinOne(currentType.typeName, currentType.fields) : false,
-							querySelfJoinMany: parsing.isSelfJoinMany(currentType.typeName, this.relations.selfJoinMany) ? parsing.getQuerySelfJoinMany(currentType.typeName, currentType.fields) : false,
+							querySelfJoinOne: currentType.fields.find(field => field.relationship === "selfJoinOne") ? parsing.getQuerySelfJoinOne(currentType.typeName, currentType.fields) : false,
+							querySelfJoinMany: currentType.fields.find(field => field.relationship === "selfJoinMany")  ? parsing.getQuerySelfJoinMany(currentType.typeName, currentType.fields) : false,
 							fields: currentType.fields,
 							directiveNames : directiveNames,
-							relations: this.relations,
+							relations: relationships,
 							manyToManyTables: this.joinTables,
 							scalarTypeNames: this.scalarTypeNames,
 							scalars: constants,
-							fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, this.relations, this.joinTables),
-							fieldsName: parsing.getFieldsName(this.tables,currentType.fields, currentType.typeName, currentType.sqlTypeName, this.relations),
+							fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, relationships, this.joinTables),
+							fieldsName: parsing.getFieldsName(this.tables,currentType.fields, currentType.typeName, currentType.sqlTypeName, relationships),
 							utils: utils,
 							manageScalars : manageScalars
 						}
@@ -393,7 +396,7 @@ module.exports = class extends Generator {
 						{
 							fields: currentType.fields,
 							typeName: currentType.typeName,
-							relations : this.relations,
+							relations : relationships,
 							typeQuery : "create"
 						}
 					)
@@ -404,7 +407,7 @@ module.exports = class extends Generator {
 						{
 							fields: currentType.fields,
 							typeName: currentType.typeName,
-							relations : this.relations,
+							relations : relationships,
 							typeQuery : "delete"
 						}
 					)
@@ -416,7 +419,7 @@ module.exports = class extends Generator {
 						{
 							fields: currentType.fields,
 							typeName: currentType.typeName,
-							relations : this.relations,
+							relations : relationships,
 							typeQuery : "update"
 						}
 					)
@@ -533,7 +536,7 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/models.js'),
 			this.destinationPath('initDatabase/models.js'),
 			{
-				creationOfModels: parsing.getCreationOfModels(this.types, this.relations, this.scalarTypeNames),
+				creationOfModels: parsing.getCreationOfModels(this.types, relationships, this.scalarTypeNames),
 				listOfModelsExport: parsing.getListOfModelsExport(this.types)
 			}
 		)
@@ -554,7 +557,7 @@ module.exports = class extends Generator {
 			{
 				types: this.types, 
 				typesName: typesNameArray, 
-				relations: this.relations,
+				relations: relationships,
 				matching : matching,
 				tables: this.tables,
 				hasFieldType: parsing.hasFieldType,

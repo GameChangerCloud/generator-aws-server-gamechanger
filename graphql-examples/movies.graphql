@@ -38,4 +38,5 @@ type Abstract {
 type City {
   id: ID
   name: String!
+  firstStudio: Studio
 }
