@@ -8,8 +8,6 @@ const relationships = require('./templates/database/relationships')
 const manageScalars = require('./scalars/manageScalars')
 
 const utils = require('./templates/database/utils');
-const { BigIntMock } = require('graphql-scalars');
-
 /**
  * From the schema, fetch all the types object and return an array of it
  * @param {*} schemaJSON 
@@ -917,6 +915,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "fieldName" : rfield.name,
                                 "type" : rfield.type
                             })
+                            // the field wont appear in model
+                            rfield["in_model"] = false
 
 
                             // No addition needed for ManyToMany --> only through join table
@@ -944,6 +944,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 })
                                 
                                 manyToMany.push({"type": type, "relationship": rfield})
+                                // the field wont appear in model
+                                rfield["in_model"] = false
                                 // No addition needed for ManyToMany --> only through join table
 
                             } else {
@@ -953,6 +955,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
 
                                 rfield["relationType"] = relationships.manyToMany
                                 manyToMany.push({"type": type, "relationship": rfield})
+                                // the field wont appear in model
+                                rfield["in_model"] = false
 
                                 // todo : to be clarified
                             }
@@ -1133,6 +1137,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
                             delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
                             delegatedField["delegated_field"]["side"] = "target"
+
+                            // the field wont appear in model
+                            rfield["in_model"] = false
                             
                         
                             targetType[0].fields.push(delegatedField)
