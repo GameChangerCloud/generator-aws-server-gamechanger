@@ -7,7 +7,8 @@ const relationships = require('./templates/database/relationships')
 
 const manageScalars = require('./scalars/manageScalars')
 
-const utils = require('./templates/database/utils')
+const utils = require('./templates/database/utils');
+const { BigIntMock } = require('graphql-scalars');
 
 /**
  * From the schema, fetch all the types object and return an array of it
@@ -903,25 +904,53 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                     let inn = getRelationOf(type.typeName, types, typenames, rfield.type)
                     if (out == 2 && inn == 2) { // Checking if self join (type related to itself)
                         if (rfield.type === type.typeName) {
+                            type["relationList"].push({ "type" : rfield.type, "relation" : relationships.selfJoinMany})
+
+                            
                             rfield["relationType"] = relationships.selfJoinMany
                             rfield["activeSide"] = true
+
+                            // add info of jointable Associated
+                            rfield["joinTable"]["state"] = true 
+                            rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                            rfield["joinTable"]["contains"].push({
+                                "fieldName" : rfield.name,
+                                "type" : rfield.type
+                            })
+
+
                             // No addition needed for ManyToMany --> only through join table
                         } else {
                             if (rfield.directives.length>0 && rfield.directives.filter(directive => directive.name == 'hasInverse').length >0) {
+                                type["relationList"].push({ "type" : rfield.type, "relation" : relationships.manyToMany})
+
                                 rfield["relationType"] = relationships.manyToMany
+                             
                                 rfield["activeSide"] = true
+                                // add info of jointable Associated
                                 rfield["joinTable"]["state"] = true 
                                 rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                                 rfield["joinTable"]["contains"].push({
                                     "fieldName" : rfield.name,
                                     "type" : rfield.type
                                 })
-                                //TO continue 
+
+                                // gets the related field of join table in the other side thanks to hasInverseDirective info
+                                hasInverseFieldName = rfield.directives.filter(directive => directive.name == 'hasInverse')[0].args[0].value
+                                // push it into joinTable info
+                                rfield["joinTable"]["contains"].push({
+                                    "fieldName" : hasInverseFieldName,
+                                    "type" : type.typeName
+                                })
+                                
                                 manyToMany.push({"type": type, "relationship": rfield})
                                 // No addition needed for ManyToMany --> only through join table
 
                             } else {
                                 // standard manyToMany tables but we try to not duplicate tables from each side of relation
+                                type["relationList"].push({ "type" : rfield.type, "relation" : relationships.manyToMany})
+
+
                                 rfield["relationType"] = relationships.manyToMany
                                 manyToMany.push({"type": type, "relationship": rfield})
 
@@ -929,6 +958,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             }
                         }
                     } else if (out == 2 && inn == 1) {
+                        type["relationList"].push({ "type" : rfield.type, "relation" : relationships.oneToMany})
+
+
                         rfield["relationType"] = relationships.oneToMany
                         // A Fk field has to be added to the targeted object
                         let targetType = types.filter(type => type.typeName == rfield.type)
@@ -975,18 +1007,55 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                         
 
                     } else if (out == 1 && inn == 2) {
+                        type["relationList"].push({ "type" : rfield.type, "relation" : relationships.manyToOne})
+
+
                         rfield["relationType"] = relationships.manyToOne
                         // a Fk field has to be added to the current object
-                    rfield["foreign_key"] = {
+                    
+                        let targetType = types.filter(type => type.typeName == rfield.type)
+                        rfield["relation"] = true
+
+                        // tracks the fk that were added to the targetType
+                        rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
+                        rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                        rfield["delegated_field"]["side"] = "origin"
+                        
+
+
+                        // copy all info from field to fk to be added in targetType
+                        let delegatedField = JSON.parse(JSON.stringify(rfield))
+                        // delegated field is a foreign Key
+                        delegatedField["foreign_key"] = {
                             "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
                             "type": "Int",
                             "noNull": true,
                             "isArray": false,
                             "foreignKey": true
                         }
+                        delegatedField["delegated_field"]["state"] = true
+                        delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                        delegatedField["type"] = "Int"
+
+                        // tracks the type who added the Fk
+                        delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
+                        delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
+                        delegatedField["delegated_field"]["side"] = "target"
+                    
+
+                        
+                        // the field wont appear in model
+                        rfield["in_model"] = false
+                    
+                        targetType[0].fields.push(delegatedField)
+
+
                     } else if (out == 1 && inn == 1) { 
                         // Checking if self join (type related to itself)
                         if (rfield.type === type.typeName) {
+                            type["relationList"].push({ "type" : rfield.type, "relation" : relationships.selfJoinOne})
+
+
                             rfield["relationType"] = relationships.selfJoinOne
                             rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
@@ -1010,6 +1079,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                     }
                     // One only 
                     else if ((out == 0 && inn == 1)||(out == 1 && inn == 0)) {
+                        type["relationList"].push({ "type" : rfield.type, "relation" : relationships.oneOnly})
+
+
                         rfield["relationType"] = relationships.oneOnly
                         // Fk to target Pk id has to be added in the current type
                         let targetSQLTypeName = utils.getSQLTableName(rfield.type)
@@ -1024,6 +1096,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                     } 
                     // ManyOnly 
                     else if ((out == 0 && inn == 2) || (out == 2 && inn == 0)) {
+                        type["relationList"].push({ "type" : rfield.type, "relation" : relationships.manyOnly})
+
                         rfield["relationType"] = relationships.manyOnly
                         // Fk to current Pk id has to be added in the targeted type
                         let targetType = types.filter(type => type.typeName == rfield.type)
@@ -1460,6 +1534,8 @@ const addIdTypes = (types) => {
 const addMissingInfos = (types) => {
     types.forEach(type => {
         if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
+            // stores all the relations which were found for a give type
+            type["relationList"] = [] // { "type" : null, "relation" : }
             type.fields.forEach(field =>{
                 // foreign key of the field
                 field["foreign_key"] = null
@@ -1487,6 +1563,7 @@ const addMissingInfos = (types) => {
                         
                     
                 }
+
             })
         }
     })
