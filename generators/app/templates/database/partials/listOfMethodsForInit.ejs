@@ -17,7 +17,17 @@
     } %>
 
     // Other tables
-    <% relations.selfJoinMany.forEach(relation => { 
+    <%let selfJoinManyRelation = []
+    types.forEach(type => {
+        if(type.relationList.length > 0){
+            type.relationList.forEach(relation => {
+                if(relation.type = relation.selfJoinMany){
+                    selfJoinManyRelation.push([type.typesName, relation.type])
+                }
+            });
+        }
+    });%>
+    <% selfJoinManyRelation.forEach(relation => { 
         for (let index = 0; index < typesName.length; index++) {
             if (typesName[index] === relation[0]) {
                 types[index].fields.forEach(field => {
@@ -39,7 +49,17 @@
             }
         }
     }) _%>
-    <%relations.manyToMany.forEach(relation => {
+    <%let manyToManyRelation = []
+    types.forEach(type => {
+        if(type.relationList.length > 0){
+            type.relationList.forEach(relation => {
+                if(relation.type = relation.manyToMany){
+                    manyToManyRelation.push([type.typesName, relation.type])
+                }
+            });
+        }
+    });%>
+    <%manyToManyRelation.forEach(relation => {
         const nameTable = relation[0] + "_" + relation[1]%>
         let <%- nameTable.toLowerCase()%>Tab = []
         function init<%-nameTable%>(){
