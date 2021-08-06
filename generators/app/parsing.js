@@ -1085,7 +1085,7 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "noNull": true,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
                                 
                             }
