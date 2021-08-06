@@ -989,7 +989,10 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
-                                "foreignKey": true
+                                "foreignKey": true,
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+
+
                             }
                             delegatedField["delegated_field"]["state"] = true
                             delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
@@ -1035,7 +1038,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             "type": "Int",
                             "noNull": true,
                             "isArray": false,
-                            "foreignKey": true
+                            "foreignKey": true,
+                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                            
                         }
                         delegatedField["delegated_field"]["state"] = true
                         delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
@@ -1066,7 +1071,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
-                                "foreignKey": true
+                                "foreignKey": true,
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+
                             }
 
                         } else {
@@ -1077,7 +1084,10 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
-                                "foreignKey": true
+                                "foreignKey": true,
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+
+                                
                             }
                         }
                     }
@@ -1095,7 +1105,7 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             "noNull": rfield.noNull, 
                             "isArray": false,
                             "foreignKey": true,
-                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+targetSQLTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + targetSQLTypeName + "_id\")"
+                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+targetSQLTypeName+"_id\") REFERENCES \"" + targetSQLTypeName + "\" (\"Pk_" + targetSQLTypeName + "_id\")"
                         }
                     } 
                     // ManyOnly 
@@ -1125,7 +1135,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "type": "Int",
                                 "noNull": true,
                                 "isArray": false,
-                                "foreignKey": true
+                                "foreignKey": true,
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+
                             }
                             delegatedField["delegated_field"]["state"] = true
                             delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
@@ -1334,7 +1346,7 @@ const getJoinTables = (types, scalarTypeNames) => {
                         }, {
                             field: rfield.name + '_id',
                             fieldType: 'INTEGER',
-                            constraint: 'FOREIGN KEY ("' + rfield.name.toLowerCase() + '_id") REFERENCES "' + elt0 + '"("Pk_' + elt0 + '_id")'
+                            constraint: 'FOREIGN KEY ("' + rfield.name.toLowerCase() + '_id") REFERENCES "' + elt1 + '"("Pk_' + elt1 + '_id")'
                         },
                     ]
                 })
