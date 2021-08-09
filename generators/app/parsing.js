@@ -1039,7 +1039,7 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             "noNull": true,
                             "isArray": false,
                             "foreignKey": true,
-                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
                             
                         }
                         delegatedField["delegated_field"]["state"] = true
