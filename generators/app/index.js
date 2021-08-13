@@ -536,8 +536,9 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/models.js'),
 			this.destinationPath('initDatabase/models.js'),
 			{
-				creationOfModels: parsing.getCreationOfModels(this.types, relationships, this.scalarTypeNames),
-				listOfModelsExport: parsing.getListOfModelsExport(this.types)
+				types: this.types,
+				scalarTypeNames :this.scalarTypeNames,
+				relations: relationships,
 			}
 		)
 
