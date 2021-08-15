@@ -556,7 +556,7 @@ module.exports = class extends Generator {
 			this.templatePath('initDatabase/fillTables.js'),
 			this.destinationPath('initDatabase/fillTables.js'),
 			{
-				types: this.types, 
+				types: this.types,
 				typesName: typesNameArray, 
 				relations: relationships,
 				matching : matching,

@@ -16,56 +16,33 @@
         <% }
     } %>
 
-    // Other tables
-    <%let selfJoinManyRelation = []
-    types.forEach(type => {
-        if(type.relationList.length > 0){
-            type.relationList.forEach(relation => {
-                if(relation.type = relation.selfJoinMany){
-                    selfJoinManyRelation.push([type.typesName, relation.type])
-                }
-            });
-        }
-    });%>
-    <% selfJoinManyRelation.forEach(relation => { 
-        for (let index = 0; index < typesName.length; index++) {
-            if (typesName[index] === relation[0]) {
-                types[index].fields.forEach(field => {
-                    if (field.type === typesName[index]) { _%>
-                       <% const nameTable = relation[0] + "_" + field.name %>
-                        let <%= nameTable.toLowerCase()%>Tab = []
-                        function init<%=nameTable%>(){
-                            for(let i = 0; i < 5; i++){
-                                let _<%- relation[0].toLowerCase()%>Position, _<%-field.name %>Position
-                                do { _<%-relation[0].toLowerCase()%>Position = Math.floor((Math.random() * 5))
-                                     _<%- field.name%>Position = pickOne(<%- relation[0].toLowerCase()%>Tab)
-                                } while(_<%-relation[0].toLowerCase()%>Position === _<%-field.name%>Position)
-                                    <%= nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5) +1), <%-field.name.toLowerCase()%>_id : Math.floor((Math.random() * 5) +1)});
-                                    
-                            }
+    // Other tables (Selfjoin & ManyToMany)
+        
+    <%_types.forEach(type => {
+        type.fields.forEach(field => {
+            if(field.joinTable.state){
+                if(field.relationType === relations.manyToMany && field.activeSide){%>
+                    let <%-field.joinTable.name.toLowerCase()%>Tab = []
+                    function init<%-field.joinTable.name%>(){
+                        for(let i = 0; i < 5; i++){
+                            
+                            <%- field.joinTable.name.toLowerCase()%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
                         }
-                   <% }
-               })
-            }
-        }
-    }) _%>
-    <%let manyToManyRelation = []
-    types.forEach(type => {
-        if(type.relationList.length > 0){
-            type.relationList.forEach(relation => {
-                if(relation.type = relation.manyToMany){
-                    manyToManyRelation.push([type.typesName, relation.type])
-                }
-            });
-        }
-    });%>
-    <%manyToManyRelation.forEach(relation => {
-        const nameTable = relation[0] + "_" + relation[1]%>
-        let <%- nameTable.toLowerCase()%>Tab = []
-        function init<%-nameTable%>(){
-            for(let i = 0; i < 5; i++){
+                    }
                 
-                <%- nameTable.toLowerCase()%>Tab.push({<%- relation[0].toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-relation[1].toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
+
+                <%}
+                if(field.relationType === relations.selfJoinMany){%>
+                    let <%-field.joinTable.name.toLowerCase()%>Tab = []
+                    function init<%-field.joinTable.name%>(){
+                        for(let i = 0; i < 5; i++){
+                            
+                            <%- field.joinTable.name.toLowerCase()%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[0].type.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
+                        }
+                    }
+                
+                <%_}  
             }
-        }
-    <%}) _%> 
+            
+        })
+    })_%>

@@ -118,6 +118,8 @@ module.exports.fillTables = async (numberItem) => {
 const queriesInsert = []
 const restoreConstraints = new Set()
 const removeConstraints = new Set()
+// Stores Relation
+const entityIndex = []
 
 /*******
  * Start of generated part using listOfMethodsForInit
