@@ -623,7 +623,16 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                             rfield["joinTable"]["contains"].push({
                                 "fieldName" : rfield.name,
-                                "type" : rfield.type
+                                "type" : rfield.type,
+                                "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+
+                            })
+                            // add info about selfType
+                            rfield["joinTable"]["contains"].push({
+                                "fieldName" : rfield.type,
+                                "type" : rfield.type,
+                                "constraint" : "FOREIGN KEY (\""+rfield.type.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+
                             })
                             // the field wont appear in model
                             rfield["in_model"] = false
@@ -643,15 +652,18 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                                 rfield["joinTable"]["contains"].push({
                                     "fieldName" : rfield.name,
-                                    "type" : rfield.type
+                                    "type" : rfield.type,
+                                    "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+
                                 })
 
                                 // gets the related field of join table in the other side thanks to hasInverseDirective info
                                 hasInverseFieldName = rfield.directives.filter(directive => directive.name == 'hasInverse')[0].args[0].value
                                 // push it into joinTable info
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : hasInverseFieldName,
-                                    "type" : type.typeName
+                                    "fieldName" : type.typeName.toLowerCase(),
+                                    "type" : type.typeName,
+                                    "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
                                 })
                                 
                                 manyToMany.push({"type": type, "relationship": rfield})
@@ -670,13 +682,18 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                                 rfield["joinTable"]["contains"].push({
                                     "fieldName" : rfield.name,
-                                    "type" : rfield.type
+                                    "type" : rfield.type,
+                                    "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+
+                                    
                                 })
                                 // push into jointable info about related type . field name is by default type name
                                 // push it into joinTable info
                                 rfield["joinTable"]["contains"].push({
                                     "fieldName" : type.typeName,
-                                    "type" : type.typeName
+                                    "type" : type.typeName,
+                                    "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
+
                                 })
 
                                 manyToMany.push({"type": type, "relationship": rfield})

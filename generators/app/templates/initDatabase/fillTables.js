@@ -130,13 +130,6 @@ const entityIndex = []
  * End of generated part using listOfMethodsForInit
  */
 
-/*******
- * Start of generated part using initEachModelsJS
- */
-<%-initEachModelsJS%>
-/*******
- * End of generated part using initEachModelsJS
- */
 
  /*******
  * Start of generated part using initEachFieldsModelsJS

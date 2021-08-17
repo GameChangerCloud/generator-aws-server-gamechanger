@@ -6,12 +6,13 @@
                 for (let index = 0; index < type["fields"].length; index++) {
                     fields.push(type["fields"][index])
                 } _%>
+
+                // Init <%-type.typeName _%> tables
                 let <%- typesName[index].toLowerCase()_%>Tab = []
-                function init<%-typesName[index]%>(){
-                    for(let i = 0; i < 5; i++){
-                        <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
-                    }
+                for(let i = 0; i < 5; i++){
+                    <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {typesName : typesName, currentType : types[index], currentTypeName : typesName[index], fields : fields, relations : relations, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
                 }
+                
                 <%- include('./getUpdateForModel', {tables: tables, currentType : types[index], currentTypeName : typesName[index], fields : fields, types : types, typesName : typesName, relations : relations, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) %>
         <% }
     } %>
@@ -21,28 +22,25 @@
     <%_types.forEach(type => {
         type.fields.forEach(field => {
             if(field.joinTable.state){
-                if(field.relationType === relations.manyToMany && field.activeSide){%>
+                if( (field.relationType === relations.manyToMany && field.activeSide) || field.relationType === relations.selfJoinMany ){_%>
                     let <%-field.joinTable.name.toLowerCase()%>Tab = []
-                    function init<%-field.joinTable.name%>(){
-                        for(let i = 0; i < 5; i++){
-                            
-                            <%- field.joinTable.name.toLowerCase()%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
-                        }
+                    for(let i = 0; i < 5; i++){
+                        
+                        <%- field.joinTable.name.toLowerCase()%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
+                        
                     }
-                
+                    removeConstraints.add("ALTER TABLE \"<%- field.joinTable.name.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%- field.joinTable.name.toLowerCase()%>_<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id_fkey\"")
+                    removeConstraints.add("ALTER TABLE \"<%- field.joinTable.name.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%- field.joinTable.name.toLowerCase()%>_<%- field.joinTable.contains[1].fieldName.toLowerCase()%>_id_fkey\"")
 
-                <%}
-                if(field.relationType === relations.selfJoinMany){%>
-                    let <%-field.joinTable.name.toLowerCase()%>Tab = []
-                    function init<%-field.joinTable.name%>(){
-                        for(let i = 0; i < 5; i++){
-                            
-                            <%- field.joinTable.name.toLowerCase()%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[0].type.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
-                        }
-                    }
+                    
+                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[0].constraint%> DEFERRABLE INITIALLY DEFERRED`)
+                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[1].constraint%> DEFERRABLE INITIALLY DEFERRED`)  
+                    
+
+                <%_}_%>
                 
-                <%_}  
-            }
+                
+            <%_}_%>
             
-        })
+        <%_})
     })_%>
