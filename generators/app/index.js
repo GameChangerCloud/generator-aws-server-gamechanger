@@ -242,6 +242,7 @@ module.exports = class extends Generator {
 					this.templatePath('graphql/type.js'),
 					this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					{
+						type, currentType,
 						graphqlType: graphqlType, //EnumType, ObjectType, InterfaceType
 						interfaces: null, // An interface doesn't implement other interface
 						typeRequire: requireTypes,
@@ -326,7 +327,10 @@ module.exports = class extends Generator {
 						this.templatePath('graphql/type.js'),
 						this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 						{
+							type : currentType,
 							graphqlType: graphqlType,
+							defaultScalars: this.defaultScalars,
+							
 							interfaces: this.interfaces ? this.interfaces : null,
 							typeRequire: requireTypes,
 							typeName: currentType.typeName,
@@ -354,6 +358,7 @@ module.exports = class extends Generator {
 						this.templatePath('database/typeHandler.js'),
 						this.destinationPath('database/handlers/handler' + currentType.typeName + '.js'),
 						{
+							currentType: currentType,
 							typeName: currentType.typeName,
 							sqltypeName: currentType.sqlTypeName,
 							sqltypeNameId: sqltypeNameId,

@@ -819,6 +819,17 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             }
 
                         } else {
+                            // insert info about oneToOne relation to the target 
+                            let targetType = types.filter(type => type.typeName == rfield.type)
+                            let targetField = targetType[0].fields.filter(field => field.type === type.typeName)
+                            
+                            rfield["oneToOneInfo"] = {
+                                "fkName" : "Fk_"+targetField[0].name+"_"+utils.getSQLTableName(targetField[0].type)+"_id"
+                            }
+                            
+
+
+                            type["relationList"].push({ "type" : rfield.type, "relation" : relationships.oneToOne})
                             rfield["relation"] = true
                             rfield["relationType"] = relationships.oneToOne
                             // Both object has to integrate a Fk to Pk but each side is processed in each type
@@ -829,9 +840,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "isArray": false,
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
-
-                                
                             }
+
                         }
                     }
                     // One only 
@@ -914,6 +924,7 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
         for (let index2 = index1+1; index2<manyToMany.length; index2++) {
             if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index1].relationship.directives.length>0  && manyToMany[index1].relationship.directives.filter(directive => directive.name == 'hasInverse').length >0) {
                 manyToMany[index2].relationship.activeSide = false // Todo should be reported in the type object
+                //manyToMany[index2].relationship.joinTable = manyToMany[index1].relationship.joinTable
             }
             else{
                 manyToMany[index2].relationship.activeSide = true
@@ -1299,6 +1310,8 @@ const addMissingInfos = (types) => {
                         
                     
                 }
+                //Contains info about OneToOne relations
+                field["oneToOneInfo"] = null
 
             })
         }

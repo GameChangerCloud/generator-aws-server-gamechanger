@@ -50,6 +50,7 @@ const {
 } = require('../defaultScalarsMap')
 
 const dbHandler = require('../../database/handler')
+const { Query } = require('pg')
 
 
 module.exports = new <%-graphqlType%>({
@@ -57,15 +58,49 @@ module.exports = new <%-graphqlType%>({
 	<% if(interfaces){%>interfaces : [<%-interfaces%>],
 	<%}%>description: '',
 	fields: () => ({
-		<%-typeFields%>	}),
-	<% if(resolveType){%>
-	resolveType: (data) => {
-		switch(data.kind) {
-<%-resolveType%>
-		}
-	}
-	<%}%>
+    <%type.fields.forEach(field => {_%>  
+      <%_if( !field.delegated_field.state){
+        switch(field.type) {
+            case "ID":%>
+                <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: "GraphQLID", needResolver: false }) _%>
+              <%break
+            case "String":_%>
+                <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: "GraphQLString", needResolver: false  }) _%>
+              <%break
+            case "Int":_%>
+                <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: "GraphQLInt", needResolver: false  }) _%>
+              <%break
+            case "Boolean":_%>
+                <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: "GraphQLBoolean", needResolver: false  }) _%>
+              <%break
+              // Not classic scalar type
+            default:
+              if (defaultScalars.includes(field.type)) {%>
+                <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: field.type, needResolver: false  }) _%>
+                
+            <%} else {%><%# means its a relationType %>
+              <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: field.type+"Type" , needResolver: true }) _%>
+            <%_}_%>
+                
+
+
+        <%_}
+      }_%>
+      
+    <%});%>
+	
+  
+  
+  
+  
+  
+  
+  
+  })
 
 })
 
 <%-typeRequire%>
+
+
+
