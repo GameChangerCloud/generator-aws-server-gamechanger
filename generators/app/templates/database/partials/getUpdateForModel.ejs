@@ -12,8 +12,11 @@
                 
                     <%break
                 case "selfJoinOne":_%>
-                    //oneOnly field management
-                    <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', Math.floor((Math.random() * 5) + 1), new model.<%-currTypeName%>)
+                    //selfJoinOne field management
+                    let selfPossibleValues = [1,2,3,4,5].sort( () => .5 - Math.random() )
+                    selfPossibleValues.splice(selfPossibleValues.indexOf(index),1)
+                    let selfJoinId = selfPossibleValues[0]
+                    <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', selfJoinId, new model.<%-currTypeName%>)
                     removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS\"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
                     restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> DEFERRABLE INITIALLY DEFERRED`)
             

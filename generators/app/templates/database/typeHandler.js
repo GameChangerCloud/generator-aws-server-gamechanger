@@ -103,6 +103,8 @@ module.exports = {
 					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+fieldType+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
+					return utils.constructOutputArray(res)
+
 				case "oneOnly":
 					/******* Start of generated part using typeName and typeNameId */
 					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
@@ -122,7 +124,7 @@ module.exports = {
 					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Pk_<%-sqltypeName%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
-					return utils.constructOutputArray(res)
+					return utils.constructOutputArray(res)[0]
 				case "selfJoinMany":
 					/******* Start of generated part using typeName and typeNameId */
 					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.joinTable.name+'"."'+args.joinTable.field1+'_id" INNER JOIN "'+minifiedparentTypeName+'" ON "Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field2+'_id" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
