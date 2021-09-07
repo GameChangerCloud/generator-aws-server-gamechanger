@@ -9,6 +9,11 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
             <%  switch (s.trim()) {  
                 case "oneToMany": _%>
                    <% break; 
+                case "oneToOne": _%>
+                //OneToOne relation
+                sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
+
+                    <% break; 
                 case "oneOnly": _%>
                     <%break
                 case "manyToOne":%>
@@ -16,19 +21,16 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                 case "manyOnly":_%>
                     let addedElements<%- sqltype %> = utils.getAddedElements([], args.<%- field.name%>)
                         for (let index = 0; index < addedElements<%- sqltype %>.length; index++) {					
-                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- sqltype %>[index])
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- sqltype %>[index])
                         }
-                        utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
                     <%break
                 case "manyToMany": _%>
-                    // Get the junction table
-                    <% let manyToManyTable = manyToManyTables.filter(table => table.sqlname.includes(field.name) && table.sqlname.includes(field.type) && table.sqlname.includes(typeName)).sqlname %>
-    
+                <% let field1 = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
+                <% let field2 = field.joinTable.contains.find(c => c.type !== field.type).fieldName%>
     // Field <%- field.name %> of type <%- sqltype %>
     for( element in args.<%-field.name%>){
-        sqlRequests.push("INSERT INTO \"<%- manyToManyTable %>\" (\"<%- sqltypeName %>_id\", \"<%- sqltype %>_id\") VALUES (currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
+        sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- field2 %>_id\", \"<%- field1 %>_id\") VALUES (currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
     }
-    utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
     
     
     

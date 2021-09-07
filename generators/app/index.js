@@ -159,7 +159,7 @@ module.exports = class extends Generator {
 
 		// Get all the relations between entities
 		//const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-		this.types = parsing.getRelations(this.types, this.scalarTypeNames)
+		this.types = parsing.getRelations(this.types, this.scalarTypeNames, this.env)
 
 		// Get all the name of join relation table
 		this.joinTables = parsing.getJoinTables(this.types, this.scalarTypeNames)
@@ -330,7 +330,7 @@ module.exports = class extends Generator {
 							type : currentType,
 							graphqlType: graphqlType,
 							defaultScalars: this.defaultScalars,
-							
+
 							interfaces: this.interfaces ? this.interfaces : null,
 							typeRequire: requireTypes,
 							typeName: currentType.typeName,

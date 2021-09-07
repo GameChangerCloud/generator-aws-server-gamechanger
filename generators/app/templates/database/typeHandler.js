@@ -223,6 +223,7 @@ module.exports = {
 		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: utils.getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: manageScalars.isScalar, isBasicType : manageScalars.isBasicType}) _%>
 		/******* End of generated part using createMethodsField */
 
+		utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
 		//return res
 
 	},

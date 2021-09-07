@@ -32,7 +32,7 @@ type Studio {
 type Abstract {
 	id: ID
   text: String!
-  movie: Movie!
+  movie: Movie
 }
 
 type City {

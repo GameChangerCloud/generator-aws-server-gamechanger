@@ -415,7 +415,13 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
         
     })
     // Deal with oneOnly relationship
-    fields.filter(field1 => field1.relationType == relations.oneOnly).forEach(field2 => {
+    fields.filter(field1 => field1.relationType == relations.oneOnly || field1.relationType == relations.selfJoinOne).forEach(field2 => {
+        sqlFields.push(`args.${
+            field2.name
+        }`);
+    })
+    // Deal with oneToOne relationship
+    fields.filter(field1 => field1.relationType == relations.oneToOne && field1.noNull).forEach(field2 => {
         sqlFields.push(`args.${
             field2.name
         }`);
@@ -435,8 +441,12 @@ const getFieldsName = (tables, fields, currentTypeName, currentSQLTypeName, rela
     })
     // Deal with oneOnly relationship
 
-    fields.filter(field1 => field1.relationType == relations.oneOnly).forEach(field2 => {
-        sqlNames.push("\\\"" + utils.getSQLTableName(field2.foreign_key.name) + "\\\"");
+    fields.filter(field1 => field1.relationType == relations.oneOnly || field1.relationType == relations.selfJoinOne).forEach(field2 => {
+        sqlNames.push("\\\"" + field2.foreign_key.name + "\\\"");
+    })
+    //Deal with OneToOne not null side RelationShip
+    fields.filter(field1 => field1.relationType == relations.oneToOne && field1.noNull).forEach(field2 => {
+        sqlNames.push("\\\"" + field2.foreign_key.name + "\\\"");
     })
 
     return sqlNames.filter(field => !field.includes("\"Pk_")).join(",");
@@ -597,9 +607,10 @@ const filter = (lst) => {
  * @param {*} types contains all types with associated attributes read from easygraphql-parser
  * @param {*} typenames names assocoated with each type
  * @param {*} scalarTypeNames scalar type name if type is one of them
+ * @param {*} env allows to throw errors of not supported relations without stacktrace
  * @returns 
  */
-const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify(types,null, 3), "\n",typenames, "\n", scalarTypeNames)
+const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stringify(types,null, 3), "\n",typenames, "\n", scalarTypeNames)
     let typenames = types.map(type => type.typeName)
     let manyToMany = []
     types.forEach(type => {
@@ -819,10 +830,17 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                             }
 
                         } else {
-                            // insert info about oneToOne relation to the target 
+                            // insert info about oneToOne relation to the target
+                            
+                            
                             let targetType = types.filter(type => type.typeName == rfield.type)
                             let targetField = targetType[0].fields.filter(field => field.type === type.typeName)
                             
+                            // Detects if a 1-1 relation is present. Not supported on sql
+                            if( targetField[0].noNull && rfield.noNull){
+                                env.error("1-1 Relation not allowed, chekout \n"+rfield.name +" field on " + targetField[0].type +"\nor \n" + targetField[0].name +" field on " + rfield.type );
+                            }
+
                             rfield["oneToOneInfo"] = {
                                 "fkName" : "Fk_"+targetField[0].name+"_"+utils.getSQLTableName(targetField[0].type)+"_id"
                             }
@@ -841,6 +859,8 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
                             }
+                            
+
 
                         }
                     }
@@ -922,9 +942,9 @@ const getRelations = (types, scalarTypeNames) => { // console.log(JSON.stringify
     for (let index1 = 0; index1< manyToMany.length; index1++) { 
         // find a reciproq relationship 
         for (let index2 = index1+1; index2<manyToMany.length; index2++) {
-            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index1].relationship.directives.length>0  && manyToMany[index1].relationship.directives.filter(directive => directive.name == 'hasInverse').length >0) {
+            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index2].relationship.directives.length>0  && manyToMany[index2].relationship.directives.filter(directive => directive.name == 'hasInverse').length >0) {
                 manyToMany[index2].relationship.activeSide = false // Todo should be reported in the type object
-                //manyToMany[index2].relationship.joinTable = manyToMany[index1].relationship.joinTable
+                manyToMany[index2].relationship.joinTable = manyToMany[index1].relationship.joinTable
             }
             else{
                 manyToMany[index2].relationship.activeSide = true
