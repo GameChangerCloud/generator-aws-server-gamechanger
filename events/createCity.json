@@ -1,0 +1,3 @@
+{
+    "query" : "mutation {cityCreate (id : 200  , name : \"LOS ANGELES \" , firstStudio : \"null\"   ){ id,  name,   firstStudio{id} }}"
+}

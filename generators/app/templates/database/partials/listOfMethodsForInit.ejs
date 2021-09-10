@@ -17,12 +17,12 @@
         <% }
     } %>
 
-    // Other tables (Selfjoin & ManyToMany)
+    // Other tables (Selfjoin & ManyToMany & Composition/aggregation tables)
         
     <%_types.forEach(type => {
         type.fields.forEach(field => {
             if(field.joinTable.state){
-                if( (field.relationType === relations.manyToMany && field.activeSide) || field.relationType === relations.selfJoinMany ){_%>
+                if( (field.relationType === relations.manyToMany && field.activeSide) || field.relationType === relations.selfJoinMany || (field.relationType === relations.manyToOne && field.joinTable.state) ){_%>
                     let <%-field.joinTable.name.toLowerCase()%>Tab = []
                     for(let i = 0; i < 5; i++){
                         

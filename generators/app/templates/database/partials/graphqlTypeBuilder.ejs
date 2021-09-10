@@ -26,7 +26,10 @@
                     oneToOneInfo : "<%-field.oneToOneInfo.fkName%>",
 
             <%}_%>
-            <%if(field.joinTable.state && field.relationType == "manyToMany"){_%>
+            <% let fieldRelationType = field.relationType %>
+            <%# manyToOne composition is handled like manyToMany tables%>
+            <%if(field.joinTable.state && (field.relationType == "manyToMany" || field.relationType == "manyToOne")){
+                fieldRelationType = "manyToMany"_%>
                     joinTable : {
                         name :"<%-field.joinTable.name.toLowerCase()%>",
                         field1 : "<%-field.joinTable.contains.find(c => c.type === field.type).fieldName%>",
@@ -42,7 +45,7 @@
                     },
 
             <%}_%>
-            parentId: obj.id, fieldType: "<%-field.type.toLowerCase()%>",parentTypeName: info.parentType, parentFieldName : "<%-field.name%>" ,relationType: "<%-field.relationType%>"}, '<%-field.type%>Type').then((data) => {
+            parentId: obj.id, fieldType: "<%-field.type.toLowerCase()%>",parentTypeName: info.parentType, parentFieldName : "<%-field.name%>" ,relationType: "<%-fieldRelationType%>"}, '<%-field.type%>Type').then((data) => {
                 return data
             })
             return result

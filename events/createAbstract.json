@@ -1,0 +1,3 @@
+{
+    "query" : "mutation {abstractCreate(id : 999  , text : \"sheesh\" , movie : \"null\"  ){ id,  text,   movie{id} }}"
+}

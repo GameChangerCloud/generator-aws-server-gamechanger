@@ -408,10 +408,11 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
 const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
     let sqlFields = []
     // Deal with scalar first (removing any Array)
-    fields.filter(field => !field.isArray).forEach(field => {
+    fields.filter(field => !field.isArray && field.delegated_field.side !== "target").forEach(field => {
         let sqlField = manageScalars.getFieldCreate(field.type, field.name)
-        if (sqlField) 
+        if (sqlField){ 
             sqlFields.push(sqlField);
+        }
         
     })
     // Deal with oneOnly relationship
@@ -433,7 +434,7 @@ const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) =
 const getFieldsName = (tables, fields, currentTypeName, currentSQLTypeName, relations) => {
     let sqlNames = []
     // Deal with scalar first (removing any Array)
-    fields.filter(field => !field.isArray).forEach(field => {
+    fields.filter(field => !field.isArray && field.delegated_field.side !== "target").forEach(field => {
         let sqlName = manageScalars.getFieldName(field.type, field.name, currentTypeName)
         if (sqlName) 
             sqlNames.push(sqlName);
@@ -633,14 +634,14 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                             rfield["joinTable"]["state"] = true 
                             rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : rfield.name,
+                                "fieldName" : rfield.name.toLowerCase(),
                                 "type" : rfield.type,
-                                "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                "constraint" : "FOREIGN KEY (\""+rfield.name.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
                             })
                             // add info about selfType
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : rfield.type,
+                                "fieldName" : rfield.type.toLowerCase(),
                                 "type" : rfield.type,
                                 "constraint" : "FOREIGN KEY (\""+rfield.type.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
@@ -662,7 +663,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                                 rfield["joinTable"]["state"] = true 
                                 rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : rfield.name,
+                                    "fieldName" : rfield.name.toLowerCase(),
                                     "type" : rfield.type,
                                     "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
@@ -692,7 +693,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                                 rfield["joinTable"]["state"] = true 
                                 rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : rfield.name,
+                                    "fieldName" : rfield.name.toLowerCase(),
                                     "type" : rfield.type,
                                     "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
@@ -701,7 +702,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                                 // push into jointable info about related type . field name is by default type name
                                 // push it into joinTable info
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : type.typeName,
+                                    "fieldName" : type.typeName.toLowerCase(),
                                     "type" : type.typeName,
                                     "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
 
@@ -740,7 +741,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                             delegatedField["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
-                                "noNull": true,
+                                "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
@@ -781,35 +782,56 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                         rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
                         rfield["delegated_field"]["side"] = "origin"
                         
-
-
-                        // copy all info from field to fk to be added in targetType
-                        let delegatedField = JSON.parse(JSON.stringify(rfield))
-                        // delegated field is a foreign Key
-                        delegatedField["foreign_key"] = {
-                            "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
-                            "type": "Int",
-                            "noNull": true,
-                            "isArray": false,
-                            "foreignKey": true,
-                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
-                            
-                        }
-                        delegatedField["delegated_field"]["state"] = true
-                        delegatedField["name"] = "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
-                        delegatedField["type"] = "Int"
-
-                        // tracks the type who added the Fk
-                        delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
-                        delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
-                        delegatedField["delegated_field"]["side"] = "target"
-                    
-
-                        
                         // the field wont appear in model
                         rfield["in_model"] = false
-                    
-                        targetType[0].fields.push(delegatedField)
+
+                        // if field is null, theres a composition relation, we create a joinTable
+                        if(rfield.noNull){
+
+                            rfield["joinTable"]["state"] = true 
+                            rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                            rfield["joinTable"]["contains"].push({
+                                "fieldName" : rfield.name,
+                                "type" : rfield.type,
+                                "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+
+                            })
+                            rfield["joinTable"]["contains"].push({
+                                "fieldName" : type.typeName.toLowerCase(),
+                                "type" : type.typeName,
+                                "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
+                            })
+
+                        }
+                        // if field can be null, then we do classic processing
+                        else{
+                            // copy all info from field to fk to be added in targetType
+                            let delegatedField = JSON.parse(JSON.stringify(rfield))
+                            // delegated field is a foreign Key
+                            delegatedField["foreign_key"] = {
+                                "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
+                                "type": "Int",
+                                "noNull": rfield.noNull,
+                                "isArray": false,
+                                "foreignKey": true,
+                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+                                
+                            }
+                            delegatedField["delegated_field"]["state"] = true
+                            delegatedField["name"] = "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
+                            delegatedField["type"] = "Int"
+
+                            // tracks the type who added the Fk
+                            delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
+                            delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
+                            delegatedField["delegated_field"]["side"] = "target"
+                        
+
+                            
+                            
+                        
+                            targetType[0].fields.push(delegatedField)
+                        }
 
 
                     } else if (out == 1 && inn == 1) { 
@@ -822,7 +844,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                             rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
-                                "noNull": true,
+                                "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
@@ -854,7 +876,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                             rfield["foreign_key"] = {
                                 "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
                                 "type": "Int",
-                                "noNull": true,
+                                "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
@@ -906,7 +928,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                             delegatedField["foreign_key"] ={
                                 "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
                                 "type": "Int",
-                                "noNull": true,
+                                "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
                                 "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
@@ -1079,7 +1101,7 @@ const getJoinTables = (types, scalarTypeNames) => {
                     ]
                 })
             })
-            rfields.filter(field => field.relationType == relationships.manyToMany && field.activeSide == true ).forEach(rfield => { 
+            rfields.filter(field => (field.relationType == relationships.manyToMany && field.activeSide == true) ||  field.relationType == relationships.manyToOne && field.joinTable.state).forEach(rfield => { 
                 let elt0 = utils.getSQLTableName(type.typeName)
                 let elt1 = utils.getSQLTableName(rfield.type.toLowerCase())
                 result.push({
