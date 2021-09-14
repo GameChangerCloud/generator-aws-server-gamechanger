@@ -41,7 +41,7 @@
             if(field.joinTable.state){%>
                 
                 
-                    <%if((field.relationType === relations.manyToMany && field.activeSide) ){%>
+                    <%if((field.relationType === relations.manyToMany && field.activeSide) || (field.relationType === relations.manyToOne && field.joinTable.state)){%>
                         <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                             let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
                                 "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",

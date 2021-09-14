@@ -33,8 +33,8 @@
                     removeConstraints.add("ALTER TABLE \"<%- field.joinTable.name.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%- field.joinTable.name.toLowerCase()%>_<%- field.joinTable.contains[1].fieldName.toLowerCase()%>_id_fkey\"")
 
                     
-                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[0].constraint%> DEFERRABLE INITIALLY DEFERRED`)
-                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[1].constraint%> DEFERRABLE INITIALLY DEFERRED`)  
+                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[0].constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                    restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.name.toLowerCase()%>" ADD <%-field.joinTable.contains[1].constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)  
                     
 
                 <%_}_%>

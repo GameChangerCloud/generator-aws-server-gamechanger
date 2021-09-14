@@ -4,10 +4,35 @@ const rdsDataService = new AWS.RDSDataService()
 
 const sqlUtils = require('../database/sqlUtils.js');
 
-const databaseConnect = {
+const utils = require('../database/utils/index')
+
+
+let sqlParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	sql: "",
+	database: process.env.DATABASE,
+	includeResultMetadata: true,
+	parameters: []
+}
+let beginParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	database: process.env.DATABASE
+}
+
+let commitParams = {
+	secretArn: process.env.SECRETARN,
+	resourceArn: process.env.RESOURCEARN,
+	transactionId: ""
+}
+
+// for postgis
+let selectParams = {
   secretArn: process.env.SECRETARN,
   resourceArn: process.env.RESOURCEARN,
-  database: process.env.DATABASE,
+  sql: "SELECT * FROM pg_extension where extname LIKE '%postgis%'",
+  database: process.env.DATABASE
 }
 
 const postgisExt = [ "postgis", "fuzzystrmatch", "postgis_tiger_geocoder", "postgis_topology" ];
@@ -22,62 +47,34 @@ let queriesAdd = sqlUtils.getSQLCreateTables();
  * End of generated part using addConstraints
  */
 
-const addPostGisSupport = async () => {
-  let selectParams = {
-    secretArn: databaseConnect.secretArn,
-    resourceArn: databaseConnect.resourceArn,
-    sql: "SELECT * FROM pg_extension where extname LIKE '%postgis%'",
-    database: databaseConnect.database
-  }
-  console.log("Executing SQL Query "+selectParams.sql);
-  let dbResponse = await rdsDataService.executeStatement(selectParams).promise();
-  if (dbResponse.records.length == 0) {
-    console.log("Creating geographic extensions");
-    for(let i = 0; i < postgisExt.length; i++){
-      let createExtensionsParams = {
-        secretArn: databaseConnect.secretArn,
-        resourceArn: databaseConnect.resourceArn,
-        sql: "CREATE EXTENSION "+postgisExt[i],
-        database: databaseConnect.database
-      } 
-      await rdsDataService.executeStatement(createExtensionsParams).promise();
-    }
-  }else {
-    console.log("Geographic extensions already there");
-  }
-}
 
-const graphQLTables = async () => {
-  console.log("Creating GraphQL schema tables");
-
-  for(let i = 0; i < queriesAdd.length; i++){
-    let createTableParams = {
-      secretArn: databaseConnect.secretArn,
-      resourceArn: databaseConnect.resourceArn,
-      sql: queriesAdd[i],
-      database: databaseConnect.database
-    }
-    console.log("Executing SQL command "+createTableParams.sql);
-    await rdsDataService.executeStatement(createTableParams).promise();
-  }
-  for(let i = 0; i < queriesConstraint.length; i++){
-    let createTableParams = {
-      secretArn: databaseConnect.secretArn,
-      resourceArn: databaseConnect.resourceArn,
-      sql: queriesConstraint[i].text,
-      database: databaseConnect.database
-    }
-    console.log("Executing SQL command "+createTableParams.sql);
-    await rdsDataService.executeStatement(createTableParams).promise();
-  }
-  return "All OK";
-}
 
 module.exports.initDatabase = async () => {
   try {
-    await addPostGisSupport();
-    await graphQLTables();
-    //await addConstraints();
+    
+    let sqlRequests = []
+
+    
+    console.log("Executing SQL Query "+selectParams.sql);
+    let dbResponse = await rdsDataService.executeStatement(selectParams).promise();
+    if (dbResponse.records.length == 0) {
+      for(let i = 0; i < postgisExt.length; i++){
+        sqlRequests.push("CREATE EXTENSION "+postgisExt[i])
+      }
+    }else {
+      console.log("Geographic extensions already there");
+    }
+
+    
+    for(let i = 0; i < queriesAdd.length; i++){
+      sqlRequests.push(queriesAdd[i])
+    }
+    for(let i = 0; i < queriesConstraint.length; i++){
+      sqlRequests.push(queriesConstraint[i].text)
+    }
+    utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+
+
   }
   catch(e) {
     return "Init failed";

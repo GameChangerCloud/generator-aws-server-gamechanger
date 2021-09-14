@@ -179,11 +179,16 @@ module.exports = {
 	},
 
 	async deleteMethods(id, directives){
+		sqlRequests = []
+
+		
 		/******* Start of generated part using typeName and typeNameId */
-		sqlParams.sql = 'DELETE FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = '+id
+		sqlRequests.push('DELETE FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = '+id)
 		/******* End of generated part using typeName and typeNameId */
-		const res = await rdsDataService.executeStatement(sqlParams).promise()
-		return res
+
+		utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
+
+		
 	},
 
 
