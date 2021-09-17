@@ -5,6 +5,7 @@ const camelCase = require('camelcase');
 const scalars = require('./scalars/scalars')
 const relationships = require('./templates/database/relationships')
 
+
 const manageScalars = require('./scalars/manageScalars')
 
 const utils = require('./templates/database/utils');
@@ -40,6 +41,15 @@ const getFieldsDirectiveNames = (type) => {
         }
     })
     return directiveNames
+}
+//
+const getschemaDirectivesNames = () =>{
+    names = []
+    for( elem in schemaDirectives.directives ){
+        names.push(elem)
+    }
+    console.log(names)
+    return names
 }
 
 /** GRAPHQL files parsing */
@@ -645,6 +655,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                                 "type" : rfield.type,
                                 "constraint" : "FOREIGN KEY (\""+rfield.type.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
+
                             })
                             // the field wont appear in model
                             rfield["in_model"] = false
@@ -714,6 +725,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
 
                                 // todo : to be clarified
                             }
+
                         }
                     } else if (out == 2 && inn == 1) {
                         type["relationList"].push({ "type" : rfield.type, "relation" : relationships.oneToMany})
@@ -1441,7 +1453,9 @@ const findField = (fields, columnName) => {
 
 module.exports = {
     getAllTypes: getAllTypes,
+
     getFieldsDirectiveNames: getFieldsDirectiveNames,
+
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,
  //   buildResolverInterface: buildResolverInterface,

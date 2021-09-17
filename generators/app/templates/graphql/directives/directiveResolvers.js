@@ -9,9 +9,6 @@
             else{
                 return false
             }
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -22,9 +19,6 @@
             //console.log(" field  ( "+ field + " ) should be of format" + format)
 
             return "this field  should be of format : " + format
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -35,9 +29,6 @@
             //console.log(" field  ( "+ field + " ) should be of format" + format)
 
             return "requires authentification : " + requirement
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -48,9 +39,6 @@
             //console.log("this field ("+ field +") is deprecated")
 
             return "this field ("+ field +") is deprecated"
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -60,9 +48,6 @@
         resolve: function (field) {
             //console.log("just a random warning")
             return "just warning you"
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -71,9 +56,6 @@
         type: "modify",
         resolve: function (field) {
             return field.toUpperCase()
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -82,9 +64,6 @@
         type: "modify",
         resolve: function (field, value) {
             return field - value
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -93,9 +72,6 @@
         type: "Perform",
         resolve: function (field, value) {
             console.log("inverse of" + value)
-        },
-        getType : function(){
-            return this.type
         }
     },
 
@@ -104,9 +80,6 @@
         type: "Perform",
         resolve: function (field, value) {
             console.log("search")
-        },
-        getType : function(){
-            return this.type
         }
     }
 
@@ -119,11 +92,11 @@
 <% for (k in resolvers){ 
     if (dirNames.includes(k)){_%>
         const <%-k %> = {
+            name : "<%- k %>" ,
             type : "<%- resolvers[k].type %>" ,
-            resolve : <%-resolvers[k].resolve%> ,
-            getType : <%-resolvers[k].getType%>
+            resolve : <%-resolvers[k].resolve%>
         }
     <%}%>
     
 <%}%>
-module.exports ={<%= dirNames %>}
+module.exports ={<%= dirNames.filter(dir => !schemaDirectives.includes(dir) ) %>}

@@ -181,6 +181,10 @@ module.exports = class extends Generator {
 		)
 
 		let typesNameArray = this.types.map(type => type.typeName)
+
+
+		let schemaDirectives = parsing.getschemaDirectivesNames()
+		
 		for (let index = 0; index < this.types.length; index++) {
 			let currentType = this.types[index]
 			let isQuery = currentType.typeName === "Query" ? true : false
@@ -389,6 +393,7 @@ module.exports = class extends Generator {
 						this.templatePath('graphql/directives/directiveResolvers.js'),
 						this.destinationPath('database/utils/' + currentType.typeName.toLocaleLowerCase() + 'DirectiveResolvers.js'),
 						{
+							schemaDirectives : schemaDirectives,
 							dirNames : directiveNames
 						}
 					)
