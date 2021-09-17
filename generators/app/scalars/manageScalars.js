@@ -77,10 +77,15 @@ const getScalarFieldInfo = (currentType, typesNameArray) => {
             else if (fieldType === "String") {
                 tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
             }
-            // else if (field === "foreign_key") {
-            //     let fkInfo = field.foreign_key
-            //     tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: null, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
-            // }
+            else if (fieldType === "Int") {
+                tableTemp.push({ field: field.name, fieldType: "int", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+            }
+            else if (fieldType === "Boolean") {
+                tableTemp.push({ field: field.name, fieldType: "boolean", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+            }
+            else if (fieldType === "Float") {
+                tableTemp.push({ field: field.name, fieldType: "float8", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+            }
             else { // handle added  foreign_keys by other types ( detected as Int)
                 let fkInfo = field.foreign_key
                 tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: fkInfo.constraint, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })

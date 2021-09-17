@@ -9,6 +9,7 @@ const relationships = require('./templates/database/relationships')
 const manageScalars = require('./scalars/manageScalars')
 
 const utils = require('./templates/database/utils');
+const schemaDirectives = require('./templates/graphql/directives/schemaDirectives')
 /**
  * From the schema, fetch all the types object and return an array of it
  * @param {*} schemaJSON 
@@ -1455,6 +1456,8 @@ module.exports = {
     getAllTypes: getAllTypes,
 
     getFieldsDirectiveNames: getFieldsDirectiveNames,
+    getschemaDirectivesNames : getschemaDirectivesNames,
+
 
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,

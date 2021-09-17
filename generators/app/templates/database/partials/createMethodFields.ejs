@@ -9,7 +9,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
             <%  switch (s.trim()) {  
                 case "oneToMany": _%>
                 
-                        sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
                         
                    <% break; 
                 case "oneToOne": _%>
