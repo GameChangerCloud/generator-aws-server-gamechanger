@@ -65,20 +65,25 @@ const isBasicType = (type) =>{
     }
 }
 
-const getScalarFieldInfo =(currentType, typesNameArray, currentSQLTypeName)=>{
+const getScalarFieldInfo = (currentType, typesNameArray) => {
     tableTemp = []
     currentType.fields.forEach(field => {
         let fieldType = field.type
         let fieldIsArray = field.isArray  
-        if (!typesNameArray.includes(fieldType)) {
+        if (!typesNameArray.includes(fieldType) && field["in_model"]) {
             if (fieldType === "ID") {
-                tableTemp.push({ field: "Pk_" + currentSQLTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
+                tableTemp.push({ field: "Pk_" + currentType.sqlTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "SERIAL PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
             }
             else if (fieldType === "String") {
                 tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
             }
-            else {
-                tableTemp.push({ field: field.name, fieldType: fieldType, noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+            // else if (field === "foreign_key") {
+            //     let fkInfo = field.foreign_key
+            //     tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: null, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
+            // }
+            else { // handle added  foreign_keys by other types ( detected as Int)
+                let fkInfo = field.foreign_key
+                tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: fkInfo.constraint, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
             }
         }
 
@@ -155,7 +160,12 @@ const getScalarFieldInfo =(currentType, typesNameArray, currentSQLTypeName)=>{
                     tableTemp.push({ field: field.name, fieldType: "text", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
             }
         }
-        else {
+        else { // handle types who are traduced into foreignkeys
+            if (field.foreign_key !== null  && field.in_model === true) {
+                
+                let fkInfo = field.foreign_key
+                tableTemp.push({ field: fkInfo.name, fieldType: fkInfo.type, noNull: fkInfo.noNull, unique: false, constraint: fkInfo.constraint, isArray: fkInfo.isArray, gqlType: fkInfo.type,  noNullArrayValues: field.noNullArrayValues })
+            }
             // Do nothing, handled after
         }
     })

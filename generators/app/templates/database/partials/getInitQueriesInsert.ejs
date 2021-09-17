@@ -1,43 +1,77 @@
-<%_tables.forEach(table => {_%>
-    <%-table.name.toLowerCase()%>Tab.forEach(item =>{
-        let temp = `INSERT INTO "<%-table.sqlname%>"(
-    <%_for (let index = 0; index < table.columns.length; index++) {_%>
-        <%_if (!table.columns[index].field.includes("Pk_")){_%>
-            "<%-table.columns[index].field%>"
-        <%}_%>
-        <%_if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {_%>
-            , 
-        <%}
-    }_%>
-    ) 
-    VALUES (
-    <%_for (let index = 0; index < table.columns.length; index++) {
-        let correctField = ''
-        if (table.columns[index].fieldType === 'Int') {
-            if(!table.columns[index].field.includes("Pk_")){
-                if (table.columns[index].field.includes("Fk")) {
-                    // Triming the Fk_ / Pk_ and _id prefix and suffix
-                    correctField = table.columns[index].field.slice(3, (table.columns[index].field.length - 3))_%>
-                    `+item.<%-correctField.toLowerCase()%>+`
-                <%_}
-                else if (table.columns[index].field.includes("Pk")) {_%>
-                    `+item.id+`
-                <%_}
-                else {_%>
-                    '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
-                <%}
-            }
-        }
-        else {_%>
-            '`+item.<%-table.columns[index].field.toLowerCase()%>+`'
+<%types.forEach(type => {_%>
+    <%if (type.typeName !== "Query" && type.typeName !== "Mutation"){_%>
+        <%-type.typeName.toLowerCase()%>Tab.forEach(item =>{
+            let temp = `INSERT INTO "<%-type.sqlTypeName%>"(
+            <% let fieldInsertList = []
+                let itemInsertList = []%>
+            <%_type.fields.forEach( field =>  {
+                if (field.type !== "ID" && field.in_model){
+                    if (field.foreign_key !== null){
+                        fieldInsertList.push(field.foreign_key.name)
+                        itemInsertList.push(["+ item."+ field.name+" +","else"])
+                    }else{
+                        fieldInsertList.push(field.name)
+                        itemInsertList.push(["+ item."+ field.name+" +", "Fk"])
+                    }  
+                }  
+            })_%>
+            <%fieldInsertList.forEach((f, index) => {_%>
+                "<%-f%>"
+                <%if (index < fieldInsertList.length - 1 ) {_%>,<%}%>
+                
+            <%});_%>
+            ) VALUES (
+                <%itemInsertList.forEach((f, index) => {_%>
+                <%if (f[1] === "Fk" ) {_%>'`<%}else{%>`<%}%>
+                <%-f[0]%>
+                <%if (f[1] === "Fk" ) {_%>`'<%}else{%>`<%}%>
+                <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
+                
+            <%});_%>
+                
         <%}%>
+        )`
+        queriesInsert.push(temp)
+    	})
+    <%})_%>
 
-        <%if (index < table.columns.length - 1 && !table.columns[index].field.includes("Pk_")) {%>
-            , 
-        <%}
-    }%>
-    )`
-    queriesInsert.push(temp)
-    })
-<%})%>
+    // JOINTABLES
+    <%_types.forEach(type => {
+        type.fields.forEach(field => {
+            if(field.joinTable.state){%>
+                
+                
+                    <%if((field.relationType === relations.manyToMany && field.activeSide) || (field.relationType === relations.manyToOne && field.joinTable.state)){%>
+                        <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
+                            let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
+                                "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
+                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id") 
+                                VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
+                                ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
+                                queriesInsert.push(temp)
+                                })                    
+                <%}
+                
+                
+                if(field.relationType === relations.selfJoinMany){%>
+                    <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
+                        let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
+                            "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
+                            "<%-field.joinTable.contains[0].type.toLowerCase()%>_id")
+                            VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
+                                ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%>_id + `)`
+                                queriesInsert.push(temp)
+                                })
 
+
+                <%}
+                
+
+                    
+
+
+                
+            }
+            
+        })
+    })_%>

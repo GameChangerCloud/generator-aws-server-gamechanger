@@ -14,5 +14,6 @@ type Actor {
 
 type Studio {
   id: ID!
-  name: String!
+  name: String! @selector
+  creationYear: Int @selector
 }

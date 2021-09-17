@@ -1,0 +1,3 @@
+{
+    "query" : "mutation {oscarCreate(id : 2222 , category : \"Worst movie ever\"   ){ id,  category }}"
+}

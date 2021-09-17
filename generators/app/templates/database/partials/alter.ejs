@@ -4,7 +4,7 @@
             <% break;
     case "Deferred" : _%>
         <% if (columns.constraint != null && columns.constraint.includes("FOREIGN KEY")) { %>
-        {tableName: "<%= name %>", text: `ALTER TABLE "<%= name %>" ADD <%- columns.constraint %> DEFERRABLE INITIALLY DEFERRED`},
+        {tableName: "<%= name %>", text: `ALTER TABLE "<%= name %>" ADD <%- columns.constraint %> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`},
         <% }break;
     case "AddColumnNotNull" :
             let d = new Date(); _%>
