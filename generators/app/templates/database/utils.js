@@ -36,7 +36,7 @@ const utils = {
 		if (data) {
 			columns.forEach(column => {
 				if (table) {
-					if (column.includes("Pk_" + table)) {
+					if (column.includes("Pk_" + table.toLowerCase())) {
 						res['id'] = data[column]
 					}
 					else {

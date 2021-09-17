@@ -100,7 +100,7 @@ module.exports = {
 				
 				// One unique currentType for N parentType
 				case "oneToMany":
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+fieldType+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
@@ -179,7 +179,7 @@ module.exports = {
 	},
 
 	async deleteMethods(id, directives){
-		sqlRequests = []
+		let sqlRequests = []
 
 		
 		/******* Start of generated part using typeName and typeNameId */
@@ -193,6 +193,7 @@ module.exports = {
 
 
 	async updateMethods(args, directives) {
+		sqlRequests = []
 
 		/******* Start of generated part using updateMethodsField */
 		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, getSQLTableName: utils.getSQLTableName}) _%>
@@ -202,11 +203,11 @@ module.exports = {
 		const input = temp.slice(0, temp.lastIndexOf(", "))
 		if(input !== ""){
 			/******* Start of generated part using typeName and typeNameId */
-			sqlParams.sql = "UPDATE \"<%-sqltypeName%>\" SET " + input + " WHERE \"Pk_<%-sqltypeName%>_id\" = " + args.id
+			sqlRequests.push("UPDATE \"<%-sqltypeName%>\" SET " + input + " WHERE \"Pk_<%-sqltypeName%>_id\" = " + args.id)
 			/******* Start of generated part using typeName and typeNameId */
-			console.log(sqlParams.sql)
-			const res = await rdsDataService.executeStatement(sqlParams).promise()
-			return res
+		}
+		if( sqlRequests.length !== 0){
+			utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
 		}
 		else{
 			// The value are the same

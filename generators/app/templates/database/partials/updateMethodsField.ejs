@@ -1,51 +1,93 @@
 let temp = ''
 <% fields.map(field => {_%>
-    <% const s = field.relationType //include('./getRelationBetween',{typeOne: field.type, typeTwo: typeName,relations: relations}) _%>
+    <% const s = field.relationType _%>
     <% let sqltype = getSQLTableName(field.type) _%>
     <% if (field.type !== "ID") { _%>
         <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !scalarTypeNames.includes(field.type)) {_%>
             <% switch (s.trim()) {
                 case "oneToMany":_%>
+                    //oneToMany update
+                    // Field <%- field.name %> of type <%- field.type %>
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id)
+
+                    
                     <% break;
+                case "oneToOne":_%>
+                    //oneToOne update
+                    sqlRequests.push("UPDATE \"<%- sqltypeName %>\" SET  \"<%-field.foreign_key.name%>\" = " + args.<%-field.name%> +" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id)
+                    
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET \"<%-field.oneToOneInfo.fkName%>\" = null WHERE \"<%-field.oneToOneInfo.fkName%>\" = " + args.id)
+
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = " +  args.id +" WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
+
+                <% break;
                 case "oneOnly":_%>
-        if(args.<%- field.name %> !== undefined){
-            temp += args.<%- field.name %> ? "\"Fk_<%- sqltype %>_id\" = '" + args.<%- field.name %> + "', " :  "\"Fk_<%- sqltype %>_id\" = null," 
-        }
+                    if(args.<%- field.name %> !== undefined){
+                        temp += args.<%- field.name %> ? "\"<%- field.foreign_key.name %>\" = '" + args.<%- field.name %> + "', " :  "\"<%- field.foreign_key.name %>\" = null," 
+                    }
+                    <% break
+                case "selfJoinOne":_%>
+                    if(args.<%- field.name %> !== undefined){
+                        temp += args.<%- field.name %> ? "\"<%- field.foreign_key.name %>\" = '" + args.<%- field.name %> + "', " :  "\"<%- field.foreign_key.name %>\" = null," 
+                    }
                     <% break
                 case "manyToOne": _%>
+                    <%if(!field.joinTable.state){%>
+                        //manyToOne update
+                        // Field <%- field.name %> of type <%- field.type %>
+
+                        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" WHERE \"<%- sqltype %>\".\"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id
+                        rdsDataService.executeStatement(sqlParams, (err, data) => {
+                            if (err) {console.log(err, err.stack)}
+                                else {
+                                    let current<%- field.type %>State = utils.constructOutputArray(data)
+
+                            // <%- field.type %> to add
+                            let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type%>State, args.<%- field.name %>)
+                            for (let index = 0; index < addedElements<%- field.type %>.length; index++) {
+                                sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- field.type %>[index])
+                                
+                            }
+                            // <%- field.type %> to delete
+                            let removedElements<%- field.type %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
+                            for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
+                                sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"Pk_<%- sqltype %>_id\" = " + removedElements<%- field.type %>[index])
+                                
+                            }
+                        }})
+                        
+                        <%}%>
                     <% break
                 case "manyOnly": _%>
-        // Field <%- field.name %> of type <%- field.type %>
-        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" WHERE \"<%- sqltype %>\".\"Fk_<%- sqltypeName %>_id\" = " + args.id
-        rdsDataService.executeStatement(sqlParams, (err, data) => {
-            if (err) {console.log(err, err.stack)}
-                else {
-                    let current<%- field.type %>State = utils.constructOutputArray(data)
+                    //manyOnly update
+                    // Field <%- field.name %> of type <%- field.type %>
 
-            // <%- field.type %> to add
-            let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type%>State, args.<%- field.name %>)
-            for (let index = 0; index < addedElements<%- field.type %>.length; index++) {
-                sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- field.type %>[index]
-                rdsDataService.executeStatement(sqlParams, (err, data) => {
-                    if (err) console.log(err, err.stack);
-                    else console.log(data);   
-                })
-            }
-            // <%- field.type %> to delete
-            let removedElements<%- field.type %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
-            for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
-                sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET  \"Fk_<%- sqltypeName %>_id\" = null WHERE \"Pk_<%- sqltype %>_id\" = " + removedElements<%- field.type %>[index]
-                rdsDataService.executeStatement(sqlParams, (err, data) => {
-                    if (err) console.log(err, err.stack);
-                    else console.log(data);   
-                })
-            }
-        }})
+                    sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" WHERE \"<%- sqltype %>\".\"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id
+                    rdsDataService.executeStatement(sqlParams, (err, data) => {
+                        if (err) {console.log(err, err.stack)}
+                            else {
+                                let current<%- field.type %>State = utils.constructOutputArray(data)
+
+                        // <%- field.type %> to add
+                        let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type%>State, args.<%- field.name %>)
+                        for (let index = 0; index < addedElements<%- field.type %>.length; index++) {
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- field.type %>[index])
+                            
+                        }
+                        // <%- field.type %> to delete
+                        let removedElements<%- field.type %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
+                        for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"Pk_<%- sqltype %>_id\" = " + removedElements<%- field.type %>[index])
+                            
+                        }
+                    }})
                     <% break
                 case "manyToMany": _%>
-        <% let manyToManyTable = manyToManyTables.filter(table => table.sqlname.includes(field.name) && table.sqlname.includes(field.type) && table.sqlname.includes(typeName)).sqlname //getSQLTableName(JSON.parse(include('getManyToManyTableBetween',{typeOne: typeName,typeTwo: field.type,manyToManyTables: manyToManyTables})).sqlname) %>
-        // Field <%- field.name %> of type <%- field.type %> 
-        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- manyToManyTable %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltype %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- manyToManyTable %>\".\"<%- sqltypeName %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
+        // Field <%- field.name %> of type <%- field.type %>
+        <% let field1 = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
+        <% let field2 = field.joinTable.contains.find(c => c.type !== field.type).fieldName%> 
+        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field1 %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field2 %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {
             if (err) {console.log(err, err.stack)}
             else {
@@ -53,75 +95,48 @@ let temp = ''
 
                 // <%- field.type %> to add
                 let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
-                rdsDataService.beginTransaction(beginParams, function (err, data) {
-                    if (err) console.log(err, err.stack); // an error occurred
-                    else {
-                        for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
-                            sqlParams.sql = "INSERT INTO \"<%- manyToManyTable %>\" (\"<%- sqltypeName %>_id\", \"<%- sqltype %>_id\") VALUES ("+ args.id +", "+ addedElements<%- field.type%>[index]+")"
-                            rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                if (err) console.log(err, err.stack);
-                                else console.log(data);   
-                            })
-                        }
-                        commitParams.transactionId = data.transactionId
-                        rdsDataService.commitTransaction(commitParams, function (err, data) {
-                            if (err) console.log(err, err.stack); // an error occurred
-                            else console.log(data)
-                        })
-                    }
-                });
-                        
+                for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
+                            sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase() %>\" (\"<%- field2 %>_id\", \"<%- field1 %>_id\") VALUES ("+ args.id +", "+ addedElements<%- field.type%>[index]+")")
+                }
                 // <%- field.type %> to delete
                 let removedElements<%- field.type %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
-                rdsDataService.beginTransaction(beginParams, function (err, data) {
-                    if (err) console.log(err, err.stack); // an error occurred
-                    else {
-                        for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
-                            sqlParams.sql = "DELETE FROM \"<%- manyToManyTable %>\" WHERE \"<%- sqltype %>_id\" = " + removedElements<%- field.type %>[index] + " AND \"<%- sqltypeName %>_id\" = " + args.id
-                            rdsDataService.executeStatement(sqlParams, (err, data) => {
-                                if (err) console.log(err, err.stack);
-                                else console.log(data);   
-                            })
-                        }
-                        commitParams.transactionId = data.transactionId
-                        rdsDataService.commitTransaction(commitParams, function (err, data) {
-                            if (err) console.log(err, err.stack); // an error occurred
-                            else console.log(data)
-                        })
-                    }
-                })
+                for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
+                            sqlRequests.push("DELETE FROM \"<%- field.joinTable.name.toLowerCase() %>\" WHERE \"<%- field1 %>_id\" = " + removedElements<%- field.type %>[index] + " AND \"<%- field2 %>_id\" = " + args.id)
+                            
+                }
+
+                
             }
         })
 
                         <% break
-                    case "oneToOneParent": _%>
-        // A child cannot change its parent in unidirectional
-        if(args.<%- field.name %>) {
-            throw 'Error, a child in 1 - 1 unildirectional relation cannot modify its parent' 
-        }
-                        <# /* Case bidirectional not supported */ %>
-                        <% break
-
-                    case "oneToOneChild": _%>
-                        <% if (field.noNull) { _%>
-        // Case bidirectional, not supported
-        // Got the field
-                        <% } else { _%>
-        // Don't have the field
-        // Remove te previous child
-        sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = null WHERE \"Pk_<%- sqltype %>_id\" = (SELECT \"Pk_<%- sqltype %>_id\" FROM \"<%- sqltype %>\" WHERE \"Fk_<%- sqltypeName %>_id\" = " + args.id + ")"
+                    case "selfJoinMany": _%>
+        // Field <%- field.name %> of type <%- field.type %>
+        <% let fieldSelfJoin = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
+        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- fieldSelfJoin %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- sqltype %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {
-        if (err) {console.log(err, err.stack)}
-        else { 
-            sqlParams.sql = "UPDATE \"<%- sqltype %>\" SET \"Fk_<%- sqltypeName %>_id\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%- field.name %>
-                rdsDataService.executeStatement(sqlParams, (err, data) => {
-                    if (err) {console.log(err, err.stack)}
-                    else {console.log(data)}
-                })
+            if (err) {console.log(err, err.stack)}
+            else {
+                let current<%- field.type %>State = utils.constructOutputArray(data, "<%- field.type %>")
+
+                // <%- field.type %> to add
+                let addedElements<%- field.type %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
+                for (let index = 0; index < addedElements<%- field.type %>.length; index++) {					
+                            sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase() %>\" (\"<%- sqltype %>_id\", \"<%- fieldSelfJoin %>_id\") VALUES ("+ args.id +", "+ addedElements<%- field.type%>[index]+")")
+                }
+                // <%- field.type %> to delete
+                let removedElements<%- field.type %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
+                for (let index = 0; index < removedElements<%- field.type %>.length; index++) {
+                            sqlRequests.push("DELETE FROM \"<%- field.joinTable.name.toLowerCase() %>\" WHERE \"<%- fieldSelfJoin %>_id\" = " + removedElements<%- field.type %>[index] + " AND \"<%- sqltype %>_id\" = " + args.id)
+                            
+                }
+
+                
             }
         })
-        <% } _%>
+
                         <% break
+                    
                     default: _%>
                         <% console.log("Error in handling relationship in update") %>
                         <% break
