@@ -99,4 +99,10 @@
     <%}%>
     
 <%}%>
-module.exports ={<%= dirNames.filter(dir => !schemaDirectives.includes(dir) ) %>}
+<% let resolversList =[]
+for (k in resolvers){ 
+    if (dirNames.includes(k) ){
+        resolversList.push(k)
+    }
+}%>
+module.exports ={<%for (k in resolversList){ %><%if(k != 0){%>,<%}%><%-resolversList[k]%><%}%>}
