@@ -10,6 +10,7 @@ const existTable = require ('./existTable/existTable')
 
 // Entry point of the lambdas function 
 module.exports.handler = (event, context, callback) => {
+  console.log("**********************  Received Event  *******************\n" + JSON.stringify(event));
 
   if(event["query"]) {
     graphql({schema: schema, source: event["query"], variableValues: event["variables"]}).then((response) => {

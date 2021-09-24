@@ -44,3 +44,10 @@ sam build
 ```  
 everytime you make a change on your lambdas before invoking and event again .
 be sure you have a large-enough time-out on the template.yaml properties to fit your lambda requirements
+
+## redeploy lambdas 
+If you change your lambda code and want to redeploy it on AWS, you have just to rebuild the zip file by typing:
+```
+zip lambda.zip -r README.md database graphql initDatabase cleanDatabase directives existTable index.js node_modules package.json
+```
+The generated zip file have to be redeploy using the AWS console and its 'Upload from' button
