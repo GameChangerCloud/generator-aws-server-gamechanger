@@ -63,6 +63,4 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
             <% }
         }
 })%>
-    <% if( containsRelations){_%>
-        utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
-    <%}%>
+    

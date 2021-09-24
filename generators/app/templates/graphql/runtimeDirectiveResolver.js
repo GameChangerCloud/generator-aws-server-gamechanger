@@ -16,26 +16,28 @@ const directiveResolver =(a, args,directives, resolvers) =>{
                     passedArgs.push(directives[a][dir].args[i].value)
                 }
             }
-            let type = resolvers[directives[a][dir].name].type
-            switch(type){
-                case "verify":
-                    if (resolvers[directives[a][dir].name].resolve.apply(this, passedArgs) == false){
-                        console.log("{\"errors\" : \"field ( " + a + " ) doesnt verify constraint : \"" + directives[a][dir].name + "\" }")
-                        return null
-                    }
-                    break
-                case "modify":
-                    console.log("{\"info\" : \"field ( " + a + " ) modified with : \"" + directives[a][dir].name + " }")
-                    return resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)
-                case "warn":
-                    console.log("{\"info\" : \"info about field ( " + a + " ) : \"" + resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)  + " }")
-                    return args[a]
-                case "notifyWhere":
-                    break
-                case "Perform":
-                    resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)
-                    return args[a]
-                    break
+            if(directives[a][dir].name in resolvers){
+                let type = resolvers[directives[a][dir].name].type
+                switch(type){
+                    case "verify":
+                        if (resolvers[directives[a][dir].name].resolve.apply(this, passedArgs) == false){
+                            console.log("{\"errors\" : \"field ( " + a + " ) doesnt verify constraint : \"" + directives[a][dir].name + "\" }")
+                            return null
+                        }
+                        break
+                    case "modify":
+                        console.log("{\"info\" : \"field ( " + a + " ) modified with : \"" + directives[a][dir].name + " }")
+                        return resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)
+                    case "warn":
+                        console.log("{\"info\" : \"info about field ( " + a + " ) : \"" + resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)  + " }")
+                        return args[a]
+                    case "notifyWhere":
+                        break
+                    case "Perform":
+                        resolvers[directives[a][dir].name].resolve.apply(this, passedArgs)
+                        return args[a]
+                        break
+                }
             }
         }
     }
