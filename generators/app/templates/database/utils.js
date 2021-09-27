@@ -109,6 +109,7 @@ const utils = {
 
 	startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
 		rdsDataService.beginTransaction(beginParams).promise().then(async (data, err) => {
+			let results = []
 			if (err) {
 				console.log(err, err.stack); // an error occurred
 			} else {
@@ -121,6 +122,7 @@ const utils = {
 						sqlParams.sql = sqlRequests[index]
 						console.log(sqlRequests[index])
 						res = await rdsDataService.executeStatement(sqlParams).promise()
+						results.push(res)
 					}
 					
 					ok = true
@@ -132,6 +134,7 @@ const utils = {
 				
 				if (ok) { 
 					rdsDataService.commitTransaction(commitParams).promise() 
+					return results
 				} else {
 					rdsDataService.rollbackTransaction(commitParams).promise()
 				}
