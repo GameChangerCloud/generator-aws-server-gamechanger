@@ -1,7 +1,7 @@
 
 type Movie {
   id: ID!
-  title: String @search
+  title: String
   actors: [Actor] @hasInverse(field: movies)
   studio: Studio!
 }

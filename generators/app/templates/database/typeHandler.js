@@ -127,7 +127,7 @@ module.exports = {
 					return utils.constructOutputArray(res)[0]
 				case "selfJoinMany":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.joinTable.name+'"."'+args.joinTable.field1+'_id" INNER JOIN "'+minifiedparentTypeName+'" ON "Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field2+'_id" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.joinTable.name+'"."'+minifiedparentTypeName+'_id" INNER JOIN "'+minifiedparentTypeName+'" AS "'+args.joinTable.field+'" ON "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field+'_id" WHERE "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = :value '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
