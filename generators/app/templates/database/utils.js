@@ -136,7 +136,6 @@ const utils = {
 				if (ok) { 
 					await rdsDataService.commitTransaction(commitParams).promise()
 					console.log("Commit transaction")
-					console.log(JSON.stringify(results)) 
 					return results
 				} else {
 					await rdsDataService.rollbackTransaction(commitParams).promise()

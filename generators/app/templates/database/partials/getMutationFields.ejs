@@ -104,6 +104,7 @@
                 resolve: (obj, args, context, info) => {
                     
                     const recordCreated = dbHandler.handleCreate(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        args.id = record
                         return dbHandler.handleGet(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
                             return record
                         })

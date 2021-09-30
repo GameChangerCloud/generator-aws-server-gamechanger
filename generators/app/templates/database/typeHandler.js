@@ -72,6 +72,8 @@ module.exports = {
 		// Pagination
 		const limit = args.limit ? "LIMIT "+args.limit : ""
 		const offset = args.skip ? "OFFSET "+args.skip : ""
+		sqlParams.transactionId = undefined
+
 
 		// From query, simple
 		if(args.id) {
@@ -232,8 +234,7 @@ module.exports = {
 		/******* End of generated part using createMethodsField */
 
 		let res = await utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
-		return res
-
+		return  res[0].records[0][0].longValue
 	},
 
 }
