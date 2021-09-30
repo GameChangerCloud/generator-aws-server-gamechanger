@@ -1,5 +1,5 @@
 sqlRequests = []
-sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") ")
+sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") RETURNING \"Pk_<%-sqltypeName%>_id\"")
 <% fields.map(field => { _%>
     <% const s = field.relationType _%>
     <% let sqltype = getSQLTableName(field.type) _%>

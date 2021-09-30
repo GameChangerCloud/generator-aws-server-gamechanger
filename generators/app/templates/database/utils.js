@@ -107,7 +107,7 @@ const utils = {
 		return minifiedType;
 	},
 
-	startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
+	async startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
 		rdsDataService.beginTransaction(beginParams).promise().then(async (data, err) => {
 			let results = []
 			if (err) {
@@ -130,10 +130,13 @@ const utils = {
 				catch (error) {
 					console.log("Damned : error "+error)
 					await rdsDataService.rollbackTransaction(sqlParams).promise()
+					console.log("RollingBack transaction")
 				}
 				
 				if (ok) { 
-					rdsDataService.commitTransaction(commitParams).promise() 
+					rdsDataService.commitTransaction(commitParams).promise()
+					console.log("Commit transaction")
+					console.log(JSON.stringify(results)) 
 					return results
 				} else {
 					rdsDataService.rollbackTransaction(commitParams).promise()
