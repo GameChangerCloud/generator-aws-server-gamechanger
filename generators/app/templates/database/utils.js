@@ -108,7 +108,7 @@ const utils = {
 	},
 
 	async startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService){
-		rdsDataService.beginTransaction(beginParams).promise().then(async (data, err) => {
+		let result = await rdsDataService.beginTransaction(beginParams).promise().then(async (data, err) => {
 			let results = []
 			if (err) {
 				console.log(err, err.stack); // an error occurred
@@ -134,16 +134,17 @@ const utils = {
 				}
 				
 				if (ok) { 
-					rdsDataService.commitTransaction(commitParams).promise()
+					await rdsDataService.commitTransaction(commitParams).promise()
 					console.log("Commit transaction")
 					console.log(JSON.stringify(results)) 
 					return results
 				} else {
-					rdsDataService.rollbackTransaction(commitParams).promise()
+					await rdsDataService.rollbackTransaction(commitParams).promise()
 				}
 				console.log("Ending transaction")
 			}           
 		  });
+		  return result
 	
 	},
 
