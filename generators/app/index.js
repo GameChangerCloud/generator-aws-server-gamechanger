@@ -159,7 +159,7 @@ module.exports = class extends Generator {
 
 		// Get all the relations between entities
 		//const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-		this.types = parsing.getRelations(this.types, this.scalarTypeNames, this.env)
+		this.types = parsing.getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
 
 		// Get all the name of join relation table
 		this.joinTables = parsing.getJoinTables(this.types, this.scalarTypeNames)

@@ -70,7 +70,7 @@ const getScalarFieldInfo = (currentType, typesNameArray) => {
     currentType.fields.forEach(field => {
         let fieldType = field.type
         let fieldIsArray = field.isArray  
-        if (!typesNameArray.includes(fieldType) && field["in_model"]) {
+        if (!typesNameArray.includes(fieldType) && field["in_model"] && isBasicType(fieldType)) {
             if (fieldType === "ID") {
                 tableTemp.push({ field: "Pk_" + currentType.sqlTypeName + "_id", fieldType: "Int", noNull: !field.noNull, unique: false, constraint: "SERIAL PRIMARY KEY NOT NULL", isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues})
             }
@@ -158,6 +158,8 @@ const getScalarFieldInfo = (currentType, typesNameArray) => {
                 case scalars.HSL:
                 case scalars.HSLA:
                 case scalars.RGB:
+                    tableTemp.push({ field: field.name, fieldType: "int", noNull: field.noNull, unique: false, constraint: null, isArray: fieldIsArray, gqlType: fieldType, noNull: field.noNull, noNullArrayValues: field.noNullArrayValues })
+                    break
                 case scalars.RGBA:
                 case scalars.ISBN:
                 default:

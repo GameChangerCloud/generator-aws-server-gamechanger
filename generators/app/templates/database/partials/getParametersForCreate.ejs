@@ -42,6 +42,9 @@
             case "Time": _%>
                 getRandomTime()
                 <% break
+            case "RGB": _%>
+                faker.random.number()
+                <%break;
             case "URL":_%>
                 <%if (tableName.includes("avatar") || tableName.includes("profile")){%>
                     faker.image.avatar()

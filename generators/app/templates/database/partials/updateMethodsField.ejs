@@ -3,7 +3,7 @@ let temp = ''
     <% const s = field.relationType _%>
     <% let sqltype = getSQLTableName(field.type) _%>
     <% if (field.type !== "ID") { _%>
-        <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !scalarTypeNames.includes(field.type)) {_%>
+        <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !isScalar(field.type)) {_%>
             <% switch (s.trim()) {
                 case "oneToMany":_%>
                     //oneToMany update

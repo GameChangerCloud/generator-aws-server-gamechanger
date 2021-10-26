@@ -199,7 +199,7 @@ module.exports = {
 		sqlRequests = []
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, getSQLTableName: utils.getSQLTableName}) _%>
+		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, isScalar: manageScalars.isScalar, getSQLTableName: utils.getSQLTableName}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error

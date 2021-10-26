@@ -504,7 +504,7 @@ const getAllTables = (types, scalarTypeNames) => {
     types.forEach(type => {
         let tableTemp = []
         // Fill up the infos on scalar field (int, string, etc.)
-        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.typeName !== "Subscription"  && !scalarTypeNames.includes(type.typeName)) {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.typeName !== "Subscription"  && !manageScalars.isScalar(type.typeName)) {
             //get scalar field infos
             tableTemp.push(...manageScalars.getScalarFieldInfo(type, typesNameArray)) 
             
@@ -557,7 +557,7 @@ const getListOfModelsExport = (types) => {
 /** RELATIONS HANDLER */
 
 const getRelationalFields = (fields, scalarTypeNames) => {
-    const lst = fields.filter(field => field.type != "String" && field.type != "ID" && field.type != "Int" && fields.type != "Boolean" && !scalarTypeNames.includes(field.type) && field.type != "foreign_key")
+    const lst = fields.filter(field => field.type != "String" && field.type != "ID" && field.type != "Int" && field.type != "Boolean" && !manageScalars.isScalar(field.type) && field.type != "foreign_key")
 
     return lst;
 
