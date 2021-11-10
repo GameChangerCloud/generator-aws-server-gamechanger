@@ -33,3 +33,7 @@ variable "lambda_name" {
 variable "secret_name" {
   type = string
 }
+
+variable "region" {
+  type = string
+}

@@ -3,7 +3,7 @@ resource "aws_rds_cluster" "postgresql" {
   engine                  = "aurora-postgresql"
   engine_mode             = "serverless"
   engine_version          = "10.7"
-  availability_zones      = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  availability_zones      = ["${var.region}a", "${var.region}b" , "${var.region}c"]
   database_name           = var.db_name
   master_username         = var.db_username
   master_password         = var.db_password
