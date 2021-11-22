@@ -18,13 +18,13 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = {
       SECRETARN = aws_secretsmanager_secret.example.arn
-      RESOURCEARN = aws_rds_cluster.postgresql.arn
-      DATABASE = aws_rds_cluster.postgresql.database_name
+      RESOURCEARN = aws_rds_cluster_parameter_group.postgresql.arn
+      DATABASE = var.db_name
     }
   }
   provisioner "local-exec" {
     command = <<EOT
-                export arn=${aws_rds_cluster.postgresql.arn}
+                export arn=${aws_rds_cluster_parameter_group.postgresql.arn}
                 export secretArn=${aws_secretsmanager_secret.example.arn}
                 rm -f final.yaml ../temp.yaml  
                 ( echo "cat <<EOF > ../template.yaml";

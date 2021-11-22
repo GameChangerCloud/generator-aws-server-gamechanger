@@ -34,6 +34,6 @@ variable "secret_name" {
   type = string
 }
 
-variable "region" {
+variable "rds_name" {
   type = string
 }
