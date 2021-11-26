@@ -9,7 +9,7 @@ data "archive_file" "init" {
 resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.init.output_base64sha256
   function_name = var.lambda_name
-  description = "Lamdba for  <%-appName%>"
+  description = "Lamdba for  testing"
   role = aws_iam_role.instance.arn
   filename = data.archive_file.init.output_path
   handler = "index.handler"
@@ -18,13 +18,13 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = {
       SECRETARN = aws_secretsmanager_secret.example.arn
-      RESOURCEARN = aws_rds_cluster_parameter_group.postgresql.arn
+      RESOURCEARN = module.rds_aurora_postgresql.cluster_arn
       DATABASE = var.db_name
     }
   }
   provisioner "local-exec" {
     command = <<EOT
-                export arn=${aws_rds_cluster_parameter_group.postgresql.arn}
+                export arn=${module.rds_aurora_postgresql.cluster_arn}
                 export secretArn=${aws_secretsmanager_secret.example.arn}
                 rm -f final.yaml ../temp.yaml  
                 ( echo "cat <<EOF > ../template.yaml";
@@ -49,3 +49,4 @@ resource "aws_lambda_permission" "lambda_permission" {
   # within API Gateway REST API.
   source_arn = "${aws_api_gateway_rest_api.myAPI.execution_arn}/*/*/*"
 }
+

@@ -9,10 +9,14 @@ data "aws_subnet_ids" "all" {
   vpc_id = data.aws_vpc.default.id
 }
 
+
+
+
+
 ######################################
 # Deploy RDS Instance
 ######################################
-module "rds-aurora" {
+module "rds_aurora_postgresql"{
   source  = "terraform-aws-modules/rds-aurora/aws"
   version = "6.1.3"
 
@@ -35,6 +39,7 @@ module "rds-aurora" {
 
   monitoring_interval = 60
 
+  backup_retention_period = 1
   apply_immediately   = true
   skip_final_snapshot = true
   enable_http_endpoint    = true
@@ -63,3 +68,5 @@ resource "aws_rds_cluster_parameter_group" "postgresql" {
   family      = "aurora-postgresql10"
   description = "${var.rds_name}-aurora-postgres-cluster-parameter-group"
 }
+
+
