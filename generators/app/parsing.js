@@ -795,8 +795,7 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                         rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
                         rfield["delegated_field"]["side"] = "origin"
                         
-                        // the field wont appear in model
-                        rfield["in_model"] = false
+                        
 
                         // if field is null, theres a composition relation, we create a joinTable
                         if(rfield.noNull){
@@ -845,6 +844,8 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                         
                             targetType[0].fields.push(delegatedField)
                         }
+                        // the field wont appear in model
+                        rfield["in_model"] = false
 
 
                     } else if (out == 1 && inn == 1) { 
