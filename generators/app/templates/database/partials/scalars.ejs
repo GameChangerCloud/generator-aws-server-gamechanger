@@ -1,6 +1,21 @@
 <% switch (field.type) {
     // todo
-    case scalars.Point: _%>
+    case "Int": _%>
+    if(args.<%- field.name %> !== undefined){
+            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = " + args.<%- field.name %> + ", " : "\" <%- field.name %>\" = null, "
+        }
+        <% break;
+    case "String": _%>
+    if(args.<%- field.name %> !== undefined){
+            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = " + utils.escapeQuote(args.<%- field.name %>) + ", " : "\" <%- field.name %>\" = null, "
+        }
+        <% break;
+    case "Boolean": _%>
+    if(args.<%- field.name %> !== undefined){
+            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = " + utils.escapeQuote(args.<%- field.name %>) + ", " : "\" <%- field.name %>\" = null, "
+        }
+        <% break;
+    case "ID": _%>
         <% break;
     case scalars.Linestring: _%> 
         <% break;
@@ -86,7 +101,7 @@ if(args.<%- field.name %> !== undefined){
     case scalars.ISBN: _%>
         <% break;
     default: _%>
-if(args.<%- field.name %> !== undefined){
+        if(args.<%- field.name %> !== undefined){
             temp += args.<%- field.name %> ? "\"<%- field.name %>\" = " + utils.escapeQuote(args.<%- field.name %>) + ", " : "\" <%- field.name %>\" = null, "
         }
         <% break; 
