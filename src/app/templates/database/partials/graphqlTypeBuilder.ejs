@@ -1,0 +1,54 @@
+    <%-field.name%> : { type :
+    <%let parenthesesCpt = 0%>
+    <%_if (field.isArray) {
+        if (field.noNull) {_%>
+            new GraphQLNonNull(
+            <%parenthesesCpt += 1%>
+        <%}%>
+        new GraphQLList(
+        <%parenthesesCpt += 1%>
+        <%if (field.noNullArrayValues) {_%>
+            new GraphQLNonNull(
+                <%parenthesesCpt += 1%>
+        <%}%>
+        <%-type%>
+    <%_} else {%>
+        <%if (field.noNull) {%>
+            new GraphQLNonNull(
+            <%parenthesesCpt += 1%>
+        <%}%>
+        <%-type%>
+    <%}%> <%for(let i =0 ; i< parenthesesCpt; i++){%>)<%}%>,
+    <% if (needResolver){_%>
+        resolve: (obj, args, context, info) => {
+            let result = dbHandler.handleGet({
+                <%if(field.oneToOneInfo !== null){_%>
+                    oneToOneInfo : "<%-field.oneToOneInfo.fkName%>",
+
+            <%}_%>
+            <% let fieldRelationType = field.relationType %>
+            <%# manyToOne composition is handled like manyToMany tables%>
+            <%if(field.joinTable.state && (field.relationType == "manyToMany" || field.relationType == "manyToOne")){
+                fieldRelationType = "manyToMany"_%>
+                    joinTable : {
+                        name :"<%-field.joinTable.name.toLowerCase()%>",
+                        field1 : "<%-field.joinTable.contains.find(c => c.type === field.type).fieldName%>",
+                        field2 : "<%-field.joinTable.contains.find(c => c.type !== field.type).fieldName%>",
+
+                    },
+
+            <%}_%>
+            <%if(field.joinTable.state && field.relationType == "selfJoinMany"){_%>
+                    joinTable : {
+                        name :"<%-field.joinTable.name.toLowerCase()%>",
+                        field : "<%-field.joinTable.contains.find(c => c.type === field.type).fieldName%>"
+                    },
+
+            <%}_%>
+            parentId: obj.id, fieldType: "<%-field.type.toLowerCase()%>",parentTypeName: info.parentType, parentFieldName : "<%-field.name%>" ,relationType: "<%-fieldRelationType%>"}, '<%-field.type%>Type').then((data) => {
+                return data
+            })
+            return result
+        }
+    <%}_%>
+    },

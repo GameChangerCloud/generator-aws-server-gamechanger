@@ -1,3 +1,5 @@
+scalar RGBA
+
 type Movie {
   id: ID
   title: String 
@@ -32,11 +34,10 @@ type Studio {
 type Synopsis {
 	id: ID
   text: String!
-  movie: Movie
+  bgcolor: RGBA
 }
 
 type City {
   id: ID
   name: String!
-  firstStudio: Studio
 }
