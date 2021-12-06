@@ -1,0 +1,15 @@
+<% switch (type) {
+    case "Int": -%>
+0 <%_ break;
+    case "text": -%>
+'' <%_ break;
+    case "Boolean": -%>
+false <%_ break;
+    case "date": -%>
+<% formatDate(d) %> <%_ break;
+    case "time": -%>
+<% formatTime(d) %> <%_ break;
+    case "timestamp": -%>
+TO_TIMESTAMP('1970-01-01 01:00:00','YYYY-MM-DD HH:MI:SS') <%_ break;
+    default:
+        break;} -%>

@@ -45,6 +45,12 @@ Link the project to your local node_modules folder
 npm link
 ```
 
+This generator is for developers who prefers to use TypeScript, React and node as their primary technologies. If you are interested in contributing or modifying the generator itself, install all modules before building the solution.  
+
+```
+npm install
+npm run build
+```
 ## Usage
 
 Generate your server application

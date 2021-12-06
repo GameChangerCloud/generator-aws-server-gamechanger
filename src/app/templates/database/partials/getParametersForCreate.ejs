@@ -1,0 +1,70 @@
+<% for (let index = 0; index < table.length; index++) { _%>
+    <%if (table[index].isArray) { _%>
+       <% switch (table[index].gqlType) { 
+            case "String": _%>
+                constructFakerListString(<%- tableName %>)
+                <%break;
+            case "ID": _%>
+                generateRandomListID()
+                <%break;
+            case "Boolean": _%>
+                generateRandomListBoolean()
+                <%break;
+            case "Int": _%>
+                generateRandomListInt()
+                <%break;
+            default: _%>
+                null
+                <%break;
+       }
+    }
+    else {%>
+        <%switch (table[index].gqlType) { 
+
+            case "String": _%>
+                <%- matching.matchString( tableName ) _%>
+                <% break;
+            case "ID": _%>
+                pad(faker.random.number(), 3)
+                <%break;
+            case "Boolean": _%>
+                faker.random.boolean()
+                <%break;
+            case "Int": _%>
+                faker.random.number()
+                <%break;
+            case "Date": _%>
+                getRandomDate()
+                <% break
+            case "DateTime": _%>
+                getRandomDateTime().toISOString()
+                <%break
+            case "Time": _%>
+                getRandomTime()
+                <% break
+            case "RGB": _%>
+                faker.random.number()
+                <%break;
+            case "URL":_%>
+                <%if (tableName.includes("avatar") || tableName.includes("profile")){%>
+                    faker.image.avatar()
+                <%}else if (tableName.includes("image") || tableName.includes("picture")){%>
+                    faker.image.image()
+                <%}else{%>
+                    faker.internet.url()
+                <%}%>
+                <%break
+            case "EmailAddress": _%>
+                faker.internet.email()
+                <%break
+            case "HexColorCode":_%>
+                faker.internet.color()
+                <%break
+            // TODO : Handle all the scalar type from graphql-scalar module, see faker
+            default:_%>
+                null
+                <%break;
+        }%>
+    <%}%>
+    , 
+<%}%>
