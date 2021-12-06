@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "start": "tsc -w & tscp -w",
-    "build": " tscp && tsc "
+    "build": " tscp && tsc ",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
