@@ -1,11 +1,15 @@
+"use strict";
 // Supported relationships
-module.exports = {
-    oneToOne: "oneToOne",
-    manyToMany: "manyToMany",
-    oneToMany: "oneToMany",
-    manyToOne: "manyToOne",
-    oneOnly: "oneOnly",
-    manyOnly: "manyOnly",
-    selfJoinOne: "selfJoinOne",
-    selfJoinMany: "selfJoinMany"
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Relationships = void 0;
+var Relationships;
+(function (Relationships) {
+    Relationships["oneToOne"] = "oneToOne";
+    Relationships["manyToMany"] = "manyToMany";
+    Relationships["oneToMany"] = "oneToMany";
+    Relationships["manyToOne"] = "manyToOne";
+    Relationships["oneOnly"] = "oneOnly";
+    Relationships["manyOnly"] = "manyOnly";
+    Relationships["selfJoinOne"] = "selfJoinOne";
+    Relationships["selfJoinMany"] = "selfJoinMany";
+})(Relationships = exports.Relationships || (exports.Relationships = {}));
