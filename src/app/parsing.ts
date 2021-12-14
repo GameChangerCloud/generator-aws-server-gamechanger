@@ -71,7 +71,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
     let result = ""
     for (let index = 0; index < type.fields.length; index++) {
         let field = type.fields[index]
-        let hasArguments = field.arguments[0] ? true : false
+        let hasArguments = field.args[0] ? true : false
         if (index > 0) 
             result += "\t\t"
         
@@ -81,7 +81,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLID", true)
                     result += "\n"
-                    result += buildArgs(field.arguments, hasArguments)
+                    result += buildArgs(field.args, hasArguments)
                     result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                     result += "\n\t\t},\n"
                 } else {
@@ -93,7 +93,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLString", true)
                     result += "\n"
-                    result += buildArgs(field.arguments, hasArguments)
+                    result += buildArgs(field.args, hasArguments)
                     result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                     result += "\n\t\t},\n"
                 } else {
@@ -105,7 +105,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLInt", true)
                     result += "\n"
-                    result += buildArgs(field.arguments, hasArguments)
+                    result += buildArgs(field.args, hasArguments)
                     result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                     result += "\n\t\t},\n"
                 } else {
@@ -117,7 +117,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 if (type.typeName === "Mutation" || type.typeName === "Query" || type.typeName === "Subscription") {
                     result += buildTypeField(field, "GraphQLBoolean", true)
                     result += "\n"
-                    result += buildArgs(field.arguments, hasArguments)
+                    result += buildArgs(field.args, hasArguments)
                     result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                     result += "\n\t\t},\n"
                 } else {
@@ -134,7 +134,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                          else 
                             result += buildTypeField(field, field.type + "Type", true)
                          result += "\n"
-                        result += buildArgs(field.arguments, hasArguments)
+                        result += buildArgs(field.args, hasArguments)
                         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                         result += "\n\t\t},\n"
                     }
@@ -145,7 +145,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                          else 
                             result += buildTypeField(field, field.type + "Type", true)
                          result += "\n"
-                        result += buildArgs(field.arguments, hasArguments)
+                        result += buildArgs(field.args, hasArguments)
                         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                         result += "\n\t\t},\n"
                     }
@@ -161,7 +161,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                         } else {
                             result += buildTypeField(field, field.type + "Type", true)
                             result += "\n"
-                            result += buildArgs(field.arguments, hasArguments)
+                            result += buildArgs(field.args, hasArguments)
 
                             // get the relation
                             let relationsBetween = field.relationType//getRelationBetween(field.type, type.typeName, relations)
@@ -185,7 +185,7 @@ const getFieldsInput = (fields) => {
     let result = ""
     for (let index = 0; index < fields.length; index++) {
         let field = fields[index]
-        let hasArguments = field.arguments[0] ? true : false
+        let hasArguments = field.args[0] ? true : false
         if (index > 0) 
             result += "\t\t"
         
@@ -333,11 +333,11 @@ const getRequireTypes = (currentType, defaultScalars) => {
             }
         }
         // Checking internal argument (for the query mainly if there's enum in place)
-        field.arguments.forEach(argument => {
-            if (argument.type !== currentType) {
-                if (argument.type !== "String" && argument.type !== "ID" && argument.type !== "Int" && argument.type != "Boolean") { // Check if it's not already included (multiple type call in Query)
-                    if (! result.includes(argument.type)) 
-                        result.push(argument.type)
+        field.args.forEach(arg => {
+            if (arg.type !== currentType) {
+                if (arg.type !== "String" && arg.type !== "ID" && arg.type !== "Int" && arg.type != "Boolean") { // Check if it's not already included (multiple type call in Query)
+                    if (! result.includes(arg.type)) 
+                        result.push(arg.type)
                 }
             }
         })

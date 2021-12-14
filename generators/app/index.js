@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Type_1 = require("./typeManagement/Type");
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize');
 const parsing = require('./parsing');
@@ -87,7 +90,8 @@ module.exports = class extends Generator {
                 // Parsing as a JSON object
                 this.schemaJSON = easygraphqlSchemaParser(this.schema);
                 // Get all the types
-                this.types = parsing.getAllTypes(this.schemaJSON);
+                this.types = Type_1.Type.initTypes(this.schemaJSON);
+                //this.types = parsing.getAllTypes(this.schemaJSON)
                 this.types = parsing.addIdTypes(this.types);
                 // completes types adding fk and relational info
                 this.types = parsing.addMissingInfos(this.types);
@@ -130,6 +134,7 @@ module.exports = class extends Generator {
                 this.defaultScalars.push(constants[scalarName]);
             }
         }
+        //this.tyty = parsing.getRelations(this.tyty.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
         // Get all the relations between entities
         //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
         this.types = parsing.getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env);
