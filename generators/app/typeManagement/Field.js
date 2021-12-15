@@ -15,7 +15,12 @@ class Field {
     setNoNull() {
         this.noNull = true;
     }
-    // Constructor to Init Object type parameters . obj = {key1 : value1, key2 : value2 ....}
+    /**
+   * Set up types fields to handle tracking of foreign key that might have been added by other types
+   * Init Object type parameters . obj = {key1 : value1, key2 : value2 ....}
+   * @param {*} types list of types
+   * @returns nothing
+   */
     initObjectParameters() {
         this.foreign_key = null;
         // if the field is a relation
@@ -30,7 +35,7 @@ class Field {
             }
         };
         // if the field will appear in final model (tables) ex for oneToMany relation the field may dissapear
-        this.in_model = false;
+        this.in_model = true;
         // contains info if the field will be in a joinTable in final model, the name of the table
         // the name of the fields associated in the table 
         this.joinTable = {

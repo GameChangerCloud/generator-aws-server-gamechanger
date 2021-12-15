@@ -105,19 +105,10 @@ module.exports = class extends Generator {
 				// Parsing as a JSON object
 				this.schemaJSON = easygraphqlSchemaParser(this.schema)
 
-				
-
-				
-
-
-
 				// Get all the types
 				this.types = Type.initTypes(this.schemaJSON)
-				//this.types = parsing.getAllTypes(this.schemaJSON)
-
-				this.types = parsing.addIdTypes(this.types)
-				// completes types adding fk and relational info
-				this.types = parsing.addMissingInfos(this.types)
+				
+				
 				// Check if the schema is valid 
 				let isValidSchema = parsing.isSchemaValid(this.types)
 				if (!isValidSchema.response) {

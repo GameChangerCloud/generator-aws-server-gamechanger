@@ -1049,66 +1049,6 @@ const hasFieldType = (type, fieldType) => {
 const formatName = (name) => {
     return name.replace(/[^a-z]/gi, '');
 };
-const addIdTypes = (types) => {
-    types.forEach(type => {
-        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
-            if (!type.fields.find(field => field.name === "id")) {
-                type.fields.push({
-                    "name": "id",
-                    "arguments": [],
-                    "directives": [],
-                    "isDeprecated": false,
-                    "noNull": true,
-                    "isArray": false,
-                    "noNullArrayValues": false,
-                    "type": "ID"
-                });
-            }
-        }
-    });
-    return types;
-};
-/**
- * Set up types fields to handle tracking of foreign key that might have been added by other types
- *
- * @param {*} types list of types
- * @returns nothing
- */
-const addMissingInfos = (types) => {
-    types.forEach(type => {
-        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition" && type.type !== "EnumTypeDefinition") {
-            // stores all the relations which were found for a give type
-            type["relationList"] = []; // { "type" : null, "relation" : }
-            type.fields.forEach(field => {
-                // foreign key of the field
-                field["foreign_key"] = null;
-                // if the field is a relation
-                field["relation"] = false;
-                // if the field is added or is adding to another field
-                field["delegated_field"] = {
-                    "state": false,
-                    "side": null,
-                    "associatedWith": {
-                        "type": null,
-                        "fieldName": null
-                    }
-                };
-                // if the field will appear in final model (tables) ex for oneToMany relation the field may dissapear
-                field["in_model"] = true;
-                // contains info if the field will be in a joinTable in final model, the name of the table
-                // the name of the fields associated in the table 
-                field["joinTable"] = {
-                    "state": false,
-                    "name": null,
-                    "contains": []
-                };
-                //Contains info about OneToOne relations
-                field["oneToOneInfo"] = null;
-            });
-        }
-    });
-    return types;
-};
 const isSchemaValid = (types) => {
     let typesName = types.map(type => type.typeName);
     if (!typesHaveId(typesName, types))
@@ -1193,12 +1133,10 @@ module.exports = {
     getQuerySelfJoinMany: getQuerySelfJoinMany,
     hasFieldType: hasFieldType,
     formatName: formatName,
-    addIdTypes: addIdTypes,
     isSchemaValid: isSchemaValid,
     getFieldsCreate: getFieldsCreate,
     getFieldsName: getFieldsName,
     compareSchema: compareSchema,
     findTable: findTable,
     findField: findField,
-    addMissingInfos: addMissingInfos
 };
