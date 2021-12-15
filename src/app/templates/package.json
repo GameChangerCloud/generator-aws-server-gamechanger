@@ -1,0 +1,11 @@
+{
+  "name": "<%=appName%>",
+  "version": "<%=appVersion%>",
+  "description": "<%=appDescription%>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "<%=appAuthor%>",
+  "license": "ISC"
+}

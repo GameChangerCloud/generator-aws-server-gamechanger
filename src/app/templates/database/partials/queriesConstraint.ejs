@@ -1,0 +1,5 @@
+const queriesConstraint = [
+<%_ tables.forEach(table => { for (let index = 0; index < table.columns.length; index++) { _%>
+    <%- include('./alter',{name: table.sqlname, columns: table.columns[index], alterCase : "Deferred"}) _%>
+<% }}); %>
+    ]

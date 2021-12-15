@@ -1,0 +1,5 @@
+"<%= column.field %>" <% if (column.field.startsWith("Pk")) { %>SERIAL PRIMARY KEY NOT NULL<% } else { -%>
+    <%- column.fieldType -%>
+    <%_ if (column.noNull) { %> NOT NULL<% } -%>
+    <%_ if (column.unique) { %> UNIQUE<% } -%>
+<% } -%>

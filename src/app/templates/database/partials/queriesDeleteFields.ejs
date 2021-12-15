@@ -1,0 +1,5 @@
+const queriesDeleteFields = [
+    <% fields.forEach(table => { _%>
+    {tableName : "<%- table.name %>" , text: `ALTER TABLE "<%- table.sqlname %>" DROP COLUMN IF EXISTS <%- table.column %>`},
+    <% }) -%>
+]

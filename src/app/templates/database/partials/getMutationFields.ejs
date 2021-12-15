@@ -1,0 +1,117 @@
+    <%for (let index = 0; index < types.length; index++) {
+        if (types[index].typeName !== "Query" && types[index].typeName !== "Mutation" && !defaultScalars.includes(types[index].typeName)) {_%>
+            <%- types[index].typeName.toLowerCase() %>Delete: { 
+			    type: <%- types[index].typeName %>Type,
+			    args: {
+				    id: { type: new GraphQLNonNull(GraphQLID) },
+			    },
+			    resolve: (obj, args, context, info) => {
+				    const recordToDelete = dbHandler.handleGet(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        // Query to delete
+                        return dbHandler.handleDelete(args.id, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(() => {
+                            return record
+                        })
+				    })
+				    return recordToDelete
+			    }
+		    },
+            <%- types[index].typeName.toLowerCase() %>Update: { 
+			    type: <%- types[index].typeName %>Type,
+			    args: {
+                    id: { type: new GraphQLNonNull(GraphQLID) },
+            <% for (let j = 0; j < types[index].fields.length; j++) { 
+                let field = types[index].fields[j]
+                if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) { _%>
+                    <%if (field.isArray) { _%>
+                        <%- field.name %> : {type: new GraphQLList(GraphQLID)},
+                    <%}
+                    else {_%>
+                        <%- field.name %> : {type: GraphQLID},
+                    <%}%>
+                    
+                <%} 
+                else { _%>
+                    <% if (field.type !== "ID") {
+                        if (field.isArray) {
+                            if (defaultScalars.includes(field.type)) { _%>
+                                <%- field.name %>: {type: new GraphQLList(<%- field.type %>)},
+                            <% }
+                            else {_%>
+                                <%- field.name %> : {type: new GraphQLList(GraphQL<%-field.type%>)},
+                            <%}%>
+                        <%}
+                        else { _%>
+                            <% if (defaultScalars.includes(field.type)) { _%>
+                                <%-field.name %>: {type: <%- field.type %>},
+                            <%}
+                            else { _%>
+                                <%- field.name %> : {type: GraphQL<%- field.type %>},
+                            <%}%>
+                        <%}%>
+                
+                    <%}
+                }
+            } _%>
+            },
+			    resolve: (obj, args, context, info) => {
+                    const recordUpdated = dbHandler.handleUpdate(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        return dbHandler.handleGet(args, '<%- types[index].typeName%>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                            return record
+                        })
+                    })
+                    return recordUpdated
+			    }
+		    },
+	        <%- types[index].typeName.toLowerCase()%>Create: {
+                type: <%- types[index].typeName %>Type ,
+                args: {
+                    id: { type: new GraphQLNonNull(GraphQLID) },
+            <% for (let j = 0; j < types[index].fields.length; j++) {
+                let field = types[index].fields[j]
+                if (field.type !== "String" && field.type !== "Boolean" && field.type !== "Int" && field.type !== "ID" && !defaultScalars.includes(field.type)) { _%>
+                    <% if (field.isArray) { _%>
+                        <%- field.name %> : {type: new GraphQLList(GraphQLID)},
+                    <%}
+                    else {_%>
+                        <%- field.name %> : {type: GraphQLID},
+                    <%}%>
+                    
+                <%}
+                else {_%>
+                    <%if (field.type !== "ID") {
+                        if (field.isArray) {
+                            if (defaultScalars.includes(field.type)) { _%>
+                                <%- field.name %> : {type: new GraphQLList(<%- field.type %>)},
+                            <%}
+                            else { _%>
+                                <%- field.name %> : {type: new GraphQLList(GraphQL<%- field.type %>)},
+                            <%}%>
+                        <%}
+                        else { _%>
+                            <%if (defaultScalars.includes(field.type)) { _%>
+                                <%- field.name %> : {type: <%- field.type %>},
+                            <%}
+                            else {_%>
+                                
+                                <%-field.name %> : {type: GraphQL<%- field.type %>},
+                            <%}%>
+                        <%}%>
+                        
+                    <%}
+                }
+            }_%>
+            },
+                resolve: (obj, args, context, info) => {
+                    
+                    const recordCreated = dbHandler.handleCreate(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                        args.id = record
+                        return dbHandler.handleGet(args, '<%- types[index].typeName %>Type', directivesOnTypes.<%- types[index].typeName.toLowerCase()%>Directives).then(record => {
+                            return record
+                        })
+                    })
+                    return recordCreated
+                }
+            },
+        <%}
+    }%>
+    
