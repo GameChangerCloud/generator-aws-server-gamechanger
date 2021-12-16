@@ -6,12 +6,17 @@
                 let itemInsertList = []%>
             <%_type.fields.forEach( field =>  {
                 if (field.type !== "ID" && field.in_model){
-                    if (field.foreign_key !== null){
-                        fieldInsertList.push(field.foreign_key.name)
-                        itemInsertList.push(["+ item."+ field.name+" +","else"])
+                    if (field.sqlType === "int"){
+                        if(field.foreign_key !== null){
+                            fieldInsertList.push(field.foreign_key.name)
+                        }
+                        else{
+                            fieldInsertList.push(field.name)
+                        } 
+                        itemInsertList.push(["+ item."+ field.name+" +","numeric"])
                     }else{
                         fieldInsertList.push(field.name)
-                        itemInsertList.push(["+ item."+ field.name+" +", "Fk"])
+                        itemInsertList.push(["+ item."+ field.name+" +", "else"])
                     }  
                 }  
             })_%>
@@ -22,9 +27,9 @@
             <%});_%>
             ) VALUES (
                 <%itemInsertList.forEach((f, index) => {_%>
-                <%if (f[1] === "Fk" ) {_%>'`<%}else{%>`<%}%>
+                <%if (f[1] === "else" ) {_%>'`<%}else{%>`<%}%>
                 <%-f[0]%>
-                <%if (f[1] === "Fk" ) {_%>`'<%}else{%>`<%}%>
+                <%if (f[1] === "else" ) {_%>`'<%}else{%>`<%}%>
                 <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
                 
             <%});_%>

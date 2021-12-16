@@ -15,6 +15,7 @@ export declare class Field {
     foreign_key: any;
     isDeprecated: boolean;
     joinTable: any;
+    sqlType: string;
     constructor(name: string, type: string, nonNullArrayValues: boolean, noNull: boolean, isArray: boolean, directives: any, args: any, isDeprecated: boolean);
     setNoNull(): void;
     /**

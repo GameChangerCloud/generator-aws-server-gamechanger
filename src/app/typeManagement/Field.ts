@@ -18,6 +18,7 @@ export class Field {
     foreign_key : any;
     isDeprecated : boolean;
     joinTable : any;
+    sqlType : string;
 
 
   public constructor(
@@ -79,6 +80,9 @@ export class Field {
     }
     //Contains info about OneToOne relations
     this.oneToOneInfo = null
+
+    // adds info about the field sqlType
+    this.sqlType = "int"
 
   }  
    

@@ -657,7 +657,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                             // delegated field is a foreign Key
                             delegatedField["foreign_key"] = {
                                 "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
-                                "type": "Int",
+                                "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
@@ -707,7 +707,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                             // delegated field is a foreign Key
                             delegatedField["foreign_key"] = {
                                 "name": "Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id",
-                                "type": "Int",
+                                "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
@@ -733,7 +733,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                             rfield["relationType"] = relationships_1.Relationships.selfJoinOne;
                             rfield["foreign_key"] = {
                                 "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
-                                "type": "Int",
+                                "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
@@ -757,7 +757,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                             // Both object has to integrate a Fk to Pk but each side is processed in each type
                             rfield["foreign_key"] = {
                                 "name": "Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id",
-                                "type": "Int",
+                                "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
@@ -774,7 +774,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                         let targetSQLTypeName = utils.getSQLTableName(rfield.type);
                         rfield["foreign_key"] = {
                             "name": "Fk_" + rfield.name + "_" + targetSQLTypeName + "_id",
-                            "type": "Int",
+                            "type": "int",
                             "noNull": rfield.noNull,
                             "isArray": false,
                             "foreignKey": true,
@@ -802,7 +802,7 @@ const getRelations = (types, scalarTypeNames, env) => {
                             // delegated field is a foreign Key
                             delegatedField["foreign_key"] = {
                                 "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
-                                "type": "Int",
+                                "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,

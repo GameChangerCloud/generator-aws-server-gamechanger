@@ -45,6 +45,8 @@ class Field {
         };
         //Contains info about OneToOne relations
         this.oneToOneInfo = null;
+        // adds info about the field sqlType
+        this.sqlType = "int";
     }
     greet() {
         return "Hello, ";

@@ -42,6 +42,9 @@
             case "Time": _%>
                 getRandomTime()
                 <% break
+            case "RGBA": _%>
+                `rgba(${faker.random.number(255)}, ${faker.random.number(255)}, ${faker.random.number(255)}, ${Math.random()})`
+                <% break
             case "RGB": _%>
                 faker.random.number()
                 <%break;
