@@ -12,6 +12,11 @@ const getFieldCreate = (type, name) => {
             break
         case "String":
         case "Date":
+        case "RGB":
+        case "RGBA":
+        case "HSL":
+        case "HSLA":
+        case "HexColorCode":
         case "Time":
             s = `utils.escapeQuote(args.${name})`
             break
