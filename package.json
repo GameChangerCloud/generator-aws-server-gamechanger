@@ -1,6 +1,6 @@
 {
   "name": "generator-aws-server-gamechanger",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Simple generator of a serverless GraphQL API that can be deployed on AWS from a GraphQL schema",
   "main": "generators/index.js",
   "files": [
@@ -31,6 +31,7 @@
     "pluralize": "^8.0.0",
     "rds-data": "^1.1.0",
     "sam": "0.0.7",
+    "tscp": "^1.0.0",
     "validator": "^13.6.0",
     "yeoman-generator": "^4.8.2",
     "yo": "^4.3.0"
@@ -56,7 +57,7 @@
     "eslint": "6.6.0",
     "mocha": "^8.4.0",
     "ts-node": "^10.4.0",
-    "typescript": "4.1.3",
+    "typescript": "4.2.3",
     "typescript-cp": "^0.1.5"
   }
 }

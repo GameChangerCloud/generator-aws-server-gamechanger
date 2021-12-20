@@ -94,9 +94,11 @@ if(args.<%- field.name %> !== undefined){
         <% break;
     case scalars.HSLA: _%>
         <% break;
-    case scalars.RGB: _%>
-        <% break;
+    case scalars.RGB: 
     case scalars.RGBA: _%>
+    if(args.<%- field.name %> !== undefined){
+            temp += args.<%- field.name %> ? "\"<%- field.name %>\" = " + utils.escapeQuote(args.<%- field.name %>) + ", " : "\" <%- field.name %>\" = null, "
+        }
         <% break;
     case scalars.ISBN: _%>
         <% break;
