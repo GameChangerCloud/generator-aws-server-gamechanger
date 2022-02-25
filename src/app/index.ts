@@ -803,7 +803,7 @@ module.exports = class extends Generator {
 	install() {
 		this.log("Install")
 		// todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
-		this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'faker', 'validator', 'graphql-scalars'])
+		this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars'])
 	}
 	
 	// Called last, cleanup, say good bye, etc

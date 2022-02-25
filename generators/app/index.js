@@ -89,6 +89,7 @@ module.exports = class extends Generator {
                 this.schema = this.fs.read(this.options.graphqlFile);
                 // Parsing as a JSON object
                 this.schemaJSON = easygraphqlSchemaParser(this.schema);
+                console.log("===> SCHEMA",this.schemaJSON)
                 // Get all the types
                 this.types = Type_1.Type.initTypes(this.schemaJSON);
                 // Check if the schema is valid 
@@ -527,7 +528,7 @@ module.exports = class extends Generator {
     install() {
         this.log("Install");
         // todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
-        this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'faker', 'validator', 'graphql-scalars']);
+        this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars']);
     }
     // Called last, cleanup, say good bye, etc
     end() {

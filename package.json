@@ -22,9 +22,9 @@
   "dependencies": {
     "camelcase": "^6.2.0",
     "chai-string": "^1.5.0",
+    "chance": "^1.1.8",
     "easygraphql-parser-gamechanger": "0.0.17",
     "ejs": "^3.1.5",
-    "faker": "^4.1.0",
     "graphql": "^15.6.0",
     "graphql-scalars": "^1.10.1",
     "pg": "^8.7.1",
@@ -43,7 +43,6 @@
     "@types/copyfiles": "2.4.1",
     "@types/ejs": "^3.1.0",
     "@types/eslint": "8.2.0",
-    "@types/faker": "^4.1.12",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.11",
     "@types/pg": "^8.6.1",

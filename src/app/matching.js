@@ -166,111 +166,110 @@ function isVersion(s){
 function matchString(s){
     // ADRESS PART.
     if(isZip(s)){
-        return 'faker.address.zipCode()'
+        return 'chance.zip()'
     }
     if(isCity(s)){
-        return 'faker.address.city()'
+        return 'chance.city()'
     }
     if(isAdress(s)){
-        return 'faker.address.streetAddress()'
+        return 'chance.street()'
     }
     if(isCountry(s)){
-        return 'faker.address.country()'
+        return 'chance.country()'
     }
     if(isState(s)){
-        return 'faker.address.state()'
+        return 'chance.state()'
     }
     if(isLatitude(s)){
-        return 'faker.address.latitude()'
+        return 'chance.latitude()'
     }
     if(isLongitude(s)){
-        return 'faker.address.longitude()'
+        return 'chance.longitude()'
     }
     // COMMERCE PART.
     if(isColor(s)){
-        return 'faker.commerce.color()'
+        return 'chance.color()'
     }
-    if(isProduct(s)){
-        return 'faker.commerce.product()'
-    }
-    if(isPrice(s)){
-        return 'faker.commerce.price()'
-    }
+    // if(isProduct(s)){
+    //     return 'chance.commerce.product()'
+    // }
+    // if(isPrice(s)){
+    //     return 'chance.commerce.price()'
+    // }
     // DATE PART.
     if(s.toLowerCase().endsWith("date")){
         return 'getRandomDate()';
     }
-    if(isDateBefore(s)){
-        return 'faker.date.past()'
-    }
-    if(isDate(s)){
-        return 'faker.date.recent()'
-    }
+    // if(isDateBefore(s)){
+    //     return 'chance.date.past()'
+    // }
+    // if(isDate(s)){
+    //     return 'chance.date.recent()'
+    // }
     if(isMonth(s)){
-        return 'faker.date.month()'
+        return 'chance.month()'
     }
     // FINANCE PART.
-    if(isIban(s)){
-        return 'faker.finance.iban()'
-    }
-    if(isBic(s)){
-        return 'faker.finance.bic()'
-    }
-    if(isBitcoin(s)){
-        return 'faker.finance.bitcoinAddress()'
-    }
-    if(isAmount(s)){
-        return 'faker.finance.amount()'
-    }
+    // if(isIban(s)){
+    //     return 'chance.finance.iban()'
+    // }
+    // if(isBic(s)){
+    //     return 'chance.finance.bic()'
+    // }
+    // if(isBitcoin(s)){
+    //     return 'chance.finance.bitcoinAddress()'
+    // }
+    // if(isAmount(s)){
+    //     return 'chance.finance.amount()'
+    // }
     // INTERNET PART.
     if(isEmail(s)){
-        return 'faker.internet.email()'
+        return 'chance.email()'
     }
-    if(isUsername(s)){
-        return 'faker.internet.userName()'
-    }
+    // if(isUsername(s)){
+    //     return 'chance.internet.userName()'
+    // }
     if(isUrl(s)){
-        return 'faker.internet.url()'
+        return 'chance.url()'
     }
-    if(isPassword(s)){
-        return 'faker.internet.password()'
-    }
+    // if(isPassword(s)){
+    //     return 'chance.internet.password()'
+    // }
     // LOREM PART.
     if(isTitle(s)){
-        return 'faker.lorem.sentence()'
+        return 'chance.sentence()'
     }
     if(isText(s)){
-        return 'faker.lorem.text()'
+        return 'chance.paragraph()'
     }
     // NAME PART.
     if(isLastname(s)){
-        return 'faker.name.lastName()'
+        return 'chance.last()'
     }
     if(isFirstname(s)){
-        return 'faker.name.firstName()'
+        return 'chance.first()'
     }
     if(isJob(s)){
-        return 'faker.name.jobTitle()'
+        return 'chance.profession()'
     }
     // PHONE PART.
     if(isPhone(s)){
-        return 'faker.phone.phoneNumber()'
+        return 'chance.phone()'
     }
     // SYSTEM PART.
-    if(isFile(s)){
-        return 'faker.system.fileName()'
-    }
-    if(isVersion(s)){
-        return 'faker.system.semver()'
-    }
+    // if(isFile(s)){
+    //     return 'chance.system.fileName()'
+    // }
+    // if(isVersion(s)){
+    //     return 'chance.system.semver()'
+    // }
 
-    return 'faker.lorem.word()'
+    return 'chance.word()'
 }
 
 module.exports = {
     matchString: matchString
 }
 
-const faker = require('faker');
+const chance = require('chance');
 
-console.log(faker.date.recent())
