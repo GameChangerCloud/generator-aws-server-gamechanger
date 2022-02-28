@@ -729,6 +729,12 @@ module.exports = class extends Generator {
 			}
 		)
 
+		// Adding launch.json file for sam configuration
+		this.fs.copyTpl(
+			this.templatePath('samConfiguration/launch.json'),
+			this.destinationPath('./.vscode/launch.json')
+		)
+
 		this.add_entities = []
 		this.update_entities = []
 		this.delete_entities = []
