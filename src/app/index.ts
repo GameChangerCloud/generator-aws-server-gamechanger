@@ -248,7 +248,7 @@ module.exports = class extends Generator {
 					this.templatePath('graphql/type.ejs'),
 					this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					{
-						type, currentType,
+						type: currentType,
 						graphqlType: graphqlType, //EnumType, ObjectType, InterfaceType
 						interfaces: null, // An interface doesn't implement other interface
 						typeRequire: requireTypes,
