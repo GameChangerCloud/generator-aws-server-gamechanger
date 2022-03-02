@@ -248,7 +248,7 @@ module.exports = class extends Generator {
 					this.templatePath('graphql/type.ejs'),
 					this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'),
 					{
-						type, currentType,
+						type: currentType,
 						graphqlType: graphqlType, //EnumType, ObjectType, InterfaceType
 						interfaces: null, // An interface doesn't implement other interface
 						typeRequire: requireTypes,
@@ -727,6 +727,12 @@ module.exports = class extends Generator {
 				appVersion: this.answers.version,
 				appAuthor: this.answers.author,
 			}
+		)
+
+		// Adding launch.json file for sam configuration
+		this.fs.copyTpl(
+			this.templatePath('samConfiguration/launch.json'),
+			this.destinationPath('./.vscode/launch.json')
 		)
 
 		this.add_entities = []
