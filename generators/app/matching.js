@@ -153,50 +153,50 @@ function matchString(s) {
     if (isColor(s)) {
         return 'chance.color()';
     }
-    // if (isProduct(s)) {
-    //     return 'chance.commerce.product()';
+    // if(isProduct(s)){
+    //     return 'chance.commerce.product()'
     // }
-    // if (isPrice(s)) {
-    //     return 'chance.commerce.price()';
+    // if(isPrice(s)){
+    //     return 'chance.commerce.price()'
     // }
     // DATE PART.
     if (s.toLowerCase().endsWith("date")) {
         return 'getRandomDate()';
     }
-    // if (isDateBefore(s)) {
-    //     return 'chance.date.past()';
+    // if(isDateBefore(s)){
+    //     return 'chance.date.past()'
     // }
-    // if (isDate(s)) {
-    //     return 'chance.date.recent()';
+    // if(isDate(s)){
+    //     return 'chance.date.recent()'
     // }
     if (isMonth(s)) {
         return 'chance.month()';
     }
     // FINANCE PART.
-    // if (isIban(s)) {
-    //     return 'chance.finance.iban()';
+    // if(isIban(s)){
+    //     return 'chance.finance.iban()'
     // }
-    // if (isBic(s)) {
-    //     return 'chance.finance.bic()';
+    // if(isBic(s)){
+    //     return 'chance.finance.bic()'
     // }
-    // if (isBitcoin(s)) {
-    //     return 'chance.finance.bitcoinAddress()';
+    // if(isBitcoin(s)){
+    //     return 'chance.finance.bitcoinAddress()'
     // }
-    // if (isAmount(s)) {
-    //     return 'chance.finance.amount()';
+    // if(isAmount(s)){
+    //     return 'chance.finance.amount()'
     // }
     // INTERNET PART.
     if (isEmail(s)) {
         return 'chance.email()';
     }
-    // if (isUsername(s)) {
-    //     return 'chance.internet.userName()';
+    // if(isUsername(s)){
+    //     return 'chance.internet.userName()'
     // }
     if (isUrl(s)) {
         return 'chance.url()';
     }
-    // if (isPassword(s)) {
-    //     return 'chance.internet.password()';
+    // if(isPassword(s)){
+    //     return 'chance.internet.password()'
     // }
     // LOREM PART.
     if (isTitle(s)) {
@@ -207,24 +207,24 @@ function matchString(s) {
     }
     // NAME PART.
     if (isLastname(s)) {
-        return 'chance.name.last()';
+        return 'chance.last()';
     }
     if (isFirstname(s)) {
-        return 'chance.name.first()';
+        return 'chance.first()';
     }
     if (isJob(s)) {
-        return 'chance.name.profession()';
+        return 'chance.profession()';
     }
     // PHONE PART.
     if (isPhone(s)) {
         return 'chance.phone()';
     }
     // SYSTEM PART.
-    // if (isFile(s)) {
-    //     return 'chance.system.fileName()';
+    // if(isFile(s)){
+    //     return 'chance.system.fileName()'
     // }
-    // if (isVersion(s)) {
-    //     return 'chance.system.semver()';
+    // if(isVersion(s)){
+    //     return 'chance.system.semver()'
     // }
     return 'chance.word()';
 }
@@ -232,4 +232,3 @@ module.exports = {
     matchString: matchString
 };
 const chance = require('chance');
-

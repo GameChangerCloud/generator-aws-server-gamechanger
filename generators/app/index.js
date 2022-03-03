@@ -89,7 +89,6 @@ module.exports = class extends Generator {
                 this.schema = this.fs.read(this.options.graphqlFile);
                 // Parsing as a JSON object
                 this.schemaJSON = easygraphqlSchemaParser(this.schema);
-                console.log("===> SCHEMA",this.schemaJSON)
                 // Get all the types
                 this.types = Type_1.Type.initTypes(this.schemaJSON);
                 // Check if the schema is valid 
@@ -190,7 +189,7 @@ module.exports = class extends Generator {
                 let resolveType = parsing.getResolveType(currentType, currentType.typeName);
                 // Adding the types graphql files
                 this.fs.copyTpl(this.templatePath('graphql/type.ejs'), this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'), {
-                    type, currentType,
+                    type: currentType,
                     graphqlType: graphqlType,
                     interfaces: null,
                     typeRequire: requireTypes,
@@ -463,6 +462,8 @@ module.exports = class extends Generator {
             appVersion: this.answers.version,
             appAuthor: this.answers.author,
         });
+        // Adding launch.json file for sam configuration
+        this.fs.copyTpl(this.templatePath('samConfiguration/launch.json'), this.destinationPath('./.vscode/launch.json'));
         this.add_entities = [];
         this.update_entities = [];
         this.delete_entities = [];
