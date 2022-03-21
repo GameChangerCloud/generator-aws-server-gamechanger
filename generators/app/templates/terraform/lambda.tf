@@ -1,6 +1,6 @@
 data "archive_file" "init" {
   type        = "zip"
-  source_dir  =  "${path.module}/.."
+  source_dir  = "${path.module}/.."
   excludes    = ["terraform"]
   output_path = "${path.module}/lambda.zip"
 }
@@ -8,22 +8,22 @@ data "archive_file" "init" {
 
 resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.init.output_base64sha256
-  function_name = var.lambda_name
-  description = "Lamdba for  testing"
-  role = aws_iam_role.instance.arn
-  filename = data.archive_file.init.output_path
-  handler = "index.handler"
-  runtime = "nodejs12.x"
-  timeout = 60
+  function_name    = var.lambda_name
+  description      = "Lamdba for  testing"
+  role             = aws_iam_role.instance.arn
+  filename         = data.archive_file.init.output_path
+  handler          = "index.handler"
+  runtime          = "nodejs14.x"
+  timeout          = 60
   environment {
     variables = {
-      SECRETARN = aws_secretsmanager_secret.example.arn
+      SECRETARN   = aws_secretsmanager_secret.example.arn
       RESOURCEARN = module.rds_aurora_postgresql.cluster_arn
-      DATABASE = var.db_name
+      DATABASE    = var.db_name
     }
   }
   provisioner "local-exec" {
-    command = <<EOT
+    command     = <<EOT
                 export arn=${module.rds_aurora_postgresql.cluster_arn}
                 export secretArn=${aws_secretsmanager_secret.example.arn}
                 rm -f final.yaml ../temp.yaml  
@@ -34,12 +34,12 @@ resource "aws_lambda_function" "lambda" {
               EOT
     interpreter = ["bash", "-c"]
   }
-  
+
 
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
-  depends_on = [aws_api_gateway_deployment.myDeployement]
+  depends_on    = [aws_api_gateway_deployment.myDeployement]
   statement_id  = "AllowMyDemoAPIInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.function_name
