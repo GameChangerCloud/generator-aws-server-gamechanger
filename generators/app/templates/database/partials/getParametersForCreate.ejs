@@ -31,7 +31,7 @@
                 chance.bool()
                 <%break;
             case "Int": _%>
-                chance.integer()
+                chance.integer({ min: -2147483647, max: 2147483647 })
                 <%break;
             case "Date": _%>
                 getRandomDate()
