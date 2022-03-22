@@ -37,15 +37,12 @@
                 queriesInsert.push(temp)
                 })
         <%}%>
-
     <%})_%>
 
     // JOINTABLES
     <%_types.forEach(type => {
         type.fields.forEach(field => {
             if(field.joinTable.state){%>
-                
-                
                     <%if((field.relationType === relations.manyToMany && field.activeSide) || (field.relationType === relations.manyToOne && field.joinTable.state)){%>
                         <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                             let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
@@ -54,10 +51,8 @@
                                 VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
                                 ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
                                 queriesInsert.push(temp)
-                                })                    
-                <%}
-                
-                
+                        })
+                    <%}            
                 if(field.relationType === relations.selfJoinMany){%>
                     <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                         let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
@@ -66,17 +61,8 @@
                             VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
                                 ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%>_id + `)`
                                 queriesInsert.push(temp)
-                                })
-
-
+                    })
                 <%}
-                
-
-                    
-
-
-                
             }
-            
         })
     })_%>
