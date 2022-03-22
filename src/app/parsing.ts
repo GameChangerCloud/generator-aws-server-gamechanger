@@ -18,7 +18,7 @@ const schemaDirectives = require('./schemaDirectives')
  * @returns 
  */
 const getAllTypes = (schemaJSON) => {
-    let types :any = []
+    let types: any = []
     for (const type in schemaJSON) {
         types.push(schemaJSON[type])
         schemaJSON[type]["typeName"] = type
@@ -29,7 +29,7 @@ const getAllTypes = (schemaJSON) => {
 
 // Get all directive names from the fields of a type object
 const getFieldsDirectiveNames = (type) => {
-    let directiveNames : any = []
+    let directiveNames: any = []
     if (type.directives.length > 0) {
         type.directives.forEach(directive => {
             directiveNames.push(directive.name)
@@ -46,9 +46,9 @@ const getFieldsDirectiveNames = (type) => {
     return directiveNames
 }
 //
-const getschemaDirectivesNames = () =>{
-    let names : any = []
-    for( let elem in schemaDirectives.directives ){
+const getschemaDirectivesNames = () => {
+    let names: any = []
+    for (let elem in schemaDirectives.directives) {
         names.push(elem)
     }
     console.log(names)
@@ -72,9 +72,9 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
     for (let index = 0; index < type.fields.length; index++) {
         let field = type.fields[index]
         let hasArguments = field.args[0] ? true : false
-        if (index > 0) 
+        if (index > 0)
             result += "\t\t"
-        
+
         switch (field.type) {
 
             case "ID":
@@ -125,26 +125,23 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 }
                 break
 
-                // Not classic scalar type
+            // Not classic scalar type
             default:
                 if (type.typeName === "Query") { // If query, we do not accept reserved field query (e.g <entity> or <entities>)
                     if (isValidFieldQuery(field.name, typesName)) {
-                        if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type)) 
+                        if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type))
                             result += buildTypeField(field, field.type, true)
-                         else 
+                        else
                             result += buildTypeField(field, field.type + "Type", true)
-                         result += "\n"
+                        result += "\n"
                         result += buildArgs(field.args, hasArguments)
                         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                         result += "\n\t\t},\n"
                     }
                 } else if (type.typeName === "Mutation") {
                     if (isValidFieldMutation(field.name, typesName)) {
-                        if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type)) 
-                            result += buildTypeField(field, field.type, true)
-                         else 
-                            result += buildTypeField(field, field.type + "Type", true)
-                         result += "\n"
+                        result += buildTypeField(field, field.type + "Type", true)
+                        result += "\n"
                         result += buildArgs(field.args, hasArguments)
                         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\t // To define \n\t\t\t}"
                         result += "\n\t\t},\n"
@@ -186,9 +183,9 @@ const getFieldsInput = (fields) => {
     for (let index = 0; index < fields.length; index++) {
         let field = fields[index]
         let hasArguments = field.args[0] ? true : false
-        if (index > 0) 
+        if (index > 0)
             result += "\t\t"
-        
+
         switch (field.type) {
 
             case "ID": result += buildTypeField(field, "GraphQLID", false)
@@ -203,7 +200,7 @@ const getFieldsInput = (fields) => {
             case "Boolean": result += buildTypeField(field, "GraphQLBoolean", false)
                 break
 
-                // Not classic scalar type
+            // Not classic scalar type
             default:
                 if (field.isArray) {
                     result += buildTypeField(field, field.type + "UpdateInput", false)
@@ -277,7 +274,7 @@ const buildArgs = (parameters, hasArguments) => {
                     break
                 case "Int": result += buildTypeField(param, "GraphQLInt", false)
                     break
-                default: result += buildTypeField(param, param.type + "Type",false)
+                default: result += buildTypeField(param, param.type + "Type", false)
                     break
             }
             // result += ",\n"
@@ -288,7 +285,7 @@ const buildArgs = (parameters, hasArguments) => {
 }
 
 // Construct the resolver based on the type field, return a string
-const buildResolver = (field, hasArguments, currentTypeName, relationType, manyToManyTable ) => {
+const buildResolver = (field, hasArguments, currentTypeName, relationType, manyToManyTable) => {
     let result = ""
     if (hasArguments) {
         result += "\t\t\tresolve: (obj, args, context, info) => {\n\t\t\t\treturn dbHandler.handleGet(args, '" + field.type + "Type')\n\t\t\t}"
@@ -321,13 +318,13 @@ const buildResolverInterface = () => {
 
 // Get all the types required, except the current one, to import in file
 const getRequireTypes = (currentType, defaultScalars) => {
-    let result :any = []
+    let result: any = []
     currentType.fields.forEach(field => {
         let type = field.type
         if (type !== currentType) {
             if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean") { // If it's a predefined scalars no need to include it
                 if (!defaultScalars.includes(type)) { // Check if it's not already included (multiple type call in Query)
-                    if (! result.includes(type)) 
+                    if (!result.includes(type))
                         result.push(type)
                 }
             }
@@ -336,7 +333,7 @@ const getRequireTypes = (currentType, defaultScalars) => {
         field.args.forEach(arg => {
             if (arg.type !== currentType) {
                 if (arg.type !== "String" && arg.type !== "ID" && arg.type !== "Int" && arg.type != "Boolean") { // Check if it's not already included (multiple type call in Query)
-                    if (! result.includes(arg.type)) 
+                    if (!result.includes(arg.type))
                         result.push(arg.type)
                 }
             }
@@ -401,17 +398,17 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
     let result = ""
     for (let index = 0; index < fields.length; index++) {
         if (fields[index].name === "id") {
-            if (!isOneToOneChild) 
+            if (!isOneToOneChild)
                 result += "\t\t\t" + fields[index].name + ": data.Pk_" + currentTypeName + "_id"
-             else 
+            else
                 result += "\t\t\t" + fields[index].name + ": data.Pk_" + parent + "_id"
-            
+
         } else {
             result += "\t\t\t" + fields[index].name + ": data." + fields[index].name
         }
-        if (index < fields.length - 1) 
+        if (index < fields.length - 1)
             result += ","
-        
+
         result += "\n"
     }
     return result
@@ -419,39 +416,37 @@ const getFieldsParsedHandler = (currentTypeName, fields, isOneToOneChild, parent
 
 
 const getFieldsCreate = (currentTypeName, fields, relations, manyToManyTables) => {
-    let sqlFields :any = []
+    let sqlFields: any = []
     // Deal with scalar first (removing any Array)
     fields.filter(field => !field.isArray && field.delegated_field.side !== "target").forEach(field => {
         let sqlField = manageScalars.getFieldCreate(field.type, field.name)
-        if (sqlField){ 
+        if (sqlField) {
             sqlFields.push(sqlField);
         }
-        
+
     })
     // Deal with oneOnly relationship
     fields.filter(field1 => field1.relationType == Relationships.oneOnly || field1.relationType == Relationships.selfJoinOne).forEach(field2 => {
-        sqlFields.push(`args.${
-            field2.name
-        }`);
+        sqlFields.push(`args.${field2.name
+            }`);
     })
     // Deal with oneToOne relationship
     fields.filter(field1 => field1.relationType == Relationships.oneToOne && field1.noNull).forEach(field2 => {
-        sqlFields.push(`args.${
-            field2.name
-        }`);
+        sqlFields.push(`args.${field2.name
+            }`);
     })
-    
+
     return sqlFields.filter(field => !field.includes("args.id")).join(` + "," + `);
 }
 
 const getFieldsName = (tables, fields, currentTypeName, currentSQLTypeName, relations) => {
-    let sqlNames : any = []
+    let sqlNames: any = []
     // Deal with scalar first (removing any Array)
     fields.filter(field => !field.isArray && field.delegated_field.side !== "target").forEach(field => {
         let sqlName = manageScalars.getFieldName(field.type, field.name, currentTypeName)
-        if (sqlName) 
+        if (sqlName)
             sqlNames.push(sqlName);
-        
+
     })
     // Deal with oneOnly relationship
 
@@ -475,12 +470,12 @@ const getAllTables = (types, scalarTypeNames) => {
     let allTables: any = []
     let typesNameArray = types.map(type => type.typeName)
     types.forEach(type => {
-        let tableTemp :any = []
+        let tableTemp: any = []
         // Fill up the infos on scalar field (int, string, etc.)
-        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.typeName !== "Subscription"  && !manageScalars.isScalar(type.typeName)) {
+        if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.typeName !== "Subscription" && !manageScalars.isScalar(type.typeName)) {
             //get scalar field infos
-            tableTemp.push(...manageScalars.getScalarFieldInfo(type, typesNameArray)) 
-            
+            tableTemp.push(...manageScalars.getScalarFieldInfo(type, typesNameArray))
+
             allTables.push({ name: type.typeName, sqlname: type.sqlTypeName, columns: tableTemp, isJoinTable: false })
         }
     })
@@ -517,7 +512,7 @@ const getInitEachFieldsModelsJS = (types) => {
 
 
 const getListOfModelsExport = (types) => {
-    let s :any = [];
+    let s: any = [];
     types.forEach(type => {
         if (type.typeName !== "Query" && type.typeName !== "Mutation" && type.type !== "ScalarTypeDefinition") {
             s.push(type.typeName + ' : ' + type.typeName)
@@ -597,37 +592,37 @@ const filter = (lst) => {
  */
 const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stringify(types,null, 3), "\n",typenames, "\n", scalarTypeNames)
     let typenames = types.map(type => type.typeName)
-    let manyToMany :any  = []
+    let manyToMany: any = []
     types.forEach(type => {
         if (type.typeName != "Query" && type.typeName != "Mutation" && type.typeName != "Subscription") {
             let rfields = getRelationalFields(type.fields, scalarTypeNames)
             rfields.forEach(rfield => { // Check if it's not a scalar type
                 // we skip fields that were been added by other types ( ex: ManyOnly relation)
-                if( !rfield["delegated_field"]["state"]){
+                if (!rfield["delegated_field"]["state"]) {
                     let out = getRelationOf(rfield.type, types, typenames, type.typeName)
                     let inn = getRelationOf(type.typeName, types, typenames, rfield.type)
                     if (out == 2 && inn == 2) { // Checking if self join (type related to itself)
                         if (rfield.type === type.typeName) {
-                            type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.selfJoinMany})
+                            type["relationList"].push({ "type": rfield.type, "relation": Relationships.selfJoinMany })
 
                             rfield["relation"] = true
                             rfield["relationType"] = Relationships.selfJoinMany
                             rfield["activeSide"] = true
 
                             // add info of jointable Associated
-                            rfield["joinTable"]["state"] = true 
-                            rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                            rfield["joinTable"]["state"] = true
+                            rfield["joinTable"]["name"] = type.typeName + "_" + rfield.type + "_" + rfield.name
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : rfield.name.toLowerCase(),
-                                "type" : rfield.type,
-                                "constraint" : "FOREIGN KEY (\""+rfield.name.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                "fieldName": rfield.name.toLowerCase(),
+                                "type": rfield.type,
+                                "constraint": "FOREIGN KEY (\"" + rfield.name.toLowerCase() + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
                             })
                             // add info about selfType
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : rfield.type.toLowerCase(),
-                                "type" : rfield.type,
-                                "constraint" : "FOREIGN KEY (\""+rfield.type.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                "fieldName": rfield.type.toLowerCase(),
+                                "type": rfield.type,
+                                "constraint": "FOREIGN KEY (\"" + rfield.type.toLowerCase() + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
 
                             })
@@ -637,20 +632,20 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
 
                             // No addition needed for ManyToMany --> only through join table
                         } else {
-                            if (rfield.directives.length>0 && rfield.directives.filter(directive => directive.name == 'hasInverse').length >0) {
-                                type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.manyToMany})
+                            if (rfield.directives.length > 0 && rfield.directives.filter(directive => directive.name == 'hasInverse').length > 0) {
+                                type["relationList"].push({ "type": rfield.type, "relation": Relationships.manyToMany })
 
                                 rfield["relation"] = true
                                 rfield["relationType"] = Relationships.manyToMany
-                             
+
                                 rfield["activeSide"] = true
                                 // add info of jointable Associated
-                                rfield["joinTable"]["state"] = true 
-                                rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                                rfield["joinTable"]["state"] = true
+                                rfield["joinTable"]["name"] = type.typeName + "_" + rfield.type + "_" + rfield.name
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : rfield.name.toLowerCase(),
-                                    "type" : rfield.type,
-                                    "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                    "fieldName": rfield.name.toLowerCase(),
+                                    "type": rfield.type,
+                                    "constraint": "FOREIGN KEY (\"" + rfield.name + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
                                 })
 
@@ -658,42 +653,42 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
                                 let hasInverseFieldName = rfield.directives.filter(directive => directive.name == 'hasInverse')[0].args[0].value
                                 // push it into joinTable info
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : type.typeName.toLowerCase(),
-                                    "type" : type.typeName,
-                                    "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
+                                    "fieldName": type.typeName.toLowerCase(),
+                                    "type": type.typeName,
+                                    "constraint": "FOREIGN KEY (\"" + type.typeName.toLowerCase() + "_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
                                 })
-                                
-                                manyToMany.push({"type": type, "relationship": rfield})
+
+                                manyToMany.push({ "type": type, "relationship": rfield })
                                 // the field wont appear in model
                                 rfield["in_model"] = false
                                 // No addition needed for ManyToMany --> only through join table
 
                             } else {
                                 // standard manyToMany tables but we try to not duplicate tables from each side of relation
-                                type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.manyToMany})
+                                type["relationList"].push({ "type": rfield.type, "relation": Relationships.manyToMany })
 
                                 rfield["relation"] = true
                                 rfield["relationType"] = Relationships.manyToMany
                                 // add info of jointable Associated
-                                rfield["joinTable"]["state"] = true 
-                                rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                                rfield["joinTable"]["state"] = true
+                                rfield["joinTable"]["name"] = type.typeName + "_" + rfield.type + "_" + rfield.name
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : rfield.name.toLowerCase(),
-                                    "type" : rfield.type,
-                                    "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                    "fieldName": rfield.name.toLowerCase(),
+                                    "type": rfield.type,
+                                    "constraint": "FOREIGN KEY (\"" + rfield.name + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
-                                    
+
                                 })
                                 // push into jointable info about related type . field name is by default type name
                                 // push it into joinTable info
                                 rfield["joinTable"]["contains"].push({
-                                    "fieldName" : type.typeName.toLowerCase(),
-                                    "type" : type.typeName,
-                                    "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
+                                    "fieldName": type.typeName.toLowerCase(),
+                                    "type": type.typeName,
+                                    "constraint": "FOREIGN KEY (\"" + type.typeName.toLowerCase() + "_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
 
                                 })
 
-                                manyToMany.push({"type": type, "relationship": rfield})
+                                manyToMany.push({ "type": type, "relationship": rfield })
                                 // the field wont appear in model
                                 rfield["in_model"] = false
 
@@ -702,231 +697,231 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
 
                         }
                     } else if (out == 2 && inn == 1) {
-                        type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.oneToMany})
+                        type["relationList"].push({ "type": rfield.type, "relation": Relationships.oneToMany })
 
 
                         rfield["relationType"] = Relationships.oneToMany
                         // A Fk field has to be added to the targeted object
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         if (targetType.length != 1) {
-                            console.error('Reference to type '+rfield.type+' found 0 or several times')
+                            console.error('Reference to type ' + rfield.type + ' found 0 or several times')
                         } else {
                             // set relation status to each side of relation
                             rfield["relation"] = true
 
                             // tracks the fk that were added to the targetType
                             rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
-                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id"
                             rfield["delegated_field"]["side"] = "origin"
-                            
+
 
 
                             // copy all info from field to fk to be added in targetType
                             let delegatedField = JSON.parse(JSON.stringify(rfield))
                             // delegated field is a foreign Key
                             delegatedField["foreign_key"] = {
-                                "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                                "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
                                 "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+                                "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
 
 
                             }
                             delegatedField["delegated_field"]["state"] = true
-                            delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
-                            delegatedField["type"] = "Int"
+                            delegatedField["name"] = "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
+                                delegatedField["type"] = "Int"
 
                             // tracks the type who added the Fk
                             delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
                             delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
                             delegatedField["delegated_field"]["side"] = "target"
-                          
 
-                            
+
+
                             // the field wont appear in model
                             rfield["in_model"] = false
-                        
+
                             targetType[0].fields.push(delegatedField)
-                              
+
                         }
-                        
+
 
                     } else if (out == 1 && inn == 2) {
-                        type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.manyToOne})
+                        type["relationList"].push({ "type": rfield.type, "relation": Relationships.manyToOne })
 
 
                         rfield["relationType"] = Relationships.manyToOne
                         // a Fk field has to be added to the current object
-                    
+
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         rfield["relation"] = true
 
                         // tracks the fk that were added to the targetType
                         rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
-                        rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                        rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id"
                         rfield["delegated_field"]["side"] = "origin"
-                        
-                        
+
+
 
                         // if field is null, theres a composition relation, we create a joinTable
-                        if(rfield.noNull){
+                        if (rfield.noNull) {
 
-                            rfield["joinTable"]["state"] = true 
-                            rfield["joinTable"]["name"] = type.typeName +"_" + rfield.type + "_" + rfield.name 
+                            rfield["joinTable"]["state"] = true
+                            rfield["joinTable"]["name"] = type.typeName + "_" + rfield.type + "_" + rfield.name
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : rfield.name,
-                                "type" : rfield.type,
-                                "constraint" : "FOREIGN KEY (\""+rfield.name+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                "fieldName": rfield.name,
+                                "type": rfield.type,
+                                "constraint": "FOREIGN KEY (\"" + rfield.name + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
 
                             })
                             rfield["joinTable"]["contains"].push({
-                                "fieldName" : type.typeName.toLowerCase(),
-                                "type" : type.typeName,
-                                "constraint" : "FOREIGN KEY (\""+type.typeName.toLowerCase()+"_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
+                                "fieldName": type.typeName.toLowerCase(),
+                                "type": type.typeName,
+                                "constraint": "FOREIGN KEY (\"" + type.typeName.toLowerCase() + "_id\") REFERENCES \"" + utils.getSQLTableName(type.typeName) + "\" (\"Pk_" + utils.getSQLTableName(type.typeName) + "_id\")"
                             })
 
                         }
                         // if field can be null, then we do classic processing
-                        else{
+                        else {
                             // copy all info from field to fk to be added in targetType
                             let delegatedField = JSON.parse(JSON.stringify(rfield))
                             // delegated field is a foreign Key
                             delegatedField["foreign_key"] = {
-                                "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
+                                "name": "Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id",
                                 "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
-                                
+                                "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+
                             }
                             delegatedField["delegated_field"]["state"] = true
-                            delegatedField["name"] = "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
-                            delegatedField["type"] = "Int"
+                            delegatedField["name"] = "Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id",
+                                delegatedField["type"] = "Int"
 
                             // tracks the type who added the Fk
                             delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
                             delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
                             delegatedField["delegated_field"]["side"] = "target"
-                        
 
-                            
-                            
-                        
+
+
+
+
                             targetType[0].fields.push(delegatedField)
                         }
                         // the field wont appear in model
                         rfield["in_model"] = false
 
 
-                    } else if (out == 1 && inn == 1) { 
+                    } else if (out == 1 && inn == 1) {
                         // Checking if self join (type related to itself)
                         if (rfield.type === type.typeName) {
-                            type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.selfJoinOne})
+                            type["relationList"].push({ "type": rfield.type, "relation": Relationships.selfJoinOne })
 
                             rfield["relation"] = true
                             rfield["relationType"] = Relationships.selfJoinOne
                             rfield["foreign_key"] = {
-                                "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                                "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
                                 "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+                                "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
 
                             }
 
                         } else {
                             // insert info about oneToOne relation to the target
-                            
-                            
+
+
                             let targetType = types.filter(type => type.typeName == rfield.type)
                             let targetField = targetType[0].fields.filter(field => field.type === type.typeName)
-                            
+
                             // Detects if a 1-1 relation is present. Not supported on sql
-                            if( targetField[0].noNull && rfield.noNull){
-                                env.error("1-1 Relation not allowed, chekout \n"+rfield.name +" field on " + targetField[0].type +"\nor \n" + targetField[0].name +" field on " + rfield.type );
+                            if (targetField[0].noNull && rfield.noNull) {
+                                env.error("1-1 Relation not allowed, chekout \n" + rfield.name + " field on " + targetField[0].type + "\nor \n" + targetField[0].name + " field on " + rfield.type);
                             }
 
                             rfield["oneToOneInfo"] = {
-                                "fkName" : "Fk_"+targetField[0].name+"_"+utils.getSQLTableName(targetField[0].type)+"_id"
+                                "fkName": "Fk_" + targetField[0].name + "_" + utils.getSQLTableName(targetField[0].type) + "_id"
                             }
-                            
 
 
-                            type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.oneToOne})
+
+                            type["relationList"].push({ "type": rfield.type, "relation": Relationships.oneToOne })
                             rfield["relation"] = true
                             rfield["relationType"] = Relationships.oneToOne
                             // Both object has to integrate a Fk to Pk but each side is processed in each type
                             rfield["foreign_key"] = {
-                                "name": "Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id",
+                                "name": "Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id",
                                 "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+utils.getSQLTableName(rfield.type)+"_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
+                                "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + utils.getSQLTableName(rfield.type) + "_id\") REFERENCES \"" + utils.getSQLTableName(rfield.type) + "\" (\"Pk_" + utils.getSQLTableName(rfield.type) + "_id\")"
                             }
-                            
+
 
 
                         }
                     }
                     // One only 
-                    else if ((out == 0 && inn == 1)||(out == 1 && inn == 0)) {
-                        type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.oneOnly})
+                    else if ((out == 0 && inn == 1) || (out == 1 && inn == 0)) {
+                        type["relationList"].push({ "type": rfield.type, "relation": Relationships.oneOnly })
 
                         rfield["relation"] = true
                         rfield["relationType"] = Relationships.oneOnly
                         // Fk to target Pk id has to be added in the current type
                         let targetSQLTypeName = utils.getSQLTableName(rfield.type)
                         rfield["foreign_key"] = {
-                            "name": "Fk_"+rfield.name+"_"+targetSQLTypeName+"_id",
+                            "name": "Fk_" + rfield.name + "_" + targetSQLTypeName + "_id",
                             "type": "int",
-                            "noNull": rfield.noNull, 
+                            "noNull": rfield.noNull,
                             "isArray": false,
                             "foreignKey": true,
-                            "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+targetSQLTypeName+"_id\") REFERENCES \"" + targetSQLTypeName + "\" (\"Pk_" + targetSQLTypeName + "_id\")"
+                            "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + targetSQLTypeName + "_id\") REFERENCES \"" + targetSQLTypeName + "\" (\"Pk_" + targetSQLTypeName + "_id\")"
                         }
-                    } 
+                    }
                     // ManyOnly 
                     else if ((out == 0 && inn == 2) || (out == 2 && inn == 0)) {
-                        type["relationList"].push({ "type" : rfield.type, "relation" : Relationships.manyOnly})
-                        
+                        type["relationList"].push({ "type": rfield.type, "relation": Relationships.manyOnly })
+
                         rfield["relationType"] = Relationships.manyOnly
                         // Fk to current Pk id has to be added in the targeted type
                         let targetType = types.filter(type => type.typeName == rfield.type)
                         if (targetType.length != 1) {
-                            console.error('Reference to type '+rfield.type+' found 0 or several times')
+                            console.error('Reference to type ' + rfield.type + ' found 0 or several times')
                         } else {
                             // set relation status to each side of relation
                             rfield["relation"] = true
 
                             // tracks the fk that were added to the targetType
                             rfield["delegated_field"]["associatedWith"]["type"] = targetType[0].typeName
-                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id"
+                            rfield["delegated_field"]["associatedWith"]["fieldName"] = "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id"
                             rfield["delegated_field"]["side"] = "origin"
 
 
                             // copy all info from field to fk to be added in targetType
                             let delegatedField = JSON.parse(JSON.stringify(rfield))
                             // delegated field is a foreign Key
-                            delegatedField["foreign_key"] ={
-                                "name": "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
+                            delegatedField["foreign_key"] = {
+                                "name": "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
                                 "type": "int",
                                 "noNull": rfield.noNull,
                                 "isArray": false,
                                 "foreignKey": true,
-                                "constraint": "FOREIGN KEY (\"Fk_"+rfield.name+"_"+type.sqlTypeName+"_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
+                                "constraint": "FOREIGN KEY (\"Fk_" + rfield.name + "_" + type.sqlTypeName + "_id\") REFERENCES \"" + type.sqlTypeName + "\" (\"Pk_" + type.sqlTypeName + "_id\")"
 
                             }
                             delegatedField["delegated_field"]["state"] = true
-                            delegatedField["name"] = "Fk_"+rfield.name+"_"+type.sqlTypeName+"_id",
-                            delegatedField["type"] = "Int"
+                            delegatedField["name"] = "Fk_" + rfield.name + "_" + type.sqlTypeName + "_id",
+                                delegatedField["type"] = "Int"
 
-                            
-                            
+
+
                             // tracks the type who added the Fk
                             delegatedField["delegated_field"]["associatedWith"]["type"] = type.typeName
                             delegatedField["delegated_field"]["associatedWith"]["fieldName"] = rfield.name
@@ -934,12 +929,12 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
 
                             // the field wont appear in model
                             rfield["in_model"] = false
-                            
-                        
+
+
                             targetType[0].fields.push(delegatedField)
-                            
+
                         }
-                    } 
+                    }
                     // Remove the relationship from the field : WHY ?
                     //type.fields = type.fields.filter((e) => e !== rfield)
                 }
@@ -948,14 +943,14 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
     })
 
     // Todo filter manyToMany relationship to keep only 1 active side
-    for (let index1 = 0; index1< manyToMany.length; index1++) { 
+    for (let index1 = 0; index1 < manyToMany.length; index1++) {
         // find a reciproq relationship 
-        for (let index2 = index1+1; index2<manyToMany.length; index2++) {
-            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index2].relationship.directives.length>0  && manyToMany[index2].relationship.directives.filter(directive => directive.name == 'hasInverse').length >0) {
+        for (let index2 = index1 + 1; index2 < manyToMany.length; index2++) {
+            if (manyToMany[index1].relationship.type == manyToMany[index2].type.typeName && manyToMany[index2].relationship.directives.length > 0 && manyToMany[index2].relationship.directives.filter(directive => directive.name == 'hasInverse').length > 0) {
                 manyToMany[index2].relationship.activeSide = false // Todo should be reported in the type object
                 manyToMany[index2].relationship.joinTable = manyToMany[index1].relationship.joinTable
             }
-            else{
+            else {
                 manyToMany[index2].relationship.activeSide = true
             }
 
@@ -977,16 +972,16 @@ const getRelations = (types, scalarTypeNames, env) => { // console.log(JSON.stri
  * @returns Tables description
  */
 const getJoinTables = (types, scalarTypeNames) => {
-    let result :any = []
+    let result: any = []
 
     types.forEach(type => {
         if (type.typeName != "Query" && type.typeName != "Mutation" && type.typeName != "Subscription") {
             let rfields = getRelationalFields(type.fields, scalarTypeNames)
-            rfields.filter(field => field.relationType == Relationships.selfJoinMany).forEach(rfield => { 
+            rfields.filter(field => field.relationType == Relationships.selfJoinMany).forEach(rfield => {
                 let elt0 = utils.getSQLTableName(type.typeName)
                 let elt1 = utils.getSQLTableName(rfield.type.toLowerCase())
                 result.push({
-                    name: type.typeName + "_" + rfield.type.toLowerCase()+ "_" + rfield.name,
+                    name: type.typeName + "_" + rfield.type.toLowerCase() + "_" + rfield.name,
                     sqlname: elt0 + "_" + elt1 + "_" + rfield.name.toLowerCase(),
                     isJoinTable: true,
                     columns: [
@@ -1002,7 +997,7 @@ const getJoinTables = (types, scalarTypeNames) => {
                     ]
                 })
             })
-            rfields.filter(field => (field.relationType == Relationships.manyToMany && field.activeSide == true) ||  field.relationType == Relationships.manyToOne && field.joinTable.state).forEach(rfield => { 
+            rfields.filter(field => (field.relationType == Relationships.manyToMany && field.activeSide == true) || field.relationType == Relationships.manyToOne && field.joinTable.state).forEach(rfield => {
                 let elt0 = utils.getSQLTableName(type.typeName)
                 let elt1 = utils.getSQLTableName(rfield.type.toLowerCase())
                 result.push({
@@ -1101,12 +1096,12 @@ const compareField = (old_entity, new_entity) => {
 }
 
 const findDifferencesBetweenEntities = (name_entity, old_entity, new_entity) => {
-    let add_fields :any = []
-    let delete_fields :any = []
-    let update_fields :any = []
+    let add_fields: any = []
+    let delete_fields: any = []
+    let update_fields: any = []
     for (let field in new_entity) {
         if (containField(old_entity, new_entity[field].name) == false) {
-            add_fields.push({name: name_entity, column: new_entity[field]})
+            add_fields.push({ name: name_entity, column: new_entity[field] })
         } else {
             if (compareFieldsForUpdate(old_entity, new_entity[field]) == false) {
                 update_fields.push({
@@ -1120,7 +1115,7 @@ const findDifferencesBetweenEntities = (name_entity, old_entity, new_entity) => 
     for (let field in old_entity) {
         if (containField(new_entity, old_entity[field].name) == false) {
             if (old_entity[field].type === "String" || old_entity[field].type === "ID" || old_entity[field].type === "Boolean" || old_entity[field].type === "Int") {
-                delete_fields.push({name: name_entity, column: old_entity[field].name})
+                delete_fields.push({ name: name_entity, column: old_entity[field].name })
             } else {
                 delete_fields.push({
                     name: name_entity,
@@ -1137,9 +1132,9 @@ const findDifferencesBetweenEntities = (name_entity, old_entity, new_entity) => 
 }
 
 const compareSchema = (old_schema, new_schema) => {
-    let add_entities :any = []
+    let add_entities: any = []
     let drop_entities: any = []
-    let update_entities :any = []
+    let update_entities: any = []
     for (let entity in new_schema) {
         if (entity !== "Query" && new_schema[entity].type !== "ScalarTypeDefinition" && entity !== "Mutation" && new_schema[entity].type !== "Mutation") {
             if (!old_schema[entity]) {
@@ -1154,14 +1149,14 @@ const compareSchema = (old_schema, new_schema) => {
     for (let entity in old_schema) {
         if (entity !== "Query" && old_schema[entity].type !== "ScalarTypeDefinition" && entity !== "Mutation" && old_schema[entity].type !== "Mutation") {
             if (!new_schema[entity]) {
-                drop_entities.push({name: entity})
+                drop_entities.push({ name: entity })
             }
         }
     }
     console.log("Add entities : ", add_entities)
     console.log("Drop entities : ", drop_entities)
     console.log("Update entities : ", update_entities)
-    let updates :any = [[], [], []]
+    let updates: any = [[], [], []]
     update_entities.forEach(x => {
         console.log("----- UPDATE ", x, " -----")
         let tmp = findDifferencesBetweenEntities(x, old_schema[x].fields, new_schema[x].fields)
@@ -1185,7 +1180,7 @@ const hasFieldType = (type, fieldType) => {
             fieldInfo = field
         }
     })
-    return {fieldInfo: fieldInfo, answers: answers}
+    return { fieldInfo: fieldInfo, answers: answers }
 }
 
 const formatName = (name) => {
@@ -1201,13 +1196,13 @@ const formatName = (name) => {
 const isSchemaValid = (types) => {
     let typesName = types.map(type => type.typeName)
 
-    if (!typesHaveId(typesName, types)) 
-        return {response: false, reason: "Missing required id field of type ID in one or multiple Entity"}
-    
-    if (!fieldTypeExists(typesName, types)) 
-        return {response: false, reason: "One Entity has one or multiple fields of undefined types. Please use default scalar, declare your own scalar or declare missing entity type"}
-    
-    return {response: true}
+    if (!typesHaveId(typesName, types))
+        return { response: false, reason: "Missing required id field of type ID in one or multiple Entity" }
+
+    if (!fieldTypeExists(typesName, types))
+        return { response: false, reason: "One Entity has one or multiple fields of undefined types. Please use default scalar, declare your own scalar or declare missing entity type" }
+
+    return { response: true }
 }
 
 const typesHaveId = (typesName, types) => {
@@ -1248,9 +1243,9 @@ const getField = (entity, fieldName) => {
 
 const containField = (entity, fieldName) => {
     for (let field in entity) {
-        if (entity[field].name == fieldName) 
+        if (entity[field].name == fieldName)
             return true
-        
+
     }
     return false;
 }
@@ -1278,7 +1273,7 @@ module.exports = {
     getAllTypes: getAllTypes,
 
     getFieldsDirectiveNames: getFieldsDirectiveNames,
-    getschemaDirectivesNames : getschemaDirectivesNames,
+    getschemaDirectivesNames: getschemaDirectivesNames,
     getFieldsParsed: getFieldsParsed,
     getFieldsInput: getFieldsInput,
     getRequire: getRequire,

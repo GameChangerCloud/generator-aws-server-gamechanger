@@ -134,7 +134,7 @@ const getFieldsParsed = (type, manyToManyTables, typesName, defaultScalarsType) 
                 else if (type.typeName === "Mutation") {
                     if (isValidFieldMutation(field.name, typesName)) {
                         if (field.type === "String" || field.type === "Int" || field.type === "Boolean" || field.type === "ID" || defaultScalarsType.includes(field.type))
-                            result += buildTypeField(field, field.type, true);
+                            result += buildTypeField(field, field.type + "Type", true);
                         else
                             result += buildTypeField(field, field.type + "Type", true);
                         result += "\n";
