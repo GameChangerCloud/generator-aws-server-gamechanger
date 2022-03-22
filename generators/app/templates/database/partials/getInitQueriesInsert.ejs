@@ -1,5 +1,5 @@
 <%types.forEach(type => {_%>
-    <%if (type.typeName !== "Query" && type.typeName !== "Mutation"){_%>
+    <%if (type.typeName !== 'Query' && type.typeName !== 'Mutation'){_%>
         <%-type.typeName.toLowerCase()%>Tab.forEach(item =>{
             let temp = `INSERT INTO "<%-type.sqlTypeName%>"(
             <% let fieldInsertList = []
@@ -33,11 +33,11 @@
                 <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
                 
             <%});_%>
-                
+                )`
+                queriesInsert.push(temp)
+                })
         <%}%>
-        )`
-        queriesInsert.push(temp)
-    	})
+
     <%})_%>
 
     // JOINTABLES
