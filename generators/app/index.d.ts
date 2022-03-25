@@ -1,1 +1,9 @@
-export {};
+declare const easygraphqlSchemaParser: any;
+declare const Generator: any;
+declare const pluralize: any;
+declare const parsing: any;
+declare const Type: any;
+declare const constants: any;
+declare const matching: any;
+declare const manageScalars: any;
+declare const relationships: any;

@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const Type_1 = require("./typeManagement/Type");
+const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger');
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize');
-const parsing = require('./parsing');
-const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger');
-const constants = require('./scalars/scalars');
-const utils = require('./utils');
-const matching = require('./matching');
-const manageScalars = require('./scalars/manageScalars');
-const relationships = require('./relationships');
+const parsing = easygraphqlSchemaParser.utils.backParsing;
+const { Type } = easygraphqlSchemaParser.utils.Type;
+const constants = easygraphqlSchemaParser.utils.scalars;
+const matching = easygraphqlSchemaParser.utils.matching;
+const manageScalars = easygraphqlSchemaParser.utils.manageScalars;
+const relationships = easygraphqlSchemaParser.utils.relationships;
 module.exports = class extends Generator {
     // The name `constructor` is important here
     constructor(args, opts) {
@@ -90,7 +87,7 @@ module.exports = class extends Generator {
                 // Parsing as a JSON object
                 this.schemaJSON = easygraphqlSchemaParser(this.schema);
                 // Get all the types
-                this.types = Type_1.Type.initTypes(this.schemaJSON);
+                this.types = Type.initTypes(this.schemaJSON);
                 // Check if the schema is valid 
                 let isValidSchema = parsing.isSchemaValid(this.types);
                 if (!isValidSchema.response) {
@@ -179,7 +176,7 @@ module.exports = class extends Generator {
                 }
             });
             let typeNameId = isOneToOneChild ? parent : currentType.typeName;
-            let sqltypeNameId = utils.getSQLTableName(typeNameId);
+            let sqltypeNameId = parsing.getSQLTableName(typeNameId);
             if (graphqlType === "GraphQLInterfaceType") {
                 // Check if this.typesInterface is already initialised
                 if (!this.typesInterface) {
@@ -287,7 +284,7 @@ module.exports = class extends Generator {
                         scalars: constants,
                         fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, relationships, this.joinTables),
                         fieldsName: parsing.getFieldsName(this.tables, currentType.fields, currentType.typeName, currentType.sqlTypeName, relationships),
-                        utils: utils,
+                        utils: parsing,
                         manageScalars: manageScalars
                     });
                     //Adding DirectiveResolvers
@@ -396,7 +393,7 @@ module.exports = class extends Generator {
             hasFieldType: parsing.hasFieldType,
             initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
             initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types),
-            utils: utils,
+            utils: parsing,
         });
         // Adding the file which drop all tables
         this.fs.copyTpl(this.templatePath('cleanDatabase/dropTables.ejs'), this.destinationPath('cleanDatabase/dropTables.js'), {
@@ -483,7 +480,7 @@ module.exports = class extends Generator {
                     add.forEach(x => {
                         let table = parsing.findTable(this.tables, x.name);
                         let name = x.column.name;
-                        let sqlname = utils.getSQLTableName(x.name);
+                        let sqlname = parsing.getSQLTableName(x.name);
                         let type = x.column.type;
                         if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
                             && type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
