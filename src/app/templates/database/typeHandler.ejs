@@ -199,7 +199,7 @@ module.exports = {
 		sqlRequests = []
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, isScalar: manageScalars.isScalar, getSQLTableName: utils.getSQLTableName}) _%>
+		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, isScalar: manageScalars.isScalar, getSQLTableName: getSQLTableName}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error
@@ -230,7 +230,7 @@ module.exports = {
 		}
 	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: utils.getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, scalars : scalars, isScalar: manageScalars.isScalar, isBasicType : manageScalars.isBasicType}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, isScalar: manageScalars.isScalar, isBasicType : manageScalars.isBasicType}) _%>
 		/******* End of generated part using createMethodsField */
 
 		let res = await utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)

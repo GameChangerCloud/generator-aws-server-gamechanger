@@ -1,17 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Type_1 = require("./typeManagement/Type");
+const easygraphql_parser_gamechanger_1 = require("easygraphql-parser-gamechanger");
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize');
-const parsing = require('./parsing');
-const easygraphqlSchemaParser = require('easygraphql-parser-gamechanger');
-const constants = require('./scalars/scalars');
-const utils = require('./utils');
-const matching = require('./matching');
-const manageScalars = require('./scalars/manageScalars');
-const relationships = require('./relationships');
+const manageScalars = {
+    isBasicType: easygraphql_parser_gamechanger_1.isBasicType,
+    isScalar: easygraphql_parser_gamechanger_1.isScalar
+};
+const matching = {
+    matchString: easygraphql_parser_gamechanger_1.matchString
+};
 module.exports = class extends Generator {
-    // The name `constructor` is important here
+    // The name `constructor` is important hereh
     constructor(args, opts) {
         super(args, opts);
         // Project Name
@@ -88,11 +88,11 @@ module.exports = class extends Generator {
                 this.log("Fetching schema from " + this.options.graphqlFile);
                 this.schema = this.fs.read(this.options.graphqlFile);
                 // Parsing as a JSON object
-                this.schemaJSON = easygraphqlSchemaParser(this.schema);
+                this.schemaJSON = easygraphql_parser_gamechanger_1.schemaParser(this.schema);
                 // Get all the types
-                this.types = Type_1.Type.initTypes(this.schemaJSON);
-                // Check if the schema is valid 
-                let isValidSchema = parsing.isSchemaValid(this.types);
+                this.types = easygraphql_parser_gamechanger_1.Type.initTypes(this.schemaJSON);
+                // Check if the schema is valid
+                let isValidSchema = easygraphql_parser_gamechanger_1.isSchemaValid(this.types);
                 if (!isValidSchema.response) {
                     throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason);
                 }
@@ -125,19 +125,19 @@ module.exports = class extends Generator {
         // Handle the scalars
         this.scalarTypeNames = this.types.filter(type => type.type === "ScalarTypeDefinition");
         this.defaultScalars = [];
-        for (const scalarName in constants) {
-            if (constants.hasOwnProperty(scalarName)) {
-                this.defaultScalars.push(constants[scalarName]);
+        for (const scalarName in easygraphql_parser_gamechanger_1.scalars) {
+            if (easygraphql_parser_gamechanger_1.scalars.hasOwnProperty(scalarName)) {
+                this.defaultScalars.push(easygraphql_parser_gamechanger_1.scalars[scalarName]);
             }
         }
-        //this.tyty = parsing.getRelations(this.tyty.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
+        //this.tyty = getRelations(this.tyty.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
         // Get all the relations between entities
         //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-        this.types = parsing.getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env);
+        this.types = easygraphql_parser_gamechanger_1.getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env);
         // Get all the name of join relation table
-        this.joinTables = parsing.getJoinTables(this.types, this.scalarTypeNames);
-        // Will hold all the informations on the tables 
-        this.tables = parsing.getAllTables(this.types, this.scalarTypeNames);
+        this.joinTables = easygraphql_parser_gamechanger_1.getJoinTables(this.types, this.scalarTypeNames);
+        // Will hold all the informations on the tables
+        this.tables = easygraphql_parser_gamechanger_1.getAllTables(this.types, this.scalarTypeNames);
         // Adding the junction table if some exeits
         this.joinTables.forEach(table => {
             this.tables.push(table);
@@ -146,19 +146,20 @@ module.exports = class extends Generator {
             tables: this.tables
         });
         let typesNameArray = this.types.map(type => type.typeName);
-        let schemaDirectives = parsing.getschemaDirectivesNames();
+        let schemaDirectives = easygraphql_parser_gamechanger_1.getDirectivesNames();
         for (let index = 0; index < this.types.length; index++) {
             let currentType = this.types[index];
             let isQuery = currentType.typeName === "Query" ? true : false;
             this.log("Processing TYPE : " + currentType.typeName);
             // Get all the fields directives names
-            let directiveNames = parsing.getFieldsDirectiveNames(this.types[index]);
+            let directiveNames = easygraphql_parser_gamechanger_1.getFieldsDirectiveNames(this.types[index]);
             // Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
-            let fieldsParsed = parsing.getFieldsParsed(currentType, this.relations, this.joinTables, typesNameArray, this.defaultScalars);
-            // Get the const require 
-            let requireTypes = parsing.getRequire(currentType, this.defaultScalars);
-            // Get the graphqlType 
-            let graphqlType = parsing.getGraphqlType(currentType);
+            //let fieldsParsed = getFieldsParsed(currentType, this.relations, this.joinTables, typesNameArray, this.defaultScalars)
+            let fieldsParsed = easygraphql_parser_gamechanger_1.getFieldsParsed(currentType, this.joinTables, typesNameArray, this.defaultScalars);
+            // Get the const require
+            let requireTypes = easygraphql_parser_gamechanger_1.getRequire(currentType, this.defaultScalars);
+            // Get the graphqlType
+            let graphqlType = easygraphql_parser_gamechanger_1.getGraphqlType(currentType);
             // Check if it's a child in one to one relations
             let isOneToOneChild = false;
             let parent = "";
@@ -179,14 +180,14 @@ module.exports = class extends Generator {
                 }
             });
             let typeNameId = isOneToOneChild ? parent : currentType.typeName;
-            let sqltypeNameId = utils.getSQLTableName(typeNameId);
+            let sqltypeNameId = easygraphql_parser_gamechanger_1.getSQLTableName(typeNameId);
             if (graphqlType === "GraphQLInterfaceType") {
                 // Check if this.typesInterface is already initialised
                 if (!this.typesInterface) {
                     this.typesInterface = [];
                 }
                 this.typesInterface.push(currentType.typeName + "Type");
-                let resolveType = parsing.getResolveType(currentType, currentType.typeName);
+                let resolveType = easygraphql_parser_gamechanger_1.getResolveType(currentType, currentType.typeName);
                 // Adding the types graphql files
                 this.fs.copyTpl(this.templatePath('graphql/type.ejs'), this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'), {
                     type: currentType,
@@ -201,7 +202,7 @@ module.exports = class extends Generator {
             else if (graphqlType === "GraphQLEnumType") {
                 this.fs.copyTpl(this.templatePath('graphql/typeEnum.ejs'), this.destinationPath('graphql/types/' + currentType.typeName.toLowerCase() + '.js'), {
                     enumName: currentType.typeName,
-                    enumValues: parsing.getEnumValues(currentType),
+                    enumValues: easygraphql_parser_gamechanger_1.getEnumValues(currentType),
                 });
             }
             else if (graphqlType === "GraphQLScalarType") {
@@ -271,23 +272,23 @@ module.exports = class extends Generator {
                         typeName: currentType.typeName,
                         sqltypeName: currentType.sqlTypeName,
                         sqltypeNameId: sqltypeNameId,
-                        typeFieldsParsed: parsing.getFieldsParsedHandler(currentType.typeName, currentType.fields, isOneToOneChild, parent),
+                        typeFieldsParsed: easygraphql_parser_gamechanger_1.getFieldsParsedHandler(currentType.typeName, currentType.fields, isOneToOneChild, parent),
                         queryManyToMany: queryManyToMany,
                         queryOneToMany: queryOneToMany,
                         queryOneToOneParent: queryOneToOneParent,
                         queryOneToOneChild: queryOneToOneChild,
                         queryManyToOne: queryManyToOne,
-                        querySelfJoinOne: currentType.fields.find(field => field.relationship === "selfJoinOne") ? parsing.getQuerySelfJoinOne(currentType.typeName, currentType.fields) : false,
-                        querySelfJoinMany: currentType.fields.find(field => field.relationship === "selfJoinMany") ? parsing.getQuerySelfJoinMany(currentType.typeName, currentType.fields) : false,
+                        querySelfJoinOne: currentType.fields.find(field => field.relationship === "selfJoinOne") ? easygraphql_parser_gamechanger_1.getQuerySelfJoinOne(currentType.typeName, currentType.fields) : false,
+                        querySelfJoinMany: currentType.fields.find(field => field.relationship === "selfJoinMany") ? easygraphql_parser_gamechanger_1.getQuerySelfJoinMany(currentType.typeName, currentType.fields) : false,
                         fields: currentType.fields,
                         directiveNames: directiveNames,
-                        relations: relationships,
+                        relations: easygraphql_parser_gamechanger_1.Relationships,
                         manyToManyTables: this.joinTables,
                         scalarTypeNames: this.scalarTypeNames,
-                        scalars: constants,
-                        fieldsCreate: parsing.getFieldsCreate(currentType.typeName, currentType.fields, relationships, this.joinTables),
-                        fieldsName: parsing.getFieldsName(this.tables, currentType.fields, currentType.typeName, currentType.sqlTypeName, relationships),
-                        utils: utils,
+                        scalars: easygraphql_parser_gamechanger_1.scalars,
+                        fieldsCreate: easygraphql_parser_gamechanger_1.getFieldsCreate(currentType.typeName, currentType.fields, easygraphql_parser_gamechanger_1.Relationships, this.joinTables),
+                        fieldsName: easygraphql_parser_gamechanger_1.getFieldsName(this.tables, currentType.fields, currentType.typeName, currentType.sqlTypeName, easygraphql_parser_gamechanger_1.Relationships),
+                        getSQLTableName: easygraphql_parser_gamechanger_1.getSQLTableName,
                         manageScalars: manageScalars
                     });
                     //Adding DirectiveResolvers
@@ -300,21 +301,21 @@ module.exports = class extends Generator {
                     this.fs.copyTpl(this.templatePath('testLambdas/eventMaker.ejs'), this.destinationPath('events/create' + currentType.typeName + '.json'), {
                         fields: currentType.fields,
                         typeName: currentType.typeName,
-                        relations: relationships,
+                        relations: easygraphql_parser_gamechanger_1.Relationships,
                         typeQuery: "create"
                     });
                     //Delete
                     this.fs.copyTpl(this.templatePath('testLambdas/eventMaker.ejs'), this.destinationPath('events/delete' + currentType.typeName + '.json'), {
                         fields: currentType.fields,
                         typeName: currentType.typeName,
-                        relations: relationships,
+                        relations: easygraphql_parser_gamechanger_1.Relationships,
                         typeQuery: "delete"
                     });
                     //Update
                     this.fs.copyTpl(this.templatePath('testLambdas/eventMaker.ejs'), this.destinationPath('events/update' + currentType.typeName + '.json'), {
                         fields: currentType.fields,
                         typeName: currentType.typeName,
-                        relations: relationships,
+                        relations: easygraphql_parser_gamechanger_1.Relationships,
                         typeQuery: "update"
                     });
                 }
@@ -380,7 +381,7 @@ module.exports = class extends Generator {
         this.fs.copyTpl(this.templatePath('initDatabase/models.ejs'), this.destinationPath('initDatabase/models.js'), {
             types: this.types,
             scalarTypeNames: this.scalarTypeNames,
-            relations: relationships,
+            relations: easygraphql_parser_gamechanger_1.Relationships,
         });
         // Adding the file which init the database
         this.fs.copyTpl(this.templatePath('initDatabase/initDatabase.ejs'), this.destinationPath('initDatabase/initDatabase.js'), {
@@ -390,13 +391,13 @@ module.exports = class extends Generator {
         this.fs.copyTpl(this.templatePath('initDatabase/fillTables.ejs'), this.destinationPath('initDatabase/fillTables.js'), {
             types: this.types,
             typesName: typesNameArray,
-            relations: relationships,
+            relations: easygraphql_parser_gamechanger_1.Relationships,
             matching: matching,
             tables: this.tables,
-            hasFieldType: parsing.hasFieldType,
-            initEachModelsJS: parsing.getInitEachModelsJS(this.tables),
-            initEachFieldsModelsJS: parsing.getInitEachFieldsModelsJS(this.types),
-            utils: utils,
+            hasFieldType: easygraphql_parser_gamechanger_1.hasFieldType,
+            initEachModelsJS: easygraphql_parser_gamechanger_1.getInitEachModelsJS(this.tables),
+            initEachFieldsModelsJS: easygraphql_parser_gamechanger_1.getInitEachFieldsModelsJS(this.types),
+            getSQLTableName: easygraphql_parser_gamechanger_1.getSQLTableName,
         });
         // Adding the file which drop all tables
         this.fs.copyTpl(this.templatePath('cleanDatabase/dropTables.ejs'), this.destinationPath('cleanDatabase/dropTables.js'), {
@@ -411,30 +412,30 @@ module.exports = class extends Generator {
             tables: this.tables
         });
         this.fs.copyTpl(this.templatePath('terraform/apigateway.tf'), this.destinationPath('terraform/apigateway.tf'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('terraform/cognito.tf'), this.destinationPath('terraform/cognito.tf'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('terraform/iam.tf'), this.destinationPath('terraform/iam.tf'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('terraform/lambda.tf'), this.destinationPath('terraform/lambda.tf'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('terraform/main.tf'), this.destinationPath('terraform/main.tf'));
         this.fs.copyTpl(this.templatePath('terraform/rds.tf'), this.destinationPath('terraform/rds.tf'));
         this.fs.copyTpl(this.templatePath('terraform/secret.tf'), this.destinationPath('terraform/secret.tf'));
         this.fs.copyTpl(this.templatePath('terraform/variables.tf'), this.destinationPath('terraform/variables.tf'));
         this.fs.copyTpl(this.templatePath('terraform/terraform.tfvar'), this.destinationPath('terraform/terraform.tfvar'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         // Adding lambda local test dependencies
         this.fs.copyTpl(this.templatePath('testLambdas/template.yaml'), this.destinationPath('template.yaml'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('readmes/README.md'), this.destinationPath('README.md'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         this.fs.copyTpl(this.templatePath('testLambdas/eventMaker.ejs'), this.destinationPath('events/fillTable.json'), {
             fields: null,
@@ -453,7 +454,7 @@ module.exports = class extends Generator {
         });
         // Adding README
         this.fs.copyTpl(this.templatePath('testLambdas/template.yaml'), this.destinationPath('template.yaml'), {
-            appName: parsing.formatName(this.answers.name)
+            appName: easygraphql_parser_gamechanger_1.formatName(this.answers.name)
         });
         // Adding the package.json config file
         this.fs.copyTpl(this.templatePath('package.json'), this.destinationPath('package.json'), {
@@ -470,8 +471,8 @@ module.exports = class extends Generator {
         if (this.override == true) {
             this.old_schema = JSON.parse(this.file_old_json);
             this.new_schema = this.schemaJSON;
-            let arr = parsing.compareSchema(this.old_schema, this.new_schema);
-            arr[0].forEach(x => this.add_entities.push(parsing.findTable(this.tables, x)));
+            let arr = easygraphql_parser_gamechanger_1.compareSchema(this.old_schema, this.new_schema);
+            arr[0].forEach(x => this.add_entities.push(easygraphql_parser_gamechanger_1.findTable(this.tables, x)));
             this.update_entities = arr[1];
             this.delete_entities = arr[2];
             this.add_fields = [];
@@ -481,15 +482,19 @@ module.exports = class extends Generator {
             this.update_entities[0].forEach(add => {
                 if (add.length > 0) {
                     add.forEach(x => {
-                        let table = parsing.findTable(this.tables, x.name);
+                        let table = easygraphql_parser_gamechanger_1.findTable(this.tables, x.name);
                         let name = x.column.name;
-                        let sqlname = utils.getSQLTableName(x.name);
+                        let sqlname = easygraphql_parser_gamechanger_1.getSQLTableName(x.name);
                         let type = x.column.type;
                         if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
                             && type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
                             name = "Fk_" + type + "_id";
                         }
-                        this.add_fields.push({ name: x.name, sqlname: sqlname, column: parsing.findField(table.columns, name) });
+                        this.add_fields.push({
+                            name: x.name,
+                            sqlname: sqlname,
+                            column: easygraphql_parser_gamechanger_1.findField(table.columns, name)
+                        });
                     });
                 }
             });
