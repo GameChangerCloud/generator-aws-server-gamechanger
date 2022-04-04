@@ -17,7 +17,7 @@
         <% break;
     case "ID": _%>
         <% break;
-    case scalars.Linestring: _%> 
+    case scalars.Linestring: _%>
         <% break;
     case scalars.Polygon: _%>
         <% break;
@@ -55,8 +55,6 @@ if(args.<%- field.name %> !== undefined){
 if(args.<%- field.name %> !== undefined){
             temp += args.<%- field.name %> ? "\"<%- field.name %>\" = '" + args.<%- field.name %>.toISOString() + "', " : "\"<%- field.name %>\" = null," 
         }
-        <% break;
-    case scalars.DateGraphQL: _%>
         <% break;
     case scalars.Time: _%>
         <% break;

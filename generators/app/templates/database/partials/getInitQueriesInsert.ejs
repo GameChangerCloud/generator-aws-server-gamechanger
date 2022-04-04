@@ -33,16 +33,24 @@ let temp = `INSERT INTO "<%-type.sqlTypeName%>"(
                 <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
                 
             <%});_%>
+<<<<<<< HEAD
 )`
 queriesInsert.push(temp)
 })
 <%}%>
+=======
+                )`
+                queriesInsert.push(temp)
+                })
+        <%}%>
+>>>>>>> 0af3198 ([TECH][#42175] Migration des utilitaires dans le parseur.)
     <%})_%>
 
 // JOINTABLES
 <%_types.forEach(type => {
         type.fields.forEach(field => {
             if(field.joinTable.state){%>
+<<<<<<< HEAD
 <%if((field.relationType === relations.manyToMany && field.activeSide) || (field.relationType === relations.manyToOne && field.joinTable.state)){%>
 <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
 let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
@@ -63,6 +71,30 @@ VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` 
 queriesInsert.push(temp)
 })
 <%}
+=======
+
+                    <%if((field.relationType === relations.manyToMany && field.activeSide) || (field.relationType === relations.manyToOne && field.joinTable.state)){%>
+                        <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
+                            let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
+                                "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
+                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id") 
+                                VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
+                                ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
+                                queriesInsert.push(temp)
+                        })
+                    <%}
+                
+                if(field.relationType === relations.selfJoinMany){%>
+                    <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
+                        let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
+                            "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
+                            "<%-field.joinTable.contains[0].type.toLowerCase()%>_id")
+                            VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
+                                ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%>_id + `)`
+                                queriesInsert.push(temp)
+                    })
+                <%}
+>>>>>>> 0af3198 ([TECH][#42175] Migration des utilitaires dans le parseur.)
             }
         })
     })_%>
