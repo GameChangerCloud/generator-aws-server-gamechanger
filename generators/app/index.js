@@ -89,16 +89,7 @@ module.exports = class extends Generator {
                 this.schema = this.fs.read(this.options.graphqlFile);
                 // Parsing as a JSON object
                 this.schemaJSON = easygraphql_parser_gamechanger_1.schemaParser(this.schema);
-                // Get all the types
-                this.types = easygraphql_parser_gamechanger_1.Type.initTypes(this.schemaJSON);
-                // Check if the schema is valid
-                let isValidSchema = easygraphql_parser_gamechanger_1.isSchemaValid(this.types);
-                if (!isValidSchema.response) {
-                    throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason);
-                }
-                else {
-                    this.log("Valid schema");
-                }
+                easygraphql_parser_gamechanger_1.typesGenerator(this.schemaJSON);
             }
             else {
                 this.log("Invalid graphql schema");
