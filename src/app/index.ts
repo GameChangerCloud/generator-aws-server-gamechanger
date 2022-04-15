@@ -29,7 +29,7 @@ import {
     getJoinTables,
     getQuerySelfJoinOne,
     getQuerySelfJoinMany,
-    compareSchema
+    compareSchema, typesGenerator
 } from "easygraphql-parser-gamechanger";
 
 const Generator = require('yeoman-generator');
@@ -137,17 +137,8 @@ module.exports = class extends Generator {
                 // Parsing as a JSON object
                 this.schemaJSON = schemaParser(this.schema)
 
-                // Get all the types
-                this.types = Type.initTypes(this.schemaJSON)
+                typesGenerator(this.schemaJSON)
 
-
-                // Check if the schema is valid
-                let isValidSchema = isSchemaValid(this.types)
-                if (!isValidSchema.response) {
-                    throw new Error("Incorrect schema, please write a valid graphql schema based on the supported guidelines.\nReason: " + isValidSchema.reason)
-                } else {
-                    this.log("Valid schema")
-                }
             } else {
                 this.log("Invalid graphql schema")
                 return 0

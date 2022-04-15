@@ -23,3 +23,5 @@ terraform/.terraform/*
 *.sln
 *.sw?
 
+# Build
+generators
