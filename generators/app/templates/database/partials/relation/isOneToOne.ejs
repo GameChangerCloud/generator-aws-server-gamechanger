@@ -1,9 +1,0 @@
-<% let answers = false
-let parent = typeTwo
-oneToOne.forEach(relation => {
-    if ((relation[0] === typeOne && relation[1] === typeTwo) || (relation[1] === typeOne && relation[0] === typeTwo)) {
-        answers = true
-        parent = relation[1]
-    }
-}) _%>
-{ answers: <%- answers %>, parent: <%- parent %> }
