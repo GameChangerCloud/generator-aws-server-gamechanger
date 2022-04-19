@@ -528,16 +528,6 @@ module.exports = class extends Generator {
             this.destinationPath('database/utils/index.js'),
         )
 
-        //Adding files for managing Scalars
-        this.fs.copyTpl(
-            this.templatePath('../scalars/scalars.js'),
-            this.destinationPath('database/utils/scalars.js'),
-        )
-        this.fs.copyTpl(
-            this.templatePath('../scalars/manageScalars.js'),
-            this.destinationPath('database/utils/manageScalars.js'),
-        )
-
         //Adding RuntimeDirectiveResolver
         this.fs.copyTpl(
             this.templatePath('graphql/runtimeDirectiveResolver.ejs'),
