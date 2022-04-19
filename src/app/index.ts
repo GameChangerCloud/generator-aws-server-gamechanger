@@ -1,13 +1,11 @@
 import {
-    scalars,
+    Scalars,
     schemaParser,
     Relationships,
-    Type,
     isBasicType,
     isScalar,
     getSQLTableName,
     matchString,
-    isSchemaValid,
     hasFieldType,
     formatName,
     findTable,
@@ -137,7 +135,7 @@ module.exports = class extends Generator {
                 // Parsing as a JSON object
                 this.schemaJSON = schemaParser(this.schema)
 
-                typesGenerator(this.schemaJSON)
+                this.types = typesGenerator(this.schemaJSON)
 
             } else {
                 this.log("Invalid graphql schema")
@@ -171,9 +169,9 @@ module.exports = class extends Generator {
         this.scalarTypeNames = this.types.filter(type => type.type === "ScalarTypeDefinition")
 
         this.defaultScalars = []
-        for (const scalarName in scalars) {
-            if (scalars.hasOwnProperty(scalarName)) {
-                this.defaultScalars.push(scalars[scalarName])
+        for (const scalarName in Scalars) {
+            if (Scalars.hasOwnProperty(scalarName)) {
+                this.defaultScalars.push(Scalars[scalarName])
             }
         }
 
@@ -181,13 +179,13 @@ module.exports = class extends Generator {
 
         // Get all the relations between entities
         //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-        this.types = getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
+        this.types = getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.env)
 
         // Get all the name of join relation table
-        this.joinTables = getJoinTables(this.types, this.scalarTypeNames)
+        this.joinTables = getJoinTables(this.types)
 
         // Will hold all the informations on the tables
-        this.tables = getAllTables(this.types, this.scalarTypeNames)
+        this.tables = getAllTables(this.types)
 
         // Adding the junction table if some exeits
         this.joinTables.forEach(table => {
@@ -392,7 +390,7 @@ module.exports = class extends Generator {
                             relations: Relationships,
                             manyToManyTables: this.joinTables,
                             scalarTypeNames: this.scalarTypeNames,
-                            scalars: scalars,
+                            scalars: Scalars,
                             fieldsCreate: getFieldsCreate(currentType.typeName, currentType.fields, Relationships, this.joinTables),
                             fieldsName: getFieldsName(this.tables, currentType.fields, currentType.typeName, currentType.sqlTypeName, Relationships),
                             getSQLTableName: getSQLTableName,
