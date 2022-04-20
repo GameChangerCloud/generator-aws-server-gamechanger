@@ -15,7 +15,6 @@ import {
     getFieldsCreate,
     getFieldsName,
     getFieldsDirectiveNames,
-    getDirectivesNames,
     getRequire,
     getGraphqlType,
     getResolveType,
@@ -27,8 +26,9 @@ import {
     getJoinTables,
     getQuerySelfJoinOne,
     getQuerySelfJoinMany,
-    compareSchema, typesGenerator
+    compareSchema, typesGenerator, directives
 } from "easygraphql-parser-gamechanger";
+import util from "util";
 
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
@@ -66,7 +66,7 @@ module.exports = class extends Generator {
     // Where you prompt users for options (where you’d call this.prompt())
     async prompting() {
         this.log("Prompting")
-        this.log("Please answer these informations to set up your project")
+        this.log("Please answer these information to set up your project")
         this.answers = await this.prompt([
             {
                 type: "input",
@@ -134,6 +134,7 @@ module.exports = class extends Generator {
 
                 // Parsing as a JSON object
                 this.schemaJSON = schemaParser(this.schema)
+                console.log('Type Generation started :', util.inspect(this.schemaJSON, false, null, true))
 
                 this.types = typesGenerator(this.schemaJSON)
 
@@ -175,8 +176,6 @@ module.exports = class extends Generator {
             }
         }
 
-        //this.tyty = getRelations(this.tyty.filter(type => type.type === "ObjectTypeDefinition"), this.scalarTypeNames, this.env)
-
         // Get all the relations between entities
         //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
         this.types = getRelations(this.types.filter(type => type.type === "ObjectTypeDefinition"), this.env)
@@ -203,11 +202,11 @@ module.exports = class extends Generator {
         let typesNameArray = this.types.map(type => type.typeName)
 
 
-        let schemaDirectives = getDirectivesNames()
+        let schemaDirectives = Object.keys(directives)
 
         for (let index = 0; index < this.types.length; index++) {
             let currentType = this.types[index]
-            let isQuery = currentType.typeName === "Query" ? true : false
+            let isQuery = currentType.typeName === "Query"
 
             this.log("Processing TYPE : " + currentType.typeName)
 
@@ -216,7 +215,6 @@ module.exports = class extends Generator {
             let directiveNames = getFieldsDirectiveNames(this.types[index])
 
             // Get the right syntax to add as a string (currentType.type indicates the graphql type (Object, Interface, etc.))
-            //let fieldsParsed = getFieldsParsed(currentType, this.relations, this.joinTables, typesNameArray, this.defaultScalars)
             let fieldsParsed = getFieldsParsed(currentType, this.joinTables, typesNameArray, this.defaultScalars)
 
             // Get the const require

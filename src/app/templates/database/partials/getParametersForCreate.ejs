@@ -25,7 +25,7 @@
                 <%- matching.matchString( tableName ) _%>
                 <% break;
             case "ID": _%>
-                pad(chance.integer(), 3)
+                pad(chance.integer({ min: -2147483647, max: 2147483647 }), 3)
                 <%break;
             case "Boolean": _%>
                 chance.bool()
@@ -46,7 +46,7 @@
                 `rgba(${chance.color({format: 'rgb'})}, ${chance.color({format: 'rgb'})}, ${chance.color({format: 'rgb'})}, ${Math.random()})`
                 <% break
             case "RGB": _%>
-                chance.integer()
+                chance.integer({ min: -2147483647, max: 2147483647 })
                 <%break;
             case "URL":_%>
                 <%if (tableName.includes("avatar") || tableName.includes("profile")){%>

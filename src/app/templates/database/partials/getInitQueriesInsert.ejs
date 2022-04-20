@@ -12,18 +12,18 @@
                         }
                         else{
                             fieldInsertList.push(field.name)
-                        } 
-                        itemInsertList.push(["+ item."+ field.name+" +","numeric"])
+                        }
+                        itemInsertList.push(["+ item."+ field.name+ " +","numeric"])
                     }else{
                         fieldInsertList.push(field.name)
-                        itemInsertList.push(["+ item."+ field.name+" +", "else"])
-                    }  
-                }  
+                        itemInsertList.push(["+ item."+ field.name+".replace(/'/g, \"\\\'\")" + " +", "else"])
+                    }
+                }
             })_%>
             <%fieldInsertList.forEach((f, index) => {_%>
                 "<%-f%>"
                 <%if (index < fieldInsertList.length - 1 ) {_%>,<%}%>
-                
+
             <%});_%>
             ) VALUES (
                 <%itemInsertList.forEach((f, index) => {_%>
@@ -31,7 +31,7 @@
                 <%-f[0]%>
                 <%if (f[1] === "else" ) {_%>`'<%}else{%>`<%}%>
                 <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
-                
+
             <%});_%>
                 )`
                 queriesInsert.push(temp)
@@ -48,13 +48,13 @@
                         <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                             let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
                                 "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
-                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id") 
+                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id")
                                 VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
                                 ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
                                 queriesInsert.push(temp)
                         })
                     <%}
-                
+
                 if(field.relationType === relations.selfJoinMany){%>
                     <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                         let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
@@ -66,6 +66,6 @@
                     })
                 <%}
             }
-            
+
         })
     })_%>
