@@ -124,7 +124,7 @@ const entityIndex = []
 /*******
  * Start of generated part using listOfMethodsForInit
  */
-<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) _%>
+<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, getSQLTableName: getSQLTableName}) _%>
 
 /*******
  * End of generated part using listOfMethodsForInit
@@ -143,7 +143,7 @@ const entityIndex = []
  /*******
  * Start of generated part using initQueriesInsert
  */
-<%- include('../database/partials/getInitQueriesInsert.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, hasFieldType: hasFieldType, getSQLTableName: getSQLTableName}) _%>
+<%- include('../database/partials/getInitQueriesInsert.ejs', {types: types, relations: relations, tables: tables}) _%>
  /*******
  * End of generated part using initQueriesInsert
  */

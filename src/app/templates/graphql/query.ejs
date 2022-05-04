@@ -16,7 +16,7 @@ module.exports = new GraphQLObjectType({
 	name: 'QueryType',
 	description: '',
 	fields: () => ({<%typesName.forEach(typeName => {%>
-		<%if (typeName !== "Query" && typeName !== "Mutation" && !scalarTypeNames.includes(typeName)){%><%-pluralize.plural(typeName.toLowerCase())%>: { 
+		<%if (typeName !== "Query" && typeName !== "Mutation" && !isScalar(typeName)){%><%-pluralize.plural(typeName.toLowerCase())%>: {
 			type: new GraphQLList(<%-typeName%>Type),
 			args: {
 				limit: { 
@@ -49,11 +49,10 @@ module.exports = new GraphQLObjectType({
 				return dbHandler.handleGet(args, '<%-typeName%>Type')
 			}
 		},<%}%><%})%>
-		<%-otherQuery%>
 	}),
 	
 
 })
 
-<%typesName.forEach(typeName => {%><%if (typeName !== "Query" && typeName !== "Mutation" && !scalarTypeNames.includes(typeName)){%>const <%-typeName%>Type = require('./<%-typeName.toLowerCase()%>')
+<%typesName.forEach(typeName => {%><%if (typeName !== "Query" && typeName !== "Mutation" && !isScalar(typeName)){%>const <%-typeName%>Type = require('./<%-typeName.toLowerCase()%>')
 <%}%><%})%>

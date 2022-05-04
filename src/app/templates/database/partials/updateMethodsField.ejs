@@ -4,7 +4,7 @@ let temp = ''
     <% let sqltype = getSQLTableName(field.type) _%>
     <% let entityInfo = field.name + field.type + field.relationType _%>
     <% if (field.type !== "ID") { _%>
-        <% if (field.type !== "String" && field.type !== "ID" && field.type !== "Int" && field.type !== "Boolean" && !isScalar(field.type)) {_%>
+        <% if (!isScalar(field.type)) {_%>
             <% switch (s.trim()) {
                 case "oneToMany":_%>
                     //oneToMany update
