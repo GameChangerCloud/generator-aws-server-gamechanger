@@ -307,7 +307,7 @@ describe('partials', function() {
     describe('partials/updateMethodsField', function() {
         const filename = './generators/app/templates/database/partials/updateMethodsField.ejs';
         it('should render fields update methods ', function() {
-            return ejs.renderFile(filename, {"fields": fields, "relations":relations, "manyToManyTables":manyToManyTables, "scalarTypeNames":scalarTypeNames, "scalars":scalars, "typeName":"Movie", "sqltypeName":"movie"}).then(result => {
+            return ejs.renderFile(filename, {"fields": fields, "relations":relations, "manyToManyTables":manyToManyTables, "scalarTypeNames":scalarTypeNames, "scalars":scalars, "typeName":"Movie", "sqlTypeName":"movie"}).then(result => {
                 result.replace(/\s\s+/g, ' ').should.equal("let temp = '' " 
                     + "if(args.title !== undefined){ "
                     + "temp += args.title ? \"\\\"title\\\" = \'\" + utils.escapeQuote(args.title) + \"', \" : \"\\\" title\\\" = null, \" } "

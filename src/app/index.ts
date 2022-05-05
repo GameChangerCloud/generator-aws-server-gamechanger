@@ -24,7 +24,6 @@ import {
     getQuerySelfJoinMany,
     compareSchema, typesGenerator, Type, isPersonalizedScalar
 } from "easygraphql-parser-gamechanger";
-import util from "util";
 import UnhandledGraphqlTypeError from "./templates/error/unhandled-graphql-type.error";
 
 const Generator = require('yeoman-generator');
@@ -583,7 +582,7 @@ module.exports = class extends Generator {
         ]);
     }
 
-    private _processGraphQLObjectType(currentType, typesNameArray, requireTypes: string) {
+    private _processGraphQLObjectType(currentType,typesNameArray, requireTypes: string) {
         // Check if it implements an interface (array non empty)
         if (currentType.implementedTypes[0]) {
             // Check if this.typesInterface is already initialised
@@ -601,7 +600,7 @@ module.exports = class extends Generator {
         // Adding the types graphql files
 
         if (currentType.typeName === "Query") {
-            this._createQueryFile(currentType)
+            this._createQueryFile(typesNameArray)
         } else if (currentType.typeName === "Mutation") {
             this._createMutationFile()
         } else {

@@ -16,7 +16,7 @@ let temp = ''
                     <% break;
                 case "oneToOne":_%>
                     //oneToOne update
-                    sqlRequests.push("UPDATE \"<%- sqltypeName %>\" SET  \"<%-field.foreign_key.name%>\" = " + args.<%-field.name%> +" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id)
+                    sqlRequests.push("UPDATE \"<%- currentType.sqlTypeName %>\" SET  \"<%-field.foreign_key.name%>\" = " + args.<%-field.name%> +" WHERE \"Pk_<%- currentType.sqlTypeName %>_id\" = " + args.id)
                     
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET \"<%-field.oneToOneInfo.fkName%>\" = null WHERE \"<%-field.oneToOneInfo.fkName%>\" = " + args.id)
 
@@ -88,7 +88,7 @@ let temp = ''
         // Field <%- field.name %> of type <%- field.type %>
         <% let field1 = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
         <% let field2 = field.joinTable.contains.find(c => c.type !== field.type).fieldName%> 
-        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field1 %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field2 %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
+        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field1 %>_id\" INNER JOIN \"<%- currentType.sqlTypeName %>\" ON \"Pk_<%- currentType.sqlTypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- field2 %>_id\" WHERE \"Pk_<%- currentType.sqlTypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {
             if (err) {console.log(err, err.stack)}
             else {
@@ -114,7 +114,7 @@ let temp = ''
                     case "selfJoinMany": _%>
         // Field <%- field.name %> of type <%- field.type %>
         <% let fieldSelfJoin = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
-        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- fieldSelfJoin %>_id\" INNER JOIN \"<%- sqltypeName %>\" ON \"Pk_<%- sqltypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- sqltype %>_id\" WHERE \"Pk_<%- sqltypeName %>_id\" = " + args.id
+        sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" INNER JOIN \"<%- field.joinTable.name.toLowerCase() %>\" ON \"Pk_<%- sqltype %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- fieldSelfJoin %>_id\" INNER JOIN \"<%- currentType.sqlTypeName %>\" ON \"Pk_<%- currentType.sqlTypeName %>_id\" = \"<%- field.joinTable.name.toLowerCase() %>\".\"<%- sqltype %>_id\" WHERE \"Pk_<%- currentType.sqlTypeName %>_id\" = " + args.id
         rdsDataService.executeStatement(sqlParams, (err, data) => {
             if (err) {console.log(err, err.stack)}
             else {
