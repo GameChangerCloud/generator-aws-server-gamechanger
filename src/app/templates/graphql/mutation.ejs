@@ -57,11 +57,10 @@ module.exports = new GraphQLObjectType({
   name: 'MutationType',
   description: '',
   fields: () => ({
-    <%- include('../database/partials/getMutationFields.ejs', { types: types, defaultScalars: defaultScalars }) _%>
+    <%- include('../database/partials/getMutationFields.ejs', { types: types, isPersonalizedScalar,isScalar }) _%>
   
-		<%- otherMutation %>
 	}),
 })
 
-  <% types.forEach(type => {%><%if (type.typeName !== "Query" && type.typeName !== "Mutation" && !defaultScalars.includes(type.typeName)) {%>const <%- type.typeName %>Type = require('./<%-type.typeName.toLowerCase()%>')
+  <% types.forEach(type => {%><%if (type.isNotOperation() && !isPersonalizedScalar(type.typeName)) {%>const <%- type.typeName %>Type = require('./<%-type.typeName.toLowerCase()%>')
     <%}%><%}) %>

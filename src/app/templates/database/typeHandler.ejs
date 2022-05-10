@@ -2,7 +2,7 @@ const AWS = require('aws-sdk')
 const rdsDataService = new AWS.RDSDataService()
 const utils = require('../utils/index')
 /******* Start of generated part (except for 'const TABLE = ' ) using typeName */
-const TABLE = "<%-sqltypeName%>"
+const TABLE = "<%-currentType.sqlTypeName%>"
 /******* End of generated part using typeName */
 
 let sqlParams = {
@@ -25,7 +25,7 @@ let commitParams = {
 	transactionId: ""
 }
 
-const resolvers = require('../utils/<%= typeName.toLowerCase() %>DirectiveResolvers')
+const resolvers = require('../utils/<%= currentType.typeName.toLowerCase() %>DirectiveResolvers')
 
 const directiveResolver = require('../utils/runtimeDirectiveResolver')
 
@@ -33,13 +33,13 @@ const constructSort = (args) => {
 	let sorting = "ORDER BY \""
 
 	if(args) {
-		// Sort field (default Fk_<%-sqltypeName%>_id)
+		// Sort field (default Fk_<%-currentType.sqlTypeName%>_id)
 		if(args.sort_field && args.sort_field !== "id") {
 			sorting += args.sort_field +"\" "
 		}
 		else {
 			/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
-			sorting += "Pk_<%-sqltypeNameId%>_id\" "
+			sorting += "Pk_<%-currentType.sqlTypeName%>_id\" "
 			/******* End of generated part using typeNameId */
 		}
 
@@ -55,7 +55,7 @@ const constructSort = (args) => {
 	// No arguments
 	else {
 		/******* Start of generated part (except for 'sorting += "Pk_' ) using typeNameId */
-		sorting +=  "Pk_<%-sqltypeNameId%>_id\" ASC"
+		sorting +=  "Pk_<%-currentType.sqlTypeName%>_id\" ASC"
 		/******* End of generated part using typeNameId */
 	}
 
@@ -81,7 +81,7 @@ module.exports = {
 			sqlParams.parameters.length = 0
 			sqlParams.parameters.push({name: 'value', value: {longValue: value}})
 			/******* Start of generated part using typeName and typeNameId*/
-			sqlParams.sql = 'SELECT * from "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = :value'
+			sqlParams.sql = 'SELECT * from "<%-currentType.sqlTypeName%>" WHERE "Pk_<%-currentType.sqlTypeName%>_id" = :value'
 			/******* End of generated part using typeName and typeNameId */
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			return utils.constructOutputArray(res)[0] // only one row
@@ -102,14 +102,14 @@ module.exports = {
 				
 				// One unique currentType for N parentType
 				case "oneToMany":
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "<%-currentType.sqlTypeName%>"."Fk_'+fieldName+'_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
 
 				case "oneOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "Pk_<%-currentType.sqlTypeName%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
@@ -117,26 +117,26 @@ module.exports = {
 				// N currentType for one parentType
 				case "manyToOne":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+fieldType+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "<%-currentType.sqlTypeName%>"."Fk_'+fieldName+'_'+fieldType+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
 				case "selfJoinOne":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Pk_<%-sqltypeName%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "<%-currentType.sqlTypeName%>"."Pk_<%-currentType.sqlTypeName%>_id" = (SELECT "Fk_'+fieldName+'_'+fieldType+'_id" FROM "'+minifiedparentTypeName+'" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value)'
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
 				case "selfJoinMany":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.joinTable.name+'"."'+minifiedparentTypeName+'_id" INNER JOIN "'+minifiedparentTypeName+'" AS "'+args.joinTable.field+'" ON "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field+'_id" WHERE "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = :value '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-currentType.sqlTypeName%>_id" = "'+args.joinTable.name+'"."'+minifiedparentTypeName+'_id" INNER JOIN "'+minifiedparentTypeName+'" AS "'+args.joinTable.field+'" ON "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field+'_id" WHERE "'+args.joinTable.field+'"."Pk_'+minifiedparentTypeName+'_id" = :value '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
 					
 				case "manyOnly":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "<%-sqltypeName%>"."Fk_'+fieldName+'_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "<%-currentType.sqlTypeName%>"."Fk_'+fieldName+'_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)
@@ -144,14 +144,14 @@ module.exports = {
 				// N currentType for N parentType (Junction table)
 				case "manyToMany":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-sqltypeName%>_id" = "'+args.joinTable.name+'"."'+args.joinTable.field1+'_id" INNER JOIN "'+minifiedparentTypeName+'" ON "Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field2+'_id" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" INNER JOIN "'+args.joinTable.name+'" ON "Pk_<%-currentType.sqlTypeName%>_id" = "'+args.joinTable.name+'"."'+args.joinTable.field1+'_id" INNER JOIN "'+minifiedparentTypeName+'" ON "Pk_'+minifiedparentTypeName+'_id" = "'+args.joinTable.name+'"."'+args.joinTable.field2+'_id" WHERE "Pk_'+minifiedparentTypeName+'_id" = :value '+sorting+' '+limit+' '+offset
 					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res, TABLE)
 
 				case "oneToOne":
 					/******* Start of generated part using typeName and typeNameId */
-					sqlParams.sql = 'SELECT * FROM "<%-sqltypeName%>" WHERE "'+args.oneToOneInfo+'" = :value '+sorting+' '+limit+' '+offset					/******* End of generated part using typeName and typeNameId   */
+					sqlParams.sql = 'SELECT * FROM "<%-currentType.sqlTypeName%>" WHERE "'+args.oneToOneInfo+'" = :value '+sorting+' '+limit+' '+offset					/******* End of generated part using typeName and typeNameId   */
 					res = await rdsDataService.executeStatement(sqlParams).promise()
 					return utils.constructOutputArray(res)[0]
 
@@ -165,7 +165,7 @@ module.exports = {
 		// List of type, not a field
 		else {
 
-			sqlParams.sql = 'SELECT * from "<%-sqltypeName%>" '+sorting+' '+limit+' '+offset
+			sqlParams.sql = 'SELECT * from "<%-currentType.sqlTypeName%>" '+sorting+' '+limit+' '+offset
 			const res = await rdsDataService.executeStatement(sqlParams).promise()
 			return utils.constructOutputArray(res)
 		}
@@ -174,7 +174,7 @@ module.exports = {
 	async getMethods(){
 		const sorting = constructSort(null)
 		/******* Start of generated part using typeNameId */
-		sqlParams.sql = 'SELECT * from "<%-sqltypeNameId%>" '+sorting
+		sqlParams.sql = 'SELECT * from "<%-currentType.sqlTypeName%>" '+sorting
 		/******* End of generated part using typeNameId */
 		const res = await rdsDataService.executeStatement(sqlParams).promise()
 		return utils.constructOutputArray(res)
@@ -185,7 +185,7 @@ module.exports = {
 
 		
 		/******* Start of generated part using typeName and typeNameId */
-		sqlRequests.push('DELETE FROM "<%-sqltypeName%>" WHERE "Pk_<%-sqltypeNameId%>_id" = '+id)
+		sqlRequests.push('DELETE FROM "<%-currentType.sqlTypeName%>" WHERE "Pk_<%-currentType.sqlTypeName%>_id" = '+id)
 		/******* End of generated part using typeName and typeNameId */
 
 		let res = utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)
@@ -199,14 +199,14 @@ module.exports = {
 		sqlRequests = []
 
 		/******* Start of generated part using updateMethodsField */
-		<%- include('../database/partials/updateMethodsField.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, scalarTypeNames: scalarTypeNames, scalars: scalars, isScalar: manageScalars.isScalar, getSQLTableName: getSQLTableName}) _%>
+		<%- include('../database/partials/updateMethodsField.ejs', {currentType: currentType, fields: fields, relations: relations, scalars: scalars, isScalar: manageScalars.isScalar, getSQLTableName: getSQLTableName}) _%>
 		/******* End of generated part using updateMethodsField */
 
 		// Trim the last comma to prevent SQL error
 		const input = temp.slice(0, temp.lastIndexOf(", "))
 		if(input !== ""){
 			/******* Start of generated part using typeName and typeNameId */
-			sqlRequests.push("UPDATE \"<%-sqltypeName%>\" SET " + input + " WHERE \"Pk_<%-sqltypeName%>_id\" = " + args.id)
+			sqlRequests.push("UPDATE \"<%-currentType.sqlTypeName%>\" SET " + input + " WHERE \"Pk_<%-currentType.sqlTypeName%>_id\" = " + args.id)
 			/******* Start of generated part using typeName and typeNameId */
 		}
 		if( sqlRequests.length !== 0){
@@ -221,8 +221,8 @@ module.exports = {
 
 	async createMethods(args, directives) {
 
-		if("<%-typeName%>" in directives){
-			directiveResolver.directiveResolver("<%-typeName%>", args, directives, resolvers)
+		if("<%-currentType.typeName%>" in directives){
+			directiveResolver.directiveResolver("<%-currentType.typeName%>", args, directives, resolvers)
 		}
 
 		for(a in args){
@@ -230,7 +230,7 @@ module.exports = {
 		}
 	
 		/******* Start of generated part using createMethodsField */
-		<%- include('../database/partials/createMethodFields.ejs', {fields: fields, relations: relations, manyToManyTables: manyToManyTables, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, isScalar: manageScalars.isScalar, isBasicType : manageScalars.isBasicType}) _%>
+		<%- include('../database/partials/createMethodFields.ejs', {currentType: currentType, fields: fields, relations: relations, getSQLTableName: getSQLTableName, fieldsName : fieldsName, fieldsCreate: fieldsCreate, isScalar: manageScalars.isScalar, isBasicScalar : manageScalars.isBasicScalar}) _%>
 		/******* End of generated part using createMethodsField */
 
 		let res = await utils.startSqlTransaction(sqlRequests, beginParams, commitParams, sqlParams, rdsDataService)

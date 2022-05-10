@@ -7,8 +7,8 @@
                 case "oneOnly":_%>
                     //oneOnly field management
                     <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', Math.floor((Math.random() * 5) + 1), new model.<%-currTypeName%>)
-                    removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                    restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                    removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS "<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                    restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
                 
                     <%break
                 case "selfJoinOne":_%>
@@ -17,8 +17,8 @@
                     selfPossibleValues.splice(selfPossibleValues.indexOf(index),1)
                     let selfJoinId = selfPossibleValues[0]
                     <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', selfJoinId, new model.<%-currTypeName%>)
-                    removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS\"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                    restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                    removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS"<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                    restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
             
                 <%break
                 case  "oneToOne":_%>
@@ -43,16 +43,16 @@
 
                         }
                         // we drop and restore constraints only once
-                        removeConstraints.add("ALTER TABLE \"<%-currentTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                        restoreConstraints.add(`ALTER TABLE "<%-currentTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                        removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS "<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                        restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
                     }
                     <%break
                 case  "oneToMany":
                     if(field.delegated_field.state && field.delegated_field.side === "target" ){_%>
                         //OneToMany field Management
                         <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', Math.floor((Math.random() * 5) + 1), new model.<%-currTypeName%>)
-                        removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                        restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                        removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS "<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                        restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
 
                     <%_}_%>
                     <%break
@@ -60,16 +60,16 @@
                     if(field.delegated_field.state && field.delegated_field.side === "target" ){_%>
                         //manyToOne field Management
                         <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', Math.floor((Math.random() * 5) + 1), new model.<%-currTypeName%>)
-                        removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                        restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                        removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS "<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                        restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
                     <%_}_%>
                     <%break
                 case  "manyOnly":
                     if(field.delegated_field.state && field.delegated_field.side === "target" ){_%>
                         //manyOnly field Management
                         <%-currTypeName.toLowerCase()%> = update(<%-currTypeName.toLowerCase()%>, '<%-field.name%>', Math.floor((Math.random() * 5) + 1), new model.<%-currTypeName%>)
-                        removeConstraints.add("ALTER TABLE \"<%-currTypeName.toLowerCase()%>\" DROP CONSTRAINT IF EXISTS \"<%-currTypeName.toLowerCase()%>_<%-field.foreign_key.name%>_fkey\"")
-                        restoreConstraints.add(`ALTER TABLE "<%-currTypeName.toLowerCase()%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+                        removeConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" DROP CONSTRAINT IF EXISTS "<%-getSQLTableName(currTypeName)%>_<%-field.foreign_key.name%>_fkey"`)
+                        restoreConstraints.add(`ALTER TABLE "<%-getSQLTableName(currTypeName)%>" ADD <%-field.foreign_key.constraint%> ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
                     <%_}_%>
                     <%break_%>
                 <%_}_%>

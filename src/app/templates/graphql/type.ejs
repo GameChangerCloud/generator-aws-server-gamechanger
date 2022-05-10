@@ -54,7 +54,7 @@ const { Query } = require('pg')
 
 
 module.exports = new <%-graphqlType%>({
-	name: '<%=typeName%>Type',
+	name: '<%=type.typeName%>Type',
 	<% if(interfaces){%>interfaces : [<%-interfaces%>],
 	<%}%>description: '',
 	fields: () => ({
@@ -75,7 +75,7 @@ module.exports = new <%-graphqlType%>({
               <%break
               // Not classic scalar type
             default:
-              if (defaultScalars.includes(field.type)) {%>
+              if (isPersonalizedScalar(field.type)) {%>
                 <%- include('../database/partials/graphqlTypeBuilder.ejs', { field: field, type: field.type, needResolver: false  }) _%>
                 
             <%} else {%><%# means its a relationType %>

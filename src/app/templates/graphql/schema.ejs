@@ -11,11 +11,11 @@ const {
 const rootQuery = require ('./types/query')
 const rootMutation = require ('./types/mutation')
 const dbHandler = require ('../database/handler')
-<% if(typesInterface){%><%typesInterface.forEach(type => {%>
+<% if(typesInterface.length){%><%typesInterface.forEach(type => {%>
 const <%-type%> = require ('./types/<%-type.substring(0, type.indexOf("Type")).toLowerCase()%>')<%})%><%}%>
 
 const schema = new GraphQLSchema({
-	<% if(typesInterface){%>types: [<%-typesInterface-%>],<%}%>
+	<% if(typesInterface.length){%>types: [<%-typesInterface-%>],<%}%>
 	query: rootQuery,
 	mutation: rootMutation
 })

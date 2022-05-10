@@ -1,5 +1,5 @@
 sqlRequests = []
-sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") RETURNING \"Pk_<%-sqltypeName%>_id\"")
+sqlRequests.push("INSERT INTO \"<%-currentType.sqlTypeName%>\" (<%-fieldsName%>) VALUES (" + <%-fieldsCreate%> + ") RETURNING \"Pk_<%-currentType.sqlTypeName%>_id\"")
 <% fields.map(field => { _%>
     <% const s = field.relationType _%>
     <% let sqltype = getSQLTableName(field.type) _%>
@@ -8,12 +8,12 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
             <%  switch (s.trim()) {  
                 case "oneToMany": _%>
                 
-                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
+                    sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
                         
                    <% break; 
                 case "oneToOne": _%>
                 //OneToOne relation
-                sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
+                sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
 
                     <% break; 
                 case "oneOnly": _%>
@@ -25,7 +25,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                         //manyToOne
                         let addedElements<%- entityInfo %> = utils.getAddedElements([], args.<%- field.name%>)
                         for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
-                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
                         }
                     
                     <%}%>
@@ -33,7 +33,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                 case "manyOnly":_%>
                     let addedElements<%- entityInfo %> = utils.getAddedElements([], args.<%- field.name%>)
                         for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
-                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
+                            sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
                         }
                     <%break
                 case "manyToMany": _%>
@@ -42,7 +42,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                 <% let field2 = field.joinTable.contains.find(c => c.type !== field.type).fieldName%>
                 // Field <%- field.name %> of type <%- sqltype %>
                 for( element in args.<%-field.name%>){
-                    sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- field2 %>_id\", \"<%- field1 %>_id\") VALUES (currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
+                    sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- field2 %>_id\", \"<%- field1 %>_id\") VALUES (currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
                 }
                     <%break
                 case "selfJoinMany": _%>
@@ -50,7 +50,7 @@ sqlRequests.push("INSERT INTO \"<%-sqltypeName%>\" (<%-fieldsName%>) VALUES (" +
                     <% let fieldSelfJoin = field.joinTable.contains.find(c => c.type === field.type).fieldName%>
                     // Field <%- field.name %> of type <%- sqltype %>
                         for( element in args.<%-field.name%>){
-                            sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- sqltypeName %>_id\", \"<%- fieldSelfJoin %>_id\") VALUES (currval(pg_get_serial_sequence('<%- sqltypeName %>','Pk_<%- sqltypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
+                            sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- currentType.sqlTypeName %>_id\", \"<%- fieldSelfJoin %>_id\") VALUES (currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
                         }
     
     
