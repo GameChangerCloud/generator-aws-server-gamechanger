@@ -52,7 +52,6 @@ const {
 const dbHandler = require('../../database/handler')
 const { Query } = require('pg')
 
-
 module.exports = new <%-graphqlType%>({
 	name: '<%=type.typeName%>Type',
 	<% if(interfaces){%>interfaces : [<%-interfaces%>],

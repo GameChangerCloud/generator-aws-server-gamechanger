@@ -4,7 +4,7 @@
     <% let entityInfo = field.name + field.type + field.relationType _%>
         <% if (!isScalar(field.type)) { 
             containsRelations = false _%>
-            <%  switch (s.trim()) {  
+            <%  switch (s) {
                 case "oneToMany": _%>
                 let addedElements<%- entityInfo %> = utils.getAddedElements([], args.<%- field.name%>)
                         for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {

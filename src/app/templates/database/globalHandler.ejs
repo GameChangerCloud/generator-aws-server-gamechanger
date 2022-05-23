@@ -18,7 +18,7 @@ module.exports = {
 					return handler<%= table.name %>.getMethodsByArgs(args, directives)
 				}
 				else {
-					return handler<%= table.name %>.getMethods()
+					return handler<%= table.name %>.getMethods(args)
 				}
 			<% }); %>
 			/******* End of generated part using tables */

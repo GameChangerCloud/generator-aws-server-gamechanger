@@ -5,7 +5,7 @@ let temp = ''
     <% let entityInfo = field.name + field.type + field.relationType _%>
     <% if (field.type !== "ID") { _%>
         <% if (!isScalar(field.type)) {_%>
-            <% switch (s.trim()) {
+            <% switch (s) {
                 case "oneToMany":_%>
                     //oneToMany update
                     // Field <%- field.name %> of type <%- field.type %>

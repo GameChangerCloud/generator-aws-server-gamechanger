@@ -5,7 +5,7 @@ sqlRequests.push("INSERT INTO \"<%-currentType.sqlTypeName%>\" (<%-fieldsName%>)
     <% let sqltype = getSQLTableName(field.type) _%>
         <% let entityInfo = field.name + field.type + field.relationType _%>
         <% if (!isScalar(field.type)) { _%>
-            <%  switch (s.trim()) {  
+            <%  switch (s) {
                 case "oneToMany": _%>
                 
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)

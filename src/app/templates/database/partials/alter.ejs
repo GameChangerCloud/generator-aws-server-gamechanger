@@ -17,7 +17,7 @@
         {tableName: "<%= name %>", text: `ALTER TABLE "<%= name %>" ALTER COLUMN "<%= old_name %>" TYPE <%= type %> USING "<%= old_name %>"<%= defaultInit %>;`},
         <% break;
     case "Update" : _%>
-        {tableName: "<%= name %>", text: `UPDATE "<%= name %>" SET "<%= old_name %>" = <%- include('./defaultVal',{type: default_val}) _%> <%- set %>;`},
+        {tableName: "<%= name %>", text: `UPDATE "<%= name %>" SET "<%= old_name %>" = <%- include('./defaultVal.ejs',{type: default_val}) _%> <%- set %>;`},
         <% break;
     case "AlterColumnSet" : _%>
         {tableName: "<%= name %>", text: `ALTER TABLE "<%= name %>" ALTER COLUMN "<%= old_name %>" SET <%= datatype %> ;`},

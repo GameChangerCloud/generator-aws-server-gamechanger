@@ -171,8 +171,8 @@ module.exports = {
 		}
 	},
 
-	async getMethods(){
-		const sorting = constructSort(null)
+	async getMethods(args){
+		const sorting = constructSort(args)
 		/******* Start of generated part using typeNameId */
 		sqlParams.sql = 'SELECT * from "<%-currentType.sqlTypeName%>" '+sorting
 		/******* End of generated part using typeNameId */

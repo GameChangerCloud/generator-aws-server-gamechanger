@@ -130,18 +130,15 @@ module.exports = class extends Generator {
         this.interfaces = null
 
         // Get all the relations between entities
-        //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-        this.types = getRelations(this.types, this.env)
+        this.types = getRelations(this.types)
         // Get all the name of join relation table
         this.joinTables = getJoinTables(this.types)
 
-        // Will hold all the informations on the tables
+        // Will hold all the information on the tables
         this.tables = getAllTables(this.types)
 
         // Adding the junction table if some exeits
-        this.joinTables.forEach(table => {
-            this.tables.push(table)
-        })
+        this.tables.push(...this.joinTables);
 
         this.fs.copyTpl(
             this.templatePath('database/sqlUtils.ejs'),
