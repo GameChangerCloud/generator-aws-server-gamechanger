@@ -25,6 +25,7 @@ import {
     compareSchema, typesGenerator, Type, isPersonalizedScalar
 } from "easygraphql-parser-gamechanger";
 import UnhandledGraphqlTypeError from "./templates/error/unhandled-graphql-type.error";
+import {exec} from "child_process";
 
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
@@ -425,75 +426,6 @@ module.exports = class extends Generator {
                 appAuthor: this.answers.author,
             }
         )
-
-        /** Versionning TODO **/
-        this.add_entities = []
-        this.update_entities = []
-        this.delete_entities = []
-        if (this.override == true) {
-            this.old_schema = JSON.parse(this.file_old_json)
-            this.new_schema = this.schemaJSON
-            let arr = compareSchema(this.old_schema, this.new_schema)
-            arr[0].forEach(x => this.add_entities.push(findTable(this.tables, x)))
-            this.update_entities = arr[1]
-            this.delete_entities = arr[2]
-            this.add_fields = []
-            // this.log("ADD ENTITIES - ", this.add_entities)
-            // this.log("DELETE ENTITIES - ", this.delete_entities)
-            // this.log("UPDATE : ", this.update_entities)
-            this.update_entities[0].forEach(add => {
-                if (add.length > 0) {
-                    add.forEach(x => {
-                        let table = findTable(this.tables, x.name)
-                        let name = x.column.name
-                        let sqlname = getSQLTableName(x.name)
-                        let type = x.column.type
-                        if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
-                            && type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
-                            name = "Fk_" + type + "_id"
-                        }
-                        this.add_fields.push({
-                            name: x.name,
-                            sqlname: sqlname,
-                            column: findField(table.columns, name)
-                        })
-
-                    })
-                }
-            })
-            this.update_fields = []
-            this.update_entities[1].forEach(up => {
-                if (up.length > 0) {
-                    up.forEach(x => {// TODO change x to match sql table names
-                        this.update_fields.push(x)
-                    })
-                }
-            })
-            this.delete_fields = []
-            this.update_entities[2].forEach(del => {
-                if (del.length > 0) {
-                    del.forEach(x => {// TODO change x to match sql table names
-                        this.delete_fields.push(x)
-                    })
-                }
-            })
-            // this.log("ADD FIELDS - ", this.add_fields)
-            // this.log("UPDATE FIELDS - ", this.update_fields)
-            // this.log("DELETE FIELDS - ", this.delete_fields)
-            this.fs.copyTpl(
-                this.templatePath('upgradeDatabase/upgradeDatabase.ejs'),
-                this.destinationPath('upgradeDatabase/upgradeDatabase.js'),
-                {
-                    tables: this.tables,
-                    add_entities: this.add_entities,
-                    delete_fields: this.delete_fields,
-                    add_fields: this.add_fields,
-                    update_fields: this.update_fields
-                }
-            )
-        }
-
-
     }
 
 // Where conflicts are handled (used internally)
@@ -505,7 +437,8 @@ module.exports = class extends Generator {
     install() {
         this.log("Install")
         // todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
-        this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars'])
+        this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars', 'prettier'])
+        exec("prettier --write .")
     }
 
     // Called last, cleanup, say good bye, etc
@@ -610,7 +543,7 @@ module.exports = class extends Generator {
                     interfaces: this.interfaces,
                     typeRequire: requireTypes,
                     isPersonalizedScalar
-                }
+                },
             )
         }
         // Reset this.interface array for the next object

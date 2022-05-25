@@ -10,10 +10,10 @@
                 // Init <%-type.typeName _%> tables
                 let <%- typesName[index].toLowerCase()_%>Tab = []
                 for(let i = 0; i < 5; i++){
-                    <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate', {currentType : types[index], fields : fields, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
+                    <%- typesName[index].toLowerCase()%>Tab.push(new model.<%- typesName[index]%>(<%- include('./getParametersForCreate.ejs', {currentType : types[index], fields : fields, matching : matching, table: tables[index]["columns"], tableName: tables[index].name})%>));
                 }
                 
-                <%- include('./getUpdateForModel', {currentType : types[index], fields : fields, types : types, getSQLTableName: getSQLTableName}) %>
+                <%- include('./getUpdateForModel.ejs', {currentType : types[index], fields : fields, types : types, getSQLTableName: getSQLTableName}) %>
         <% }
     } %>
 

@@ -1,6 +1,6 @@
 /******* Start of generated part using tables */
 <% tables.filter(table => !table.isJoinTable).forEach(table => { -%>
-	<%- include('./partials/requireByEntity', {entity: table.name}) %>
+	<%- include('./partials/requireByEntity.ejs', {entity: table.name}) %>
 <% }); %>
 /******* End of generated part using tables */
 
@@ -18,7 +18,7 @@ module.exports = {
 					return handler<%= table.name %>.getMethodsByArgs(args, directives)
 				}
 				else {
-					return handler<%= table.name %>.getMethods(args)
+					return handler<%= table.name %>.getMethods()
 				}
 			<% }); %>
 			/******* End of generated part using tables */
