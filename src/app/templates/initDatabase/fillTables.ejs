@@ -114,46 +114,43 @@ function update(modelToUpdate, field, value, result) {
 
 
 module.exports.fillTables = async (numberItem) => {
+    const queriesInsert = []
+    const restoreConstraints = new Set()
+    const removeConstraints = new Set()
+    // Stores Relation
+    const entityIndex = []
 
-const queriesInsert = []
-const restoreConstraints = new Set()
-const removeConstraints = new Set()
-// Stores Relation
-const entityIndex = []
+    /*******
+    * Start of generated part using listOfMethodsForInit
+    */
+    <%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matchString: matchString, tables: tables}) _%>
 
-/*******
- * Start of generated part using listOfMethodsForInit
- */
-<%- include('../database/partials/listOfMethodsForInit.ejs', { typesName: typesName, types: types, relations: relations , matching: matching, tables: tables, getSQLTableName: getSQLTableName}) _%>
+    /*******
+    * End of generated part using listOfMethodsForInit
+    */
 
-/*******
- * End of generated part using listOfMethodsForInit
- */
+    /*******
+    * Start of generated part using initEachFieldsModelsJS
+    */
+    <%-initEachFieldsModelsJS%>
+    /*******
+    * End of generated part using initEachFieldsModelsJS
+    */
+    queriesInsert.push(...removeConstraints)
 
+    /*******
+    * Start of generated part using initQueriesInsert
+    */
+    <%- include('../database/partials/getInitQueriesInsert.ejs', {types: types, relations: relations, tables: tables}) _%>
+    /*******
+    * End of generated part using initQueriesInsert
+    */
+    queriesInsert.push(...restoreConstraints)
 
- /*******
- * Start of generated part using initEachFieldsModelsJS
- */
-<%-initEachFieldsModelsJS%>
-/*******
- * End of generated part using initEachFieldsModelsJS
- */
- queriesInsert.push(...removeConstraints)
-
- /*******
- * Start of generated part using initQueriesInsert
- */
-<%- include('../database/partials/getInitQueriesInsert.ejs', {types: types, relations: relations, tables: tables}) _%>
- /*******
- * End of generated part using initQueriesInsert
- */
-queriesInsert.push(...restoreConstraints)
-
-for (let index = 0; index < queriesInsert.length ; index ++){
-    console.log(queriesInsert[index])
-    sqlParams.sql = queriesInsert[index]
-    const res = await rdsDataService.executeStatement(sqlParams).promise()
-    console.log(JSON.stringify(res.records))
-}   
-
+    for (let index = 0; index < queriesInsert.length ; index ++){
+        console.log(queriesInsert[index])
+        sqlParams.sql = queriesInsert[index]
+        const res = await rdsDataService.executeStatement(sqlParams).promise()
+        console.log(JSON.stringify(res.records))
+    }
 }

@@ -1,8 +1,8 @@
-<% for (let index = 0; index < table.length; index++) { _%>
-    <%if (table[index].isArray) { _%>
-       <% switch (table[index].gqlType) { 
+<% table.columns.forEach(column => { _%>
+    <%if (column.isArray) { _%>
+       <% switch (column.gqlType) {
             case "String": _%>
-                constructChanceListString(<%- tableName %>)
+                constructChanceListString(<%- table.name %>)
                 <%break;
             case "ID": _%>
                 generateRandomListID()
@@ -19,10 +19,10 @@
        }
     }
     else {%>
-        <%switch (table[index].gqlType) { 
+        <%switch (column.gqlType) {
 
             case "String": _%>
-                <%- matching.matchString( tableName ) _%>
+                <%- matchString( table.name ) _%>
                 <% break;
             case "ID": _%>
                 pad(chance.integer({ min: -2147483647, max: 2147483647 }), 3)
@@ -49,13 +49,7 @@
                 chance.integer({ min: -2147483647, max: 2147483647 })
                 <%break;
             case "URL":_%>
-                <%if (tableName.includes("avatar") || tableName.includes("profile")){%>
-                    chance.avatar()
-                <%}else if (tableName.includes("image") || tableName.includes("picture")){%>
-                    chance.avatar() 
-                <%}else{%>
-                    chance.url()
-                <%}%>
+                <%- matchString( table.name ) _%>
                 <%break
             case "EmailAddress": _%>
                 chance.email()
@@ -69,7 +63,7 @@
                 <%break;
         }%>
     <%}%>
-    , 
-<%}%>
+    ,
+<%})%>
 
 

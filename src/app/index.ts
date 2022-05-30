@@ -270,10 +270,9 @@ module.exports = class extends Generator {
                 types: this.types,
                 typesName: typesNameArray,
                 relations: Relationships,
-                matching: matching,
+                matchString,
                 tables: this.tables,
                 initEachFieldsModelsJS: getInitEachFieldsModelsJS(this.types),
-                getSQLTableName: getSQLTableName,
             }
         )
 
@@ -552,7 +551,7 @@ module.exports = class extends Generator {
         // No need for a queryType handler
         if (currentType.isNotOperation()) {
             const directiveNames = getFieldsDirectiveNames(currentType)
-            let queryManyToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentType.sqlTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentType.sqlTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
+            let queryManyToMany = `SELECT * FROM ${currentType.sqlTypeName} INNER JOIN "'+args.tableJunction+'" ON Pk_${currentType.sqlTypeName}_id = "'+args.tableJunction+'".${currentType.sqlTypeName}_id INNER JOIN "'+parentTypeName+'" ON Pk_'+parentTypeName+'_id = "'+args.tableJunction+'".'+parentTypeName+'_id WHERE Pk_'+parentTypeName+'_id = $1`
             let queryOneToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"Pk_" + currentType.sqlTypeName + "_id\" = (SELECT \"Fk_" + currentType.sqlTypeName + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
             let queryManyToOne = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + currentType.sqlTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
             // One To One queries

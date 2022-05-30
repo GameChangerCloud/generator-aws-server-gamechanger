@@ -1,5 +1,5 @@
 <%types.forEach(type => {_%>
-    <%if (type.typeName !== 'Query' && type.typeName !== 'Mutation'){_%>
+    <%if (type.isNotOperation()){_%>
         <%-type.typeName.toLowerCase()%>Tab.forEach(item =>{
             let temp = `INSERT INTO "<%-type.sqlTypeName%>"(
             <% let fieldInsertList = []
@@ -20,16 +20,16 @@
                     }
                 }
             })_%>
-            <%fieldInsertList.forEach((f, index) => {_%>
-                "<%-f%>"
-                <%if (index < fieldInsertList.length - 1 ) {_%>,<%}%>
+            <%fieldInsertList.forEach((fieldInsert, index) => {_%>
+                "<%-fieldInsert-%>"
+                <%if (index < fieldInsertList.length - 1 ) {-%>,<%}%>
 
             <%});_%>
             ) VALUES (
-                <%itemInsertList.forEach((f, index) => {_%>
-                <%if (f[1] === "else" ) {_%>'`<%}else{%>`<%}%>
-                <%-f[0]%>
-                <%if (f[1] === "else" ) {_%>`'<%}else{%>`<%}%>
+                <%itemInsertList.forEach((itemInsert, index) => {_%>
+                <%if (itemInsert[1] === "else" ) {_%>'`<%}else{%>`<%}%>
+                <%-itemInsert[0]%>
+                <%if (itemInsert[1] === "else" ) {_%>`'<%}else{%>`<%}%>
                 <%if (index < itemInsertList.length - 1 ) {_%>,<%}%>
 
             <%});_%>
