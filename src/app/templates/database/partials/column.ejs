@@ -1,7 +1,7 @@
-"<%= column.field %>" <% if (column.field.startsWith("Pk")) { -%> <%=column.constraint-%><%- } else { -%>
+"<%= column.field %>" <% if (column.field.startsWith("Pk")) { -%> <%=column.constraint-%><% } else { -%>
     <%- column.fieldType -%>
-    <%-if (column.isArray) { -%> ARRAY<% } -%>
-    <%- if (column.noNull) { -%> NOT NULL<% } -%>
-    <%- if (column.unique) { -%> UNIQUE<% } -%>
-    <%- if (column.noNullArrayValues) { -%> constraint not_null_inside_array check( array_position(<%=column.field %>, null) is null)<% } -%>
-<%- } -%>
+    <%_ if (column.isArray) { -%> ARRAY<% } -%>
+    <%_ if (column.noNull) { -%> NOT NULL<% } -%>
+    <%_ if (column.unique) { -%> UNIQUE<% } -%>
+    <%_ if (column.noNullArrayValues) { -%> constraint not_null_inside_array check( array_position(<%=column.field %>, null) is null)<% } -%>
+<% } -%>

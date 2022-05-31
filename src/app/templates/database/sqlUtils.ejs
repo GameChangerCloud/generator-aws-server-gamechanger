@@ -5,19 +5,19 @@ const sqlUtils = {
     */
     getSQLCreateTables : () => {
         let sqlStatements = [];
-<% tables.forEach(table => { -%>
+        <% tables.forEach(table => { -%>
         sqlStatements.push(
-                `CREATE TABLE IF NOT EXISTS "<%= table.sqlName %>" (
-                <%- include('./partials/columns', {columns: table.columns}) -%> )`,);
-<% }); -%>
+            `CREATE TABLE IF NOT EXISTS "<%= table.sqlName %>" (
+            <%- include('./partials/columns.ejs', {columns: table.columns}) -%> )`,);
+        <% }); -%>
         return sqlStatements;
     },
 
     getSQLTables : () => {
         let sqlTables = [];
-<% tables.forEach(table => { -%>
-        sqlTables.push("<%= table.sqlName %>");
-<% }); -%>
+        <% tables.forEach(table => { -%>
+            sqlTables.push("<%= table.sqlName %>");
+        <% }); -%>
         return sqlTables;
     }
 }

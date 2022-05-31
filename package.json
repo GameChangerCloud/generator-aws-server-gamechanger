@@ -27,6 +27,7 @@
     "chance": "^1.1.8",
     "easygraphql-parser-gamechanger": "^1.0.2",
     "ejs": "^3.1.5",
+    "ejs-lint": "^1.2.2",
     "express-beautiful-ejs-engine": "^0.0.6",
     "graphql": "^15.6.0",
     "graphql-scalars": "^1.10.1",
