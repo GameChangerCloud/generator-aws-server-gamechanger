@@ -1,7 +1,15 @@
+resource "null_resource" "downsizing" {
+  provisioner "local-exec" {
+    working_dir = "${path.module}/.."
+    command     = "npm prune --production"
+    interpreter = ["bash", "-c"]
+  }
+}
+
 data "archive_file" "init" {
   type        = "zip"
   source_dir  = "${path.module}/.."
-  excludes    = ["terraform"]
+  excludes    = ["terraform", ".aws-sam"]
   output_path = "${path.module}/lambda.zip"
 }
 
