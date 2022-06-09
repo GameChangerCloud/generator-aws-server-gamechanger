@@ -7,15 +7,12 @@ sqlRequests.push("INSERT INTO \"<%-currentType.sqlTypeName%>\" (<%-fieldsName%>)
         <% if (!isScalar(field.type)) { _%>
             <%  switch (s) {
                 case "oneToMany": _%>
-                
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
-                        
-                   <% break; 
+                   <% break;
                 case "oneToOne": _%>
                 //OneToOne relation
                 sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
-
-                    <% break; 
+                    <% break;
                 case "oneOnly": _%>
                     <%break
                 case "selfJoinOne": _%>
@@ -27,7 +24,6 @@ sqlRequests.push("INSERT INTO \"<%-currentType.sqlTypeName%>\" (<%-fieldsName%>)
                         for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
                             sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')) WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
                         }
-                    
                     <%}%>
                    <% break 
                 case "manyOnly":_%>
@@ -52,9 +48,6 @@ sqlRequests.push("INSERT INTO \"<%-currentType.sqlTypeName%>\" (<%-fieldsName%>)
                         for( element in args.<%-field.name%>){
                             sqlRequests.push("INSERT INTO \"<%- field.joinTable.name.toLowerCase()%>\" (\"<%- currentType.sqlTypeName %>_id\", \"<%- fieldSelfJoin %>_id\") VALUES (currval(pg_get_serial_sequence('<%- currentType.sqlTypeName %>','Pk_<%- currentType.sqlTypeName %>_id')), "+ args.<%- field.name%>[element]+")" )
                         }
-    
-    
-                    
                     <% break
                 default: _%>
                     <% console.log("Error in handling relationship in create") %>

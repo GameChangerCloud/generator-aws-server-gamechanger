@@ -1,5 +1,5 @@
 "<%= column.field %>" <% if (column.field.startsWith("Pk")) { -%> <%=column.constraint-%><% } else { -%>
-    <%- column.fieldType -%>
+<%- column.fieldType -%>
     <%_ if (column.isArray) { -%> ARRAY<% } -%>
     <%_ if (column.noNull) { -%> NOT NULL<% } -%>
     <%_ if (column.unique) { -%> UNIQUE<% } -%>

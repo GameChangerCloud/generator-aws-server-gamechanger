@@ -1,18 +1,14 @@
 const sqlUtils = {
-
     /***
     *   Construct all the statements for creating the tables in the database
     */
     getSQLCreateTables : () => {
         let sqlStatements = [];
-        <% tables.forEach(table => { -%>
+        <% tables.forEach(table => { %>
         sqlStatements.push(
-            `CREATE TABLE IF NOT EXISTS "<%= table.sqlName %>" (
-            <%- include('./partials/columns.ejs', {columns: table.columns}) -%> )`,);
-        <% }); -%>
+            `CREATE TABLE IF NOT EXISTS "<%= table.sqlName -%>"(<%- include('./partials/columns.ejs', {columns: table.columns}) -%> <%_ _%> )`,);<% }); %>
         return sqlStatements;
     },
-
     getSQLTables : () => {
         let sqlTables = [];
         <% tables.forEach(table => { -%>
@@ -21,5 +17,4 @@ const sqlUtils = {
         return sqlTables;
     }
 }
-
 module.exports = sqlUtils

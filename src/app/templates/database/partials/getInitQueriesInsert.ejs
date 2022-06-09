@@ -34,7 +34,7 @@
 
             <%});_%>
                 )`
-                queriesInsert.push(temp)
+                queriesInsert.push(temp.replace(/\n/g,''))
                 })
         <%}%>
     <%})_%>
@@ -53,7 +53,7 @@
                                 "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id")
                                 VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
                                 ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
-                                queriesInsert.push(temp)
+                                queriesInsert.push(temp.replace(/\n/g,''))
                         })
                     <%}
 
@@ -64,7 +64,7 @@
                             "<%-field.joinTable.contains[0].type.toLowerCase()%>_id")
                             VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
                                 ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%>_id + `)`
-                                queriesInsert.push(temp)
+                                queriesInsert.push(temp.replace(/\n/g,''))
                     })
                 <%}
             }

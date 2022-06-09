@@ -1,5 +1,5 @@
 <%_ types.forEach(type => {%>
-    class <%-type.typeName%> {
+class <%-type.typeName%> {
     constructor(<%_type.fields.forEach((field, idx) => {_%>
          <%_if( field.in_model){ _%>  
             <%-field.name_%>
