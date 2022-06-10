@@ -6,7 +6,7 @@ const sqlUtils = {
         let sqlStatements = [];
         <% tables.forEach(table => { %>
         sqlStatements.push(
-            `CREATE TABLE IF NOT EXISTS "<%= table.sqlName -%>"(<%- include('./partials/columns.ejs', {columns: table.columns}) -%> <%_ _%> )`,);<% }); %>
+            `CREATE TABLE IF NOT EXISTS "<%= table.sqlName -%>"(<%- include('./partials/columns.ejs', {columns: table.columns}) -%>)`,);<% }); %>
         return sqlStatements;
     },
     getSQLTables : () => {
