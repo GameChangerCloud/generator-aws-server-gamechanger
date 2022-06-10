@@ -17,10 +17,10 @@ let <%-field.joinTable.sqlName%>Tab = []
 for(let i = 0; i < 5; i++){
 <%- field.joinTable.sqlName%>Tab.push({<%- field.joinTable.contains[0].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1), <%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id : Math.floor((Math.random() * 5) + 1)})
 }
-removeConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName%>" DROP CONSTRAINT IF EXISTS "<%- field.joinTable.sqlName%>_<%- field.joinTable.contains[0].fieldName%>_id_fkey"`)
-removeConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName%>" DROP CONSTRAINT IF EXISTS "<%- field.joinTable.sqlName%>_<%- field.joinTable.contains[1].fieldName%>_id_fkey"`)
-restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName%>" ADD "<%-field.joinTable.contains[0].constraint%>" ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
-restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName%>" ADD "<%-field.joinTable.contains[1].constraint%>" ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+removeConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName.toLowerCase()%>" DROP CONSTRAINT IF EXISTS "<%- field.joinTable.sqlName%>_<%- field.joinTable.contains[0].fieldName%>_id_fkey"`)
+removeConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName.toLowerCase()%>" DROP CONSTRAINT IF EXISTS "<%- field.joinTable.sqlName%>_<%- field.joinTable.contains[1].fieldName%>_id_fkey"`)
+restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName.toLowerCase()%>" ADD "<%-field.joinTable.contains[0].constraint%>" ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
+restoreConstraints.add(`ALTER TABLE "<%- field.joinTable.sqlName.toLowerCase()%>" ADD "<%-field.joinTable.contains[1].constraint%>" ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED`)
 <%_}_%>
 <%_}_%>
 <%_})
