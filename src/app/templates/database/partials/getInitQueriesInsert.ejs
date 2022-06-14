@@ -49,10 +49,10 @@
                     <%if((field.relationType === relations.manyToMany)){%>
                         <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                             let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
-                                "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
-                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id")
-                                VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
-                                ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%>_id + `)`
+                                "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>",
+                                "<%-field.joinTable.contains[1].fieldName.toLowerCase()%>")
+                                VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%> +` ,
+                                ` + item.<%-field.joinTable.contains[1].fieldName.toLowerCase()%> + `)`
                                 queriesInsert.push(temp.replace(/\n/g,''))
                         })
                     <%}
@@ -60,10 +60,10 @@
                 if(field.relationType === relations.selfJoinMany){%>
                     <%-field.joinTable.name.toLowerCase()%>Tab.forEach(item =>{
                         let temp = `INSERT INTO "<%-field.joinTable.name.toLowerCase()%>"(
-                            "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id",
-                            "<%-field.joinTable.contains[0].type.toLowerCase()%>_id")
-                            VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%>_id +` ,
-                                ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%>_id + `)`
+                            "<%-field.joinTable.contains[0].fieldName.toLowerCase()%>",
+                            "<%-field.joinTable.contains[0].type.toLowerCase()%>")
+                            VALUES (` + item.<%-field.joinTable.contains[0].fieldName.toLowerCase()%> +` ,
+                                ` + item.<%-field.joinTable.contains[0].type.toLowerCase()%> + `)`
                                 queriesInsert.push(temp.replace(/\n/g,''))
                     })
                 <%}

@@ -6,7 +6,6 @@ const fillTable = require ('./initDatabase/fillTables')
 const dropTables = require ('./cleanDatabase/dropTables')
 const cleanTables = require ('./cleanDatabase/cleanTables')
 const existTable = require ('./existTable/existTable')
-<%-importUpdate%>
 
 // Entry point of the lambdas function 
 module.exports.handler = (event, context, callback) => {
@@ -50,9 +49,6 @@ module.exports.handler = (event, context, callback) => {
     console.log("Tables exists ?")
     existTable.existTable().then(x => callback(null, {statusCode: 200, body: JSON.stringify(x)}))
   }
-
-  <%-updateRequest%>
-
 
 else {
     console.log("Hello world")

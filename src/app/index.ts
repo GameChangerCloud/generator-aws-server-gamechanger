@@ -26,6 +26,7 @@ import {
 } from "easygraphql-parser-gamechanger";
 import UnhandledGraphqlTypeError from "./templates/error/unhandled-graphql-type.error";
 import {exec} from "child_process";
+import * as util from "util";
 
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
@@ -154,12 +155,13 @@ module.exports = class extends Generator {
         for (let index = 0; index < this.types.length; index++) {
             const currentType = this.types[index] as Type
             this.log("Processing TYPE : " + currentType.typeName)
-
+            this.log(util.inspect(currentType, false, null, true))
             // Get the const require
             const requireTypes = getRequire(currentType)
-
+            console.log("require types: ", requireTypes)
             // Get the graphqlType
             const graphqlType = getGraphqlType(currentType)
+            console.log("graphql type : ", graphqlType)
 
             // Create File with directives by type
             if (index == 0) {
@@ -437,7 +439,7 @@ module.exports = class extends Generator {
         this.log("Install")
         // todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
         this.npmInstall(['graphql', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars'])
-        this.npmInstall(['aws-sdk', 'prettier'], { 'save-dev': true });
+        this.npmInstall(['aws-sdk', 'prettier'], {'save-dev': true});
         exec("prettier --write .")
     }
 
@@ -512,7 +514,7 @@ module.exports = class extends Generator {
         ]);
     }
 
-    private _processGraphQLObjectType(currentType,typesNameArray, requireTypes: string) {
+    private _processGraphQLObjectType(currentType, typesNameArray, requireTypes: string) {
         // Check if it implements an interface (array non empty)
         if (currentType.implementedTypes[0]) {
             // Check if this.typesInterface is already initialised
@@ -552,7 +554,11 @@ module.exports = class extends Generator {
         // No need for a queryType handler
         if (currentType.isNotOperation()) {
             const directiveNames = getFieldsDirectiveNames(currentType)
-            let queryManyToMany = `SELECT * FROM ${currentType.sqlTypeName} INNER JOIN "'+args.tableJunction+'" ON Pk_${currentType.sqlTypeName}_id = "'+args.tableJunction+'".${currentType.sqlTypeName}_id INNER JOIN "'+parentTypeName+'" ON Pk_'+parentTypeName+'_id = "'+args.tableJunction+'".'+parentTypeName+'_id WHERE Pk_'+parentTypeName+'_id = $1`
+            let queryManyToMany = `SELECT *
+                                   FROM ${currentType.sqlTypeName}
+                                            INNER JOIN "'+args.tableJunction+'" ON Pk_${currentType.sqlTypeName}_id = "'+args.tableJunction+'".${currentType.sqlTypeName}_id INNER JOIN "'+parentTypeName+'"
+                                   ON Pk_'+parentTypeName+'_id = "'+args.tableJunction+'".'+parentTypeName+'_id
+                                   WHERE Pk_'+parentTypeName+'_id = $1`
             let queryOneToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"Pk_" + currentType.sqlTypeName + "_id\" = (SELECT \"Fk_" + currentType.sqlTypeName + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
             let queryManyToOne = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + currentType.sqlTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
             // One To One queries
@@ -651,6 +657,7 @@ module.exports = class extends Generator {
 
             }
         )
+        this.log("Content created for enum")
     }
 
     private _processGraphQLInterfaceType(currentType, requireTypes: string) {
