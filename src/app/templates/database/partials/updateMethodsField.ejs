@@ -5,23 +5,18 @@ let temp = ''
     <% let entityInfo = field.name + field.type + field.relationType _%>
     <% if (field.type !== "ID") { _%>
         <% if (!isScalar(field.type)) {_%>
-            <% switch (s.trim()) {
+            <% switch (s) {
                 case "oneToMany":_%>
                     //oneToMany update
                     // Field <%- field.name %> of type <%- field.type %>
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%> )
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id)
-
-                    
                     <% break;
                 case "oneToOne":_%>
                     //oneToOne update
                     sqlRequests.push("UPDATE \"<%- currentType.sqlTypeName %>\" SET  \"<%-field.foreign_key.name%>\" = " + args.<%-field.name%> +" WHERE \"Pk_<%- currentType.sqlTypeName %>_id\" = " + args.id)
-                    
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET \"<%-field.oneToOneInfo.fkName%>\" = null WHERE \"<%-field.oneToOneInfo.fkName%>\" = " + args.id)
-
                     sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.oneToOneInfo.fkName%>\" = " +  args.id +" WHERE \"Pk_<%- sqltype %>_id\" = " + args.<%-field.name%>)
-
                 <% break;
                 case "oneOnly":_%>
                     if(args.<%- field.name %> !== undefined){
@@ -37,50 +32,41 @@ let temp = ''
                     <%if(!field.joinTable.state){%>
                         //manyToOne update
                         // Field <%- field.name %> of type <%- field.type %>
-
                         sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" WHERE \"<%- sqltype %>\".\"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id
                         rdsDataService.executeStatement(sqlParams, (err, data) => {
                             if (err) {console.log(err, err.stack)}
                                 else {
                                     let current<%- field.type %>State = utils.constructOutputArray(data)
-
                             // <%- field.type %> to add
                             let addedElements<%- entityInfo %> = utils.getAddedElements(current<%- field.type%>State, args.<%- field.name %>)
                             for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
                                 sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
-                                
                             }
                             // <%- field.type %> to delete
                             let removedElements<%- entityInfo %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
                             for (let index = 0; index < removedElements<%- entityInfo %>.length; index++) {
                                 sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"Pk_<%- sqltype %>_id\" = " + removedElements<%- entityInfo %>[index])
-                                
                             }
                         }})
-                        
                         <%}%>
                     <% break
                 case "manyOnly": _%>
                     //manyOnly update
                     // Field <%- field.name %> of type <%- field.type %>
-
                     sqlParams.sql = "SELECT * FROM \"<%- sqltype %>\" WHERE \"<%- sqltype %>\".\"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id
                     rdsDataService.executeStatement(sqlParams, (err, data) => {
                         if (err) {console.log(err, err.stack)}
                             else {
                                 let current<%- field.type %>State = utils.constructOutputArray(data)
-
                         // <%- field.type %> to add
                         let addedElements<%- entityInfo %> = utils.getAddedElements(current<%- field.type%>State, args.<%- field.name %>)
                         for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
                             sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = " + args.id + " WHERE \"Pk_<%- sqltype %>_id\" = " + addedElements<%- entityInfo %>[index])
-                            
                         }
                         // <%- field.type %> to delete
                         let removedElements<%- entityInfo %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
                         for (let index = 0; index < removedElements<%- entityInfo %>.length; index++) {
                             sqlRequests.push("UPDATE \"<%- sqltype %>\" SET  \"<%-field.delegated_field.associatedWith.fieldName%>\" = null WHERE \"Pk_<%- sqltype %>_id\" = " + removedElements<%- entityInfo %>[index])
-                            
                         }
                     }})
                     <% break
@@ -93,7 +79,6 @@ let temp = ''
             if (err) {console.log(err, err.stack)}
             else {
                 let current<%- field.type %>State = utils.constructOutputArray(data, "<%- field.type %>")
-
                 // <%- field.type %> to add
                 let addedElements<%- entityInfo %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
                 for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
@@ -103,13 +88,9 @@ let temp = ''
                 let removedElements<%- entityInfo %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
                 for (let index = 0; index < removedElements<%- entityInfo %>.length; index++) {
                             sqlRequests.push("DELETE FROM \"<%- field.joinTable.name.toLowerCase() %>\" WHERE \"<%- field1 %>_id\" = " + removedElements<%- entityInfo %>[index] + " AND \"<%- field2 %>_id\" = " + args.id)
-                            
                 }
-
-                
             }
         })
-
                         <% break
                     case "selfJoinMany": _%>
         // Field <%- field.name %> of type <%- field.type %>
@@ -119,7 +100,6 @@ let temp = ''
             if (err) {console.log(err, err.stack)}
             else {
                 let current<%- field.type %>State = utils.constructOutputArray(data, "<%- field.type %>")
-
                 // <%- field.type %> to add
                 let addedElements<%- entityInfo %> = utils.getAddedElements(current<%- field.type %>State, args.<%- field.name %>)
                 for (let index = 0; index < addedElements<%- entityInfo %>.length; index++) {
@@ -129,15 +109,10 @@ let temp = ''
                 let removedElements<%- entityInfo %> = utils.getRemovedElements(current<%- field.type %>State, args.<%- field.name %>)
                 for (let index = 0; index < removedElements<%- entityInfo %>.length; index++) {
                             sqlRequests.push("DELETE FROM \"<%- field.joinTable.name.toLowerCase() %>\" WHERE \"<%- fieldSelfJoin %>_id\" = " + removedElements<%- entityInfo %>[index] + " AND \"<%- sqltype %>_id\" = " + args.id)
-                            
                 }
-
-                
             }
         })
-
                         <% break
-                    
                     default: _%>
                         <% console.log("Error in handling relationship in update") %>
                         <% break

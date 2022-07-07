@@ -1,5 +1,7 @@
-"<%= column.field %>" <% if (column.field.startsWith("Pk")) { %>SERIAL PRIMARY KEY NOT NULL<% } else { -%>
-    <%- column.fieldType -%>
-    <%_ if (column.noNull) { %> NOT NULL<% } -%>
-    <%_ if (column.unique) { %> UNIQUE<% } -%>
+"<%= column.field %>" <% if (column.field.startsWith("Pk")) { -%> <%=column.constraint-%><% } else { -%>
+<%- column.fieldType -%>
+    <%_ if (column.isArray) { -%> ARRAY<% } -%>
+    <%_ if (column.noNull) { -%> NOT NULL<% } -%>
+    <%_ if (column.unique) { -%> UNIQUE<% } -%>
+    <%_ if (column.noNullArrayValues) { -%> constraint not_null_inside_array check( array_position(<%=column.field %>, null) is null)<% } -%>
 <% } -%>

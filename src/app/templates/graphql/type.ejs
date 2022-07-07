@@ -46,12 +46,11 @@ const {
   Currency,
   JSON,
   JSONObject,
-	Byte
+  Byte
 } = require('../defaultScalarsMap')
 
 const dbHandler = require('../../database/handler')
 const { Query } = require('pg')
-
 
 module.exports = new <%-graphqlType%>({
 	name: '<%=type.typeName%>Type',

@@ -25,6 +25,8 @@ import {
     compareSchema, typesGenerator, Type, isPersonalizedScalar
 } from "easygraphql-parser-gamechanger";
 import UnhandledGraphqlTypeError from "./templates/error/unhandled-graphql-type.error";
+import {exec} from "child_process";
+import * as util from "util";
 
 const Generator = require('yeoman-generator');
 const pluralize = require('pluralize')
@@ -130,18 +132,15 @@ module.exports = class extends Generator {
         this.interfaces = null
 
         // Get all the relations between entities
-        //const tmpTypes = JSON.parse(JSON.stringify(this.types)); // why ?
-        this.types = getRelations(this.types, this.env)
+        this.types = getRelations(this.types)
         // Get all the name of join relation table
         this.joinTables = getJoinTables(this.types)
 
-        // Will hold all the informations on the tables
+        // Will hold all the information on the tables
         this.tables = getAllTables(this.types)
 
         // Adding the junction table if some exeits
-        this.joinTables.forEach(table => {
-            this.tables.push(table)
-        })
+        this.tables.push(...this.joinTables);
 
         this.fs.copyTpl(
             this.templatePath('database/sqlUtils.ejs'),
@@ -156,12 +155,13 @@ module.exports = class extends Generator {
         for (let index = 0; index < this.types.length; index++) {
             const currentType = this.types[index] as Type
             this.log("Processing TYPE : " + currentType.typeName)
-
+            this.log(util.inspect(currentType, false, null, true))
             // Get the const require
             const requireTypes = getRequire(currentType)
-
+            console.log("require types: ", requireTypes)
             // Get the graphqlType
             const graphqlType = getGraphqlType(currentType)
+            console.log("graphql type : ", graphqlType)
 
             // Create File with directives by type
             if (index == 0) {
@@ -272,10 +272,9 @@ module.exports = class extends Generator {
                 types: this.types,
                 typesName: typesNameArray,
                 relations: Relationships,
-                matching: matching,
+                matchString,
                 tables: this.tables,
                 initEachFieldsModelsJS: getInitEachFieldsModelsJS(this.types),
-                getSQLTableName: getSQLTableName,
             }
         )
 
@@ -428,75 +427,6 @@ module.exports = class extends Generator {
                 appAuthor: this.answers.author,
             }
         )
-
-        /** Versionning TODO **/
-        this.add_entities = []
-        this.update_entities = []
-        this.delete_entities = []
-        if (this.override == true) {
-            this.old_schema = JSON.parse(this.file_old_json)
-            this.new_schema = this.schemaJSON
-            let arr = compareSchema(this.old_schema, this.new_schema)
-            arr[0].forEach(x => this.add_entities.push(findTable(this.tables, x)))
-            this.update_entities = arr[1]
-            this.delete_entities = arr[2]
-            this.add_fields = []
-            // this.log("ADD ENTITIES - ", this.add_entities)
-            // this.log("DELETE ENTITIES - ", this.delete_entities)
-            // this.log("UPDATE : ", this.update_entities)
-            this.update_entities[0].forEach(add => {
-                if (add.length > 0) {
-                    add.forEach(x => {
-                        let table = findTable(this.tables, x.name)
-                        let name = x.column.name
-                        let sqlname = getSQLTableName(x.name)
-                        let type = x.column.type
-                        if (type !== "String" && type !== "ID" && type !== "Int" && type != "Boolean"
-                            && type !== "DateTime" && type !== "Date" && type !== "Time" && type !== "URL") {
-                            name = "Fk_" + type + "_id"
-                        }
-                        this.add_fields.push({
-                            name: x.name,
-                            sqlname: sqlname,
-                            column: findField(table.columns, name)
-                        })
-
-                    })
-                }
-            })
-            this.update_fields = []
-            this.update_entities[1].forEach(up => {
-                if (up.length > 0) {
-                    up.forEach(x => {// TODO change x to match sql table names
-                        this.update_fields.push(x)
-                    })
-                }
-            })
-            this.delete_fields = []
-            this.update_entities[2].forEach(del => {
-                if (del.length > 0) {
-                    del.forEach(x => {// TODO change x to match sql table names
-                        this.delete_fields.push(x)
-                    })
-                }
-            })
-            // this.log("ADD FIELDS - ", this.add_fields)
-            // this.log("UPDATE FIELDS - ", this.update_fields)
-            // this.log("DELETE FIELDS - ", this.delete_fields)
-            this.fs.copyTpl(
-                this.templatePath('upgradeDatabase/upgradeDatabase.ejs'),
-                this.destinationPath('upgradeDatabase/upgradeDatabase.js'),
-                {
-                    tables: this.tables,
-                    add_entities: this.add_entities,
-                    delete_fields: this.delete_fields,
-                    add_fields: this.add_fields,
-                    update_fields: this.update_fields
-                }
-            )
-        }
-
-
     }
 
 // Where conflicts are handled (used internally)
@@ -508,7 +438,9 @@ module.exports = class extends Generator {
     install() {
         this.log("Install")
         // todo : Do we really need pg ? rds-data dependancy should be removed by using RDSDataService
-        this.npmInstall(['graphql', 'aws-sdk', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars'])
+        this.npmInstall(['graphql', 'pg', 'rds-data', 'chance', 'validator', 'graphql-scalars'])
+        this.npmInstall(['aws-sdk', 'prettier'], {'save-dev': true});
+        exec("prettier --write .")
     }
 
     // Called last, cleanup, say good bye, etc
@@ -582,7 +514,7 @@ module.exports = class extends Generator {
         ]);
     }
 
-    private _processGraphQLObjectType(currentType,typesNameArray, requireTypes: string) {
+    private _processGraphQLObjectType(currentType, typesNameArray, requireTypes: string) {
         // Check if it implements an interface (array non empty)
         if (currentType.implementedTypes[0]) {
             // Check if this.typesInterface is already initialised
@@ -613,7 +545,7 @@ module.exports = class extends Generator {
                     interfaces: this.interfaces,
                     typeRequire: requireTypes,
                     isPersonalizedScalar
-                }
+                },
             )
         }
         // Reset this.interface array for the next object
@@ -622,7 +554,11 @@ module.exports = class extends Generator {
         // No need for a queryType handler
         if (currentType.isNotOperation()) {
             const directiveNames = getFieldsDirectiveNames(currentType)
-            let queryManyToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" INNER JOIN \"'+args.tableJunction+'\" ON \"Pk_" + currentType.sqlTypeName + "_id\" = \"'+args.tableJunction+'\".\"" + currentType.sqlTypeName + "_id\" INNER JOIN \"'+parentTypeName+'\" ON \"Pk_'+parentTypeName+'_id\" = \"'+args.tableJunction+'\".\"'+parentTypeName+'_id\" WHERE \"Pk_'+parentTypeName+'_id\" = $1"
+            let queryManyToMany = `SELECT *
+                                   FROM ${currentType.sqlTypeName}
+                                            INNER JOIN "'+args.tableJunction+'" ON Pk_${currentType.sqlTypeName}_id = "'+args.tableJunction+'".${currentType.sqlTypeName}_id INNER JOIN "'+parentTypeName+'"
+                                   ON Pk_'+parentTypeName+'_id = "'+args.tableJunction+'".'+parentTypeName+'_id
+                                   WHERE Pk_'+parentTypeName+'_id = $1`
             let queryOneToMany = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"Pk_" + currentType.sqlTypeName + "_id\" = (SELECT \"Fk_" + currentType.sqlTypeName + "_id\" FROM \"'+parentTypeName+'\" WHERE \"'+parentTypeName+'\".\"Pk_'+parentTypeName+'_id\" = $1)"
             let queryManyToOne = "SELECT * FROM \"" + currentType.sqlTypeName + "\" WHERE \"" + currentType.sqlTypeName + "\".\"Fk_'+parentTypeName+'_id\" = $1 '+limit+' '+offset"
             // One To One queries
@@ -721,6 +657,7 @@ module.exports = class extends Generator {
 
             }
         )
+        this.log("Content created for enum")
     }
 
     private _processGraphQLInterfaceType(currentType, requireTypes: string) {
